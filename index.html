@@ -779,36 +779,47 @@ const TAB_RANKING = {
   },
 };
 const RANKING = {
+  hour: [
+    { rank:1, title:"ホルムズ海峡 タンカー3隻通過の報道", cat:"地政学・安全保障", searches:18400, change:"new", topicId:"hormuz_crisis", why:"英国主催協議の結果が速報で流れ急騰" },
+    { rank:2, title:"日経平均 475円高", cat:"経済・金融", searches:12100, change:"↑2", topicId:"food_price_hike", why:"米雇用統計発表を前にリスクオン" },
+    { rank:3, title:"Microsoft 1兆円 日本投資発表", cat:"経済・産業", searches:9800, change:"↓1", topicId:"microsoft_japan", why:"昨日の発表を受けて調査が続く" },
+    { rank:4, title:"円安 159円台後半", cat:"経済・金融", searches:7200, change:"↑1", topicId:"food_price_hike", why:"米雇用統計控えドル買い優勢" },
+    { rank:5, title:"袴田巌 国家賠償 第1回口頭弁論", cat:"司法・裁判", searches:5600, change:"→", topicId:"hakamada_muzai", why:"昨日の弁論内容を後追い確認する動き" },
+  ],
   day: [
-    { rank:1, title:"ホルムズ海峡 40カ国が再開協議", cat:"地政学・安全保障", searches:124500, change:"new", topicId:"hormuz_crisis" },
-    { rank:2, title:"Microsoft 日本1兆円投資", cat:"経済・産業", searches:98200, change:"↑3", topicId:"microsoft_japan" },
-    { rank:3, title:"日経平均 475円高 半導体株高", cat:"経済・金融", searches:87300, change:"↑1", topicId:"food_price_hike" },
-    { rank:4, title:"円安 159円台 米雇用統計待ち", cat:"経済・金融", searches:76100, change:"↑2", topicId:"food_price_hike" },
-    { rank:5, title:"袴田巌 国賠訴訟 口頭弁論", cat:"司法・裁判", searches:54200, change:"↑1", topicId:"hakamada_muzai" },
+    { rank:1, title:"ホルムズ海峡 40カ国が再開協議", cat:"地政学・安全保障", searches:124500, change:"new", topicId:"hormuz_crisis", why:"英国主催の国際協議が報道され一気に急上昇" },
+    { rank:2, title:"Microsoft 日本1兆円投資", cat:"経済・産業", searches:98200, change:"↑3", topicId:"microsoft_japan", why:"発表翌日も関連検索が継続中" },
+    { rank:3, title:"日経平均 475円高 半導体株高", cat:"経済・金融", searches:87300, change:"↑1", topicId:"food_price_hike", why:"大幅反発を受けて相場確認の検索急増" },
+    { rank:4, title:"円安 159円台 米雇用統計待ち", cat:"経済・金融", searches:76100, change:"↑2", topicId:"food_price_hike", why:"為替の行方と物価への影響を気にする声多数" },
+    { rank:5, title:"袴田巌 国賠訴訟 口頭弁論", cat:"司法・裁判", searches:54200, change:"↑1", topicId:"hakamada_muzai", why:"第1回口頭弁論の内容を確認する検索が集中" },
   ],
   week: [
-    { rank:1, title:"ホルムズ海峡危機 日本への影響", cat:"地政学・安全保障", searches:892000, change:"→", topicId:"hormuz_crisis" },
-    { rank:2, title:"日本 原油輸入量3割減 過去最少", cat:"エネルギー", searches:654000, change:"↑2", topicId:"hormuz_crisis" },
-    { rank:3, title:"再審制度改革 法制審議論", cat:"司法・裁判", searches:432000, change:"↑1", topicId:"enzai_cf" },
-    { rank:4, title:"AI データセンター 日本誘致競争", cat:"科学・技術", searches:321000, change:"new", topicId:"ai_datacenter_japan" },
-    { rank:5, title:"米雇用統計 4月3日発表", cat:"経済・金融", searches:298000, change:"↑1", topicId:"food_price_hike" },
+    { rank:1, title:"ホルムズ海峡危機 日本への影響", cat:"地政学・安全保障", searches:892000, change:"→", topicId:"hormuz_crisis", why:"週を通じて最多。原油高・停電リスクへの関心継続" },
+    { rank:2, title:"日本 原油輸入量3割減 過去最少", cat:"エネルギー", searches:654000, change:"↑2", topicId:"hormuz_crisis", why:"統計発表を受けてエネルギー問題への関心急増" },
+    { rank:3, title:"再審制度改革 法制審議論", cat:"司法・裁判", searches:432000, change:"↑1", topicId:"enzai_cf", why:"法制審部会が非公開会合を継続し注目が集まる" },
+    { rank:4, title:"AI データセンター 日本誘致競争", cat:"科学・技術", searches:321000, change:"new", topicId:"ai_datacenter_japan", why:"Microsoft発表をきっかけにAI投資への関心が急増" },
+    { rank:5, title:"米雇用統計 4月3日発表", cat:"経済・金融", searches:298000, change:"↑1", topicId:"food_price_hike", why:"円相場・日経平均への影響を事前に確認する動き" },
   ],
 };
 
 
 const PICKUP = [
-  { id:0, icon:"⛽", label:"注目", cat:"地政学・安全保障", topicId:"hormuz_crisis",
+  { id:0, icon:"⛽", label:"緊急", cat:"地政学・安全保障", topicId:"hormuz_crisis",
     title:"ホルムズ海峡危機 日本への影響まとめ",
     summary:"原油輸入の約9割がホルムズ海峡経由の日本。3月の原油輸入量が2月比3割減と過去最少水準に。ガソリン・電気代高騰・円安のダブルパンチで家計への影響が深刻化。",
-    score:91, alert:{type:"fact", msg:"政府の備蓄放出・緊急対応について各社の報道に差があります。"} },
+    note:"本日、40カ国協議で一部航路再開の可能性が浮上。状況は刻々と変化しています。",
+    updated:"2026年4月3日", hasFollowup:true, score:91,
+    alert:{type:"fact", msg:"政府の備蓄放出・緊急対応について各社の報道に差があります。"} },
   { id:1, icon:"⚖️", label:"注目", cat:"司法・裁判", topicId:"enzai_cf",
     title:"再審制度改革 法制審部会の行方",
     summary:"袴田事件を契機に再審法改正の議論が2025年10月から法制審議会部会で本格化。証拠開示の義務化・検察の不服申し立て禁止をめぐり検察側が抵抗。",
-    score:85, alert:null },
+    note:"法制審部会は非公開会合を継続中。与野党で改正への温度差が顕著になっている。",
+    updated:"2026年4月3日", hasFollowup:true, score:85, alert:null },
   { id:2, icon:"🤖", label:"注目", cat:"科学・技術", topicId:"ai_datacenter_japan",
     title:"AIデータセンター 日本誘致競争の構図",
     summary:"MicrosoftのAI拠点投資1兆円発表に続き、GoogleやAmazonも日本でのデータセンター投資を計画。データ主権・経済安保の観点から政府も積極誘致。電力需要急増が課題。",
-    score:78, alert:null },
+    note:"電力需給と安全保障の観点から今後の政策動向に注目。電力株にも影響が出始めている。",
+    updated:"2026年4月3日", hasFollowup:false, score:78, alert:null },
 ];
 
 
@@ -1197,63 +1208,84 @@ function renderHomeTab(tab){
   if(tab === 'trending'){
     var rp = state.rankingPeriod || 'day';
     var rankData = RANKING[rp] || RANKING.day;
+    var maxSearches = rankData[0] ? rankData[0].searches : 1;
     var periods2 = ['hour','day','week'];
-    var labels2 = {hour:'時間', day:'今日', week:'今週'};
-    var periodBar = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
+    var labels2 = {hour:'1時間', day:'今日', week:'今週'};
+    var periodBar = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">' +
       '<div class="section-title" style="margin-bottom:0">🔥 急上昇ランキング</div>' +
       '<div style="display:flex;gap:4px">' +
       periods2.map(function(pd){
         var active = rp === pd;
-        var bc = active ? p.brand : '#1a2a4a';
-        var tc = active ? p.brand : '#666';
-        var bg = active ? p.brand+'22' : 'transparent';
-        return '<button onclick="state.rankingPeriod=\''+pd+'\';render()" style="padding:3px 10px;background:'+bg+';border:1px solid '+bc+';border-radius:99px;font-size:10px;color:'+tc+';cursor:pointer;font-family:sans-serif">'+labels2[pd]+'</button>';
+        return '<button onclick="state.rankingPeriod=\''+pd+'\';render()" style="padding:3px 10px;background:'+(active?p.brand+'22':'transparent')+';border:1px solid '+(active?p.brand:'#1a2a4a')+';border-radius:99px;font-size:10px;color:'+(active?p.brand:'#666')+';cursor:pointer;font-family:sans-serif">'+labels2[pd]+'</button>';
       }).join('') + '</div></div>';
-    return periodBar + rankData.map(function(t){
+    var rankColors = ['#FFD700','#C0C0C0','#CD7F32'];
+    return periodBar + rankData.map(function(t, i){
       var chColor = t.change.startsWith('↑') ? p.high : t.change.startsWith('↓') ? p.danger : t.change==='new' ? p.warn : '#555';
-      var kNum = t.searches >= 10000 ? (t.searches/1000).toFixed(0)+'k' : (t.searches/1000).toFixed(1)+'k';
+      var kNum = t.searches >= 100000 ? (t.searches/10000).toFixed(0)+'万' : t.searches >= 1000 ? (t.searches/1000).toFixed(1)+'k' : t.searches+'';
+      var barWidth = Math.round((t.searches / maxSearches) * 100);
+      var rankNumColor = i < 3 ? rankColors[i] : '#2a4a7a';
       var onclickFn = t.topicId ? 'goTopic(\'' + t.topicId + '\')' : 'setSearchQuery(this.dataset.title)';
-      return '<div class="card clickable" style="display:flex;align-items:center;gap:10px" onclick="' + onclickFn + '" data-title="' + t.title.replace(/"/g,'&quot;') + '">' +
-        '<div style="font-family:monospace;font-size:18px;font-weight:900;color:#1a3a6a;min-width:22px;text-align:center">' + t.rank + '</div>' +
+      return '<div class="card clickable" style="margin-bottom:8px;padding:12px 14px" onclick="' + onclickFn + '" data-title="' + t.title.replace(/"/g,'&quot;') + '">' +
+        '<div style="display:flex;align-items:flex-start;gap:10px">' +
+        '<div style="font-family:monospace;font-size:20px;font-weight:900;color:'+rankNumColor+';min-width:24px;text-align:center;line-height:1.3">' + t.rank + '</div>' +
         '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:13px;font-weight:600;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.title + '</div>' +
-        '<div style="display:flex;align-items:center;gap:6px">' +
+        '<div style="font-size:13px;font-weight:700;margin-bottom:4px;line-height:1.4">' + t.title + '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">' +
         '<span style="font-size:10px;color:#555">' + t.cat + '</span>' +
-        '<span style="font-size:10px;color:' + chColor + ';font-family:monospace">' + t.change + '</span>' +
-        '</div></div>' +
-        '<div style="font-size:11px;color:#2a5a9a;font-family:monospace;flex-shrink:0">' + kNum + '</div>' +
-        '</div>';
+        '<span style="font-size:10px;color:'+chColor+';font-family:monospace;font-weight:700">' + t.change + '</span>' +
+        '</div>' +
+        (t.why ? '<div style="font-size:11px;color:#3a5a8a;line-height:1.5;margin-bottom:8px">💡 ' + t.why + '</div>' : '') +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+        '<div style="flex:1;height:3px;background:#1a2035;border-radius:99px;overflow:hidden">' +
+        '<div style="width:'+barWidth+'%;height:100%;background:linear-gradient(90deg,'+p.brand+'88,'+p.brand+');border-radius:99px"></div>' +
+        '</div>' +
+        '<span style="font-size:10px;color:#4a6a9a;font-family:monospace;flex-shrink:0">🔍 '+kNum+'</span>' +
+        '</div>' +
+        '</div></div></div>';
     }).join('');
   }
 
 
 
   if(tab === 'pickup'){
+    var labelColors = { '緊急': p.danger, '注目': p.warn, '解説': p.brand };
     return '<div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
       '<div class="section-title" style="margin-bottom:0">📅 今日のピックアップ</div>' +
-      '<span style="font-size:10px;color:#555">編集部セレクト</span>' +
+      '<span style="font-size:10px;color:#555">編集部セレクト · ' + (new Date().getMonth()+1) + '/' + new Date().getDate() + '</span>' +
       '</div>' +
       PICKUP.map(function(item){
-        var alertBadge = item.alert ?
-          '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px">⚠️</span>' : '';
-        return '<div class="card clickable" style="margin-bottom:10px" onclick="goTopic(\'' + item.topicId + '\')">' +
-          '<div style="display:flex;align-items:flex-start;gap:10px">' +
-          '<div style="font-size:24px;margin-top:2px;flex-shrink:0">' + item.icon + '</div>' +
-          '<div style="flex:1">' +
-          '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">' +
-          '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '22;padding:2px 8px;border-radius:99px;border:1px solid ' + p.warn + '44">' + item.label + '</span>' +
+        var lc = labelColors[item.label] || p.warn;
+        var sc = scoreColor(item.score);
+        return '<div class="card clickable" style="margin-bottom:12px;padding:0;overflow:hidden" onclick="goTopic(\'' + item.topicId + '\')">' +
+          '<div style="padding:14px 14px 12px">' +
+          '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">' +
+          '<span style="font-size:10px;font-weight:700;color:'+lc+';background:'+lc+'22;padding:2px 10px;border-radius:99px;border:1px solid '+lc+'44">' + item.label + '</span>' +
           '<span style="font-size:10px;color:#555">' + item.cat + '</span>' +
-          alertBadge +
+          (item.hasFollowup ? '<span style="font-size:10px;color:#4a9eff;background:#4a9eff11;border:1px solid #4a9eff33;padding:2px 8px;border-radius:99px;margin-left:auto">🔄 続報あり</span>' : '') +
           '</div>' +
+          '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">' +
+          '<div style="font-size:26px;flex-shrink:0;margin-top:2px">' + item.icon + '</div>' +
+          '<div style="flex:1">' +
           '<div style="font-size:14px;font-weight:700;line-height:1.5;margin-bottom:6px;color:#e0e6f0">' + item.title + '</div>' +
-          '<div style="font-size:12px;color:#777;line-height:1.7;margin-bottom:8px">' + item.summary + '</div>' +
-          '<div style="display:flex;align-items:center;gap:8px">' +
-          '<div style="flex:1;height:4px;background:#1a2035;border-radius:99px;overflow:hidden">' +
-          '<div style="width:' + item.score + '%;height:100%;background:' + scoreColor(item.score) + ';border-radius:99px"></div>' +
+          '<div style="font-size:12px;color:#666;line-height:1.7">' + item.summary + '</div>' +
+          '</div></div>' +
+          (item.note ? '<div style="background:#4a9eff0a;border-left:2px solid #4a9eff44;padding:8px 10px;border-radius:0 6px 6px 0;margin-bottom:10px">' +
+            '<span style="font-size:11px;color:#4a6a9a;line-height:1.6">📌 編集部ノート：' + item.note + '</span></div>' : '') +
           '</div>' +
-          '<span style="font-family:monospace;font-size:12px;color:' + scoreColor(item.score) + ';font-weight:700">' + item.score + 'pt</span>' +
-          '</div></div></div></div>';
+          (item.alert ? '<div style="background:'+p.warn+'11;border-top:1px solid '+p.warn+'22;padding:8px 14px;display:flex;align-items:center;gap:6px">' +
+            '<span style="font-size:11px">⚠️</span>' +
+            '<span style="font-size:11px;color:'+p.warn+';line-height:1.5">' + item.alert.msg + '</span></div>' : '') +
+          '<div style="padding:10px 14px;border-top:1px solid #0f1a2e;display:flex;align-items:center;justify-content:space-between">' +
+          '<div style="display:flex;align-items:center;gap:8px;flex:1;margin-right:12px">' +
+          '<div style="flex:1;height:3px;background:#1a2035;border-radius:99px;overflow:hidden">' +
+          '<div style="width:' + item.score + '%;height:100%;background:' + sc + ';border-radius:99px"></div>' +
+          '</div>' +
+          '<span style="font-family:monospace;font-size:11px;color:'+sc+';font-weight:700;flex-shrink:0">' + item.score + 'pt</span>' +
+          '</div>' +
+          '<span style="font-size:10px;color:#3a5a7a;flex-shrink:0">📅 ' + (item.updated||'') + '</span>' +
+          '</div>' +
+          '</div>';
       }).join('') +
       '</div>';
   }
@@ -1261,45 +1293,45 @@ function renderHomeTab(tab){
   
 
   if(tab === 'followup'){
-    return `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="section-title" style="margin-bottom:0">🔄 続報</div>
-      <span style="font-size:10px;color:#555">追いかけているニュース</span>
-    </div>
-    ${FOLLOWUP.map(f=>{
-      const statusColors = { high: p.high, warn: p.warn, mid: p.mid, danger: p.danger };
-      const sc = statusColors[f.statusColor] || p.warn;
-      return `<div class="card" style="margin-bottom:10px">
-        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px">
-          <span style="font-size:20px;margin-top:1px">${f.icon}</span>
-          <div style="flex:1">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-              <span style="font-size:13px;font-weight:700;color:#e0e6f0">${f.title}</span>
-              <span style="font-size:10px;color:${sc};background:${sc}22;padding:2px 8px;border-radius:99px;border:1px solid ${sc}44;white-space:nowrap;margin-left:8px">${f.status}</span>
-            </div>
-            <div style="font-size:10px;color:#555;margin-bottom:5px">${f.cat} · ${f.lastUpdate}に更新</div>
-            <div style="font-size:12px;color:#aaa;line-height:1.5;margin-bottom:8px">${f.summary}</div>
-          </div>
-        </div>
-        <div style="border-top:1px solid #0f1a2e;padding-top:8px">
-          ${f.updates.map((u,i)=>`
-            <div style="display:flex;gap:8px;margin-bottom:${i<f.updates.length-1?6:0}px">
-              <div style="display:flex;flex-direction:column;align-items:center;padding-top:3px">
-                <div style="width:6px;height:6px;border-radius:50%;background:${i===0?sc:'#2a3a5a'};flex-shrink:0"></div>
-                ${i<f.updates.length-1?`<div style="width:1px;flex:1;background:#1a2a4a;margin-top:3px"></div>`:''}
-              </div>
-              <div style="flex:1;padding-bottom:${i<f.updates.length-1?6:0}px">
-                <div style="font-size:10px;color:#555;font-family:monospace;margin-bottom:2px">${u.date}</div>
-                <div style="font-size:12px;color:#ccc;line-height:1.5">${u.text}</div>
-              </div>
-            </div>`).join('')}
-        </div>
-        <div style="margin-top:8px;padding-top:8px;border-top:1px solid #0f1a2e;display:flex;gap:8px;flex-wrap:wrap">
-          <button onclick="goTopic('${f.topicId}')" style="font-size:11px;color:${p.brand};background:${p.brand}11;border:1px solid ${p.brand}33;padding:5px 14px;border-radius:99px;cursor:pointer;font-family:'Noto Sans JP',sans-serif">詳しく調べる →</button>
-          <button onclick="goExploreCat('${f.cat}')" style="font-size:11px;color:#4a9eff;background:#4a9eff11;border:1px solid #4a9eff33;padding:5px 14px;border-radius:99px;cursor:pointer;font-family:'Noto Sans JP',sans-serif">🗄️ 記録を閲覧 →</button>
-        </div>
-      </div>`;
-    }).join('')}`;
+    var today = '2026年4月3日';
+    var statusColors = { high: p.high, warn: p.warn, mid: p.mid, danger: p.danger };
+    return '<div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
+      '<div class="section-title" style="margin-bottom:0">🔄 続報</div>' +
+      '<span style="font-size:10px;color:#555">追いかけているニュース ' + FOLLOWUP.length + '件</span>' +
+      '</div>' +
+      FOLLOWUP.map(function(f){
+        var sc = statusColors[f.statusColor] || p.warn;
+        var isToday = f.lastUpdate === today;
+        var latestUpdate = f.updates[0];
+        return '<div class="card clickable" style="margin-bottom:12px;padding:0;overflow:hidden" onclick="goTopic(\''+f.topicId+'\')">' +
+          '<div style="padding:12px 14px 10px">' +
+          '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">' +
+          '<span style="font-size:20px">' + f.icon + '</span>' +
+          '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:13px;font-weight:700;color:#e0e6f0;margin-bottom:2px">' + f.title + '</div>' +
+          '<div style="font-size:10px;color:#555">' + f.cat + '</div>' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">' +
+          '<span style="font-size:10px;color:'+sc+';background:'+sc+'22;padding:2px 8px;border-radius:99px;border:1px solid '+sc+'44;white-space:nowrap">' + f.status + '</span>' +
+          (isToday ? '<span style="font-size:9px;color:#FF9800;background:#FF980022;padding:1px 6px;border-radius:99px;border:1px solid #FF980044">本日更新</span>' : '') +
+          '</div></div>' +
+          '<div style="font-size:12px;color:#666;line-height:1.6;margin-bottom:10px">' + f.summary + '</div>' +
+          '</div>' +
+          '<div style="background:#060c1a;border-top:1px solid #0f1a2e;padding:10px 14px">' +
+          '<div style="font-size:10px;color:#3a5a7a;font-family:monospace;margin-bottom:6px;letter-spacing:0.5px">最新アップデート</div>' +
+          (latestUpdate ? '<div style="display:flex;gap:8px">' +
+            '<div style="width:6px;height:6px;border-radius:50%;background:'+sc+';flex-shrink:0;margin-top:4px"></div>' +
+            '<div><div style="font-size:10px;color:#555;font-family:monospace;margin-bottom:2px">' + latestUpdate.date + '</div>' +
+            '<div style="font-size:12px;color:#bbb;line-height:1.5">' + latestUpdate.text + '</div>' +
+            '</div></div>' : '') +
+          '</div>' +
+          '<div style="padding:8px 14px;border-top:1px solid #0f1a2e;display:flex;align-items:center;justify-content:space-between">' +
+          '<span style="font-size:10px;color:#3a5a7a">更新 ' + f.updates.length + '件</span>' +
+          '<span style="font-size:11px;color:'+p.brand+'">詳しく調べる →</span>' +
+          '</div>' +
+          '</div>';
+      }).join('') + '</div>';
   }
 
   return '';
