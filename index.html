@@ -1847,7 +1847,7 @@ function renderSourcesTab(){
 
   var makeMediaCard = function(s){
     var rankColor = s.score>=90 ? p.high : s.score>=75 ? p.brand : p.mid;
-    var isExpanded = state.expandedMediaId === s.id;
+    var isExpanded = state.expandedMediaId == s.id; // 文字列・数値の型差を吸収
     var articleCount = s.articles ? s.articles.length : 0;
 
     var articleList = '';
