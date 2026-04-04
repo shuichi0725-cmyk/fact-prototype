@@ -112,6 +112,26 @@ input[type=range] { width: 100%; accent-color: #4a9eff; }
 
 .info-box { padding: 8px 12px; background: #4a9eff11; border: 1px solid #4a9eff33; border-radius: 8px; font-size: 11px; color: #4a9eff; margin-bottom: 14px; line-height: 1.6; }
 .warn-box { padding: 8px 10px; background: #FF980011; border: 1px solid #FF980044; border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-top: 10px; }
+
+/* タップフィードバック */
+.card.clickable:active { background: #0f1e35; transform: scale(0.992); transition: transform 0.1s, background 0.1s; }
+.cat-card:active { transform: scale(0.97); transition: transform 0.1s; }
+
+/* ポップアップ改善 */
+#popup-overlay { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+#popup-box { border: 1px solid #1a2a4a; box-shadow: 0 -8px 40px rgba(0,0,0,0.6); max-height: 85vh; overflow-y: auto; border-radius: 20px 20px 0 0; }
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* スコアバーアニメーション */
+.score-bar-fill { transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+
+/* ナビゲーション改善 */
+.nav-btn { transition: border-color 0.2s, color 0.2s; }
+.nav-btn:active { background: rgba(74,158,255,0.08); }
+
+/* ヘッダー */
+#header { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 </style>
 </head>
 <body>
@@ -134,9 +154,6 @@ input[type=range] { width: 100%; accent-color: #4a9eff; }
     </button>
     <button class="nav-btn" data-nav="alerts" onclick="switchNav('alerts')">
       <span class="nav-icon">⚠️</span><span class="nav-label">注意</span>
-    </button>
-    <button class="nav-btn" data-nav="amazon" onclick="switchNav('amazon')">
-      <span class="nav-icon">🛒</span><span class="nav-label">Amazon</span>
     </button>
     <button class="nav-btn" data-nav="settings" onclick="switchNav('settings')">
       <span class="nav-icon">⚙️</span><span class="nav-label">設定</span>
@@ -1009,7 +1026,7 @@ function showPopup(dataStr){
   try{ d = typeof dataStr==="string" ? JSON.parse(dataStr) : dataStr; }catch(e){ return; }
   const c=alertColor(d.type||"bias");
   document.getElementById("popup-icon").textContent = alertIcon(d.type||"bias");
-  document.getElementById("popup-type").textContent = "注意喚起";
+  document.getElementById("popup-type").textContent = d.title || "注意喚起";
   document.getElementById("popup-type").style.color = c;
   document.getElementById("popup-msg").textContent = d.msg||d.alertMsg||"";
   const btn=document.getElementById("popup-btn");
@@ -1064,12 +1081,12 @@ function renderHome(){
   ];
   const tabBar = HOME_TABS.map(t=>`
     <button onclick="setHomeTab('${t.id}')" style="
-      flex:1;padding:9px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:2px;
+      flex:1;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;
       border:none;background:none;cursor:pointer;
       border-bottom:2px solid ${state.homeTab===t.id?p.brand:'transparent'};
-      transition:border-color 0.2s;">
-      <span style="font-size:16px">${t.icon}</span>
-      <span style="font-size:9px;color:${state.homeTab===t.id?p.brand:'#555'};font-weight:${state.homeTab===t.id?700:400};letter-spacing:0.3px">${t.label}</span>
+      transition:border-color 0.2s, color 0.2s;">
+      <span style="font-size:${state.homeTab===t.id?'19':'16'}px;transition:font-size 0.15s">${t.icon}</span>
+      <span style="font-size:10px;color:${state.homeTab===t.id?p.brand:'#555'};font-weight:${state.homeTab===t.id?700:400};letter-spacing:0.3px">${t.label}</span>
     </button>`).join('');
 
   return `
@@ -1089,13 +1106,6 @@ function renderHome(){
     ${renderHomeTab(state.homeTab)}
   </div>
 
-  <div style="padding:14px 14px 0">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="section-title" style="margin-bottom:0">🛒 Amazonで探す</div>
-      <span style="font-size:10px;color:#555">購入でFACT支援</span>
-    </div>
-    <div class="card" style="padding:14px">${amazonSearchHTML('home')}</div>
-  </div>
   <div style="height:20px"></div>`;
 }
 
@@ -1131,7 +1141,19 @@ function renderHomeTab(tab){
   if(tab === 'trending'){
     var rp = state.rankingPeriod || 'day';
     var rankData = RANKING[rp] || RANKING.day;
-    return rankData.map(function(t){
+    var periods2 = ['hour','day','week'];
+    var labels2 = {hour:'時間', day:'今日', week:'今週'};
+    var periodBar = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
+      '<div class="section-title" style="margin-bottom:0">🔥 急上昇ランキング</div>' +
+      '<div style="display:flex;gap:4px">' +
+      periods2.map(function(pd){
+        var active = rp === pd;
+        var bc = active ? p.brand : '#1a2a4a';
+        var tc = active ? p.brand : '#666';
+        var bg = active ? p.brand+'22' : 'transparent';
+        return '<button onclick="state.rankingPeriod=\''+pd+'\';render()" style="padding:3px 10px;background:'+bg+';border:1px solid '+bc+';border-radius:99px;font-size:10px;color:'+tc+';cursor:pointer;font-family:sans-serif">'+labels2[pd]+'</button>';
+      }).join('') + '</div></div>';
+    return periodBar + rankData.map(function(t){
       var chColor = t.change.startsWith('↑') ? p.high : t.change.startsWith('↓') ? p.danger : t.change==='new' ? p.warn : '#555';
       var kNum = t.searches >= 10000 ? (t.searches/1000).toFixed(0)+'k' : (t.searches/1000).toFixed(1)+'k';
       var onclickFn = t.topicId ? 'goTopic(\'' + t.topicId + '\')' : 'setSearchQuery(this.dataset.title)';
@@ -1230,6 +1252,8 @@ function renderHomeTab(tab){
 function renderRankingSection(){
   var p = P();
   var tab = state.homeTab || 'alerts';
+  // trendingタブでは非表示（タブ自体がランキングコンテンツ）
+  if(tab === 'trending') return '';
   var rp = state.rankingPeriod || 'day';
   var tabData = TAB_RANKING[tab] || TAB_RANKING.alerts;
   var rankData = tabData[rp] || [];
@@ -2381,6 +2405,12 @@ function renderAmazon(){
     <div class="card" style="padding:14px">${amazonSearchHTML('home')}</div>
   </div>
   <div style="height:20px"></div>`;
+}
+
+function updateSearchSuggestions(){
+  // サジェスト機能（将来実装予定）。現時点ではクリアボタン表示制御のみ
+  var btn = document.getElementById('search-clear-btn');
+  if(btn) btn.style.display = state.searchQuery ? 'block' : 'none';
 }
 
 function navSearch(){
