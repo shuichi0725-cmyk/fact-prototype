@@ -30,12 +30,12 @@ body { background: #080e1e; color: #e0e6f0; font-family: 'Noto Sans JP', sans-se
 
 /* 下部ナビ */
 #bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: #0c1525; border-top: 1px solid #1a2a4a; display: flex; z-index: 50; }
-.nav-btn { flex: 1; padding: 10px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; border: none; background: none; cursor: pointer; border-top: 2px solid transparent; transition: border-color 0.2s; }
+.nav-btn { flex: 1; padding: 9px 2px 7px; display: flex; flex-direction: column; align-items: center; gap: 2px; border: none; background: none; cursor: pointer; border-top: 2px solid transparent; transition: border-color 0.2s; }
 .nav-btn.active { border-top-color: var(--brand); }
 .nav-btn.active .nav-label { color: var(--brand); }
-.nav-icon { font-size: 18px; }
+.nav-icon { font-size: 16px; }
 .nav-btn:not(.active) .nav-icon { filter: grayscale(1) opacity(0.5); }
-.nav-label { font-size: 9px; color: #555; letter-spacing: 0.5px; }
+.nav-label { font-size: 8.5px; color: #555; letter-spacing: 0.3px; }
 
 /* 共通 */
 .section { padding: 14px 14px 0; }
@@ -136,6 +136,10 @@ input[type=range] { width: 100%; accent-color: #4a9eff; }
 .nav-btn { transition: border-color 0.2s, color 0.2s; }
 .nav-btn:active { background: rgba(74,158,255,0.08); }
 
+/* ページ遷移アニメーション */
+@keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+#content.page-enter { animation: pageIn 0.18s ease-out; }
+
 /* ヘッダー */
 #header { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 </style>
@@ -160,6 +164,9 @@ input[type=range] { width: 100%; accent-color: #4a9eff; }
     </button>
     <button class="nav-btn" data-nav="alerts" onclick="switchNav('alerts')">
       <span class="nav-icon">⚠️</span><span class="nav-label">注意</span>
+    </button>
+    <button class="nav-btn" data-nav="amazon" onclick="switchNav('amazon')">
+      <span class="nav-icon">🛒</span><span class="nav-label">Amazon</span>
     </button>
     <button class="nav-btn" data-nav="settings" onclick="switchNav('settings')">
       <span class="nav-icon">⚙️</span><span class="nav-label">設定</span>
@@ -1103,6 +1110,8 @@ function switchNav(nav){
 function render(){
   const c=document.getElementById("content");
   c.scrollTop=0;
+  c.classList.remove('page-enter');
+  void c.offsetHeight; // reflow for re-trigger
   if(state.nav==="home")         c.innerHTML=renderHome();
   if(state.nav==="search")       c.innerHTML=renderSearch();
   if(state.nav==="explore")      c.innerHTML=renderExplore();
@@ -1110,6 +1119,7 @@ function render(){
   if(state.nav==="settings")     c.innerHTML=renderSettings();
   if(state.nav==="sourceDetail") c.innerHTML=renderSourceDetail();
   if(state.nav==="amazon")       c.innerHTML=renderAmazon();
+  c.classList.add('page-enter');
   document.getElementById("sens-badge").textContent=`感度 Lv.${state.sensitivity}`;
   bindEvents();
 }
@@ -2426,9 +2436,13 @@ function doAmazonSearch(context){
   const el = document.getElementById('amz-input-'+context);
   if(!el || !el.value.trim()) return;
   const q = encodeURIComponent(el.value.trim());
-  // 実際はアソシエイトタグ付きURLに遷移
-  // window.open('https://www.amazon.co.jp/s?k='+q+'&tag=YOUR_ASSOCIATE_TAG', '_blank');
-  alert('Amazon検索：「' + el.value + '」\n（本実装時はアソシエイトタグ付きURLに遷移します）');
+  const a = document.createElement('a');
+  a.href = 'https://www.amazon.co.jp/s?k=' + q;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function setAmazonQuery(keyword, context){
@@ -2437,18 +2451,59 @@ function setAmazonQuery(keyword, context){
 }
 
 function renderAmazon(){
-  const p = P();
+  // ニュース連動キーワード（現在のトピックから自動生成）
+  const newsKeywords = ['AI・ChatGPT','防災グッズ','節電グッズ','ビジネス書','健康食品','スマホアクセサリー'];
+  const categories = [
+    { icon:'🔦', label:'防災', q:'防災 備蓄' },
+    { icon:'📱', label:'スマホ', q:'スマートフォン アクセサリー' },
+    { icon:'📚', label:'本', q:'ビジネス書 話題' },
+    { icon:'🏃', label:'健康', q:'健康 サプリメント' },
+    { icon:'🍳', label:'キッチン', q:'キッチン 便利グッズ' },
+    { icon:'💡', label:'節電', q:'節電 省エネ グッズ' },
+  ];
   return `
-  <div style="padding:14px 14px 0">
-    <div class="section-title">🛒 Amazon で探す</div>
-  </div>
-  ${amazonSearchHTML('full')}
-  <div id="sec-amazon" style="padding:14px 14px 0;display:${state.nav === 'amazon' ? 'none' : 'block'}">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="section-title" style="margin-bottom:0">🛒 Amazonで探す</div>
-      <span style="font-size:10px;color:#555">購入でFACT支援</span>
+  <div style="background:linear-gradient(180deg,#0c1525 0%,#080e1e 100%);padding:20px 14px 16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <span style="font-size:28px">🛒</span>
+      <div>
+        <div style="font-size:17px;font-weight:700;color:#FF9900;letter-spacing:0.5px">Amazon で探す</div>
+        <div style="font-size:11px;color:#555;margin-top:2px">購入でFACTの運営を支援</div>
+      </div>
     </div>
-    <div class="card" style="padding:14px">${amazonSearchHTML('home')}</div>
+  </div>
+
+  <div style="padding:0 14px 14px">
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input id="amz-input-full" class="search-input"
+        placeholder="商品・キーワードを入力..."
+        style="flex:1;font-size:14px"
+        onkeydown="if(event.key==='Enter')doAmazonSearch('full')">
+      <button onclick="doAmazonSearch('full')"
+        style="padding:10px 18px;background:#FF9900;border:none;border-radius:8px;color:#111;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif">検索</button>
+    </div>
+
+    <div style="font-size:10px;color:#4a9eff;letter-spacing:1.5px;font-family:monospace;margin-bottom:8px">CATEGORIES</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+      ${categories.map(c=>`
+      <button onclick="setAmazonQuery('${c.q}','full')"
+        style="background:#0c1525;border:1px solid #1a2a4a;border-radius:10px;padding:12px 8px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;display:flex;flex-direction:column;align-items:center;gap:4px;transition:border-color 0.2s"
+        onmouseover="this.style.borderColor='#2a4a7a'" onmouseout="this.style.borderColor='#1a2a4a'">
+        <span style="font-size:22px">${c.icon}</span>
+        <span style="font-size:11px;color:#ccc">${c.label}</span>
+      </button>`).join('')}
+    </div>
+
+    <div style="font-size:10px;color:#4a9eff;letter-spacing:1.5px;font-family:monospace;margin-bottom:8px">NEWS連動キーワード</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+      ${newsKeywords.map(k=>`
+      <button onclick="setAmazonQuery('${k}','full')"
+        style="padding:6px 14px;background:#FF990011;border:1px solid #FF990033;border-radius:99px;font-size:12px;color:#FF9900;cursor:pointer;font-family:'Noto Sans JP',sans-serif">${k}</button>`).join('')}
+    </div>
+
+    <div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:10px;padding:12px">
+      <div style="font-size:11px;color:#FF9900;margin-bottom:6px">📋 Amazonアソシエイトについて</div>
+      <div style="font-size:11px;color:#555;line-height:1.7">FACTはAmazonアソシエイト・プログラムに参加しています。このリンクから購入された場合、売上の一部がFACTの運営費用に充てられます。商品価格に変わりはありません。</div>
+    </div>
   </div>
   <div style="height:20px"></div>`;
 }
