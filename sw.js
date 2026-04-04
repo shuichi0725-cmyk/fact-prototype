@@ -1,5 +1,5 @@
 // FACT Service Worker
-const CACHE_NAME = 'fact-v1';
+const CACHE_NAME = 'fact-v2';
 const ASSETS = [
   '/fact-prototype/',
   '/fact-prototype/index.html',
