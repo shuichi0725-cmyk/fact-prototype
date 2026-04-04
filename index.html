@@ -1,0 +1,2540 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FACT — Verified Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --brand: #4a9eff; }
+body { background: #080e1e; color: #e0e6f0; font-family: 'Noto Sans JP', sans-serif; display: flex; justify-content: center; }
+::-webkit-scrollbar { display: none; }
+
+#app { width: 100%; max-width: 400px; min-height: 100vh; display: flex; flex-direction: column; position: relative; background: #080e1e; }
+
+/* ヘッダー */
+#header { background: #0c1525; border-bottom: 1px solid #1a2a4a; padding: 12px 16px; display: flex; align-items: center; gap: 10; flex-shrink: 0; }
+.logo { font-family: monospace; font-weight: 900; font-size: 18px; color: var(--brand); letter-spacing: 2px; }
+.logo-sub { font-size: 10px; color: var(--brand); letter-spacing: 1px; opacity: 0.6; margin-left: 8px; }
+.sensitivity-badge { margin-left: auto; font-size: 10px; color: #555; font-family: monospace; }
+
+/* コンテンツ */
+#content { flex: 1; overflow-y: auto; padding-bottom: 70px; }
+
+/* 下部ナビ */
+#bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: #0c1525; border-top: 1px solid #1a2a4a; display: flex; z-index: 50; }
+.nav-btn { flex: 1; padding: 10px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; border: none; background: none; cursor: pointer; border-top: 2px solid transparent; transition: border-color 0.2s; }
+.nav-btn.active { border-top-color: var(--brand); }
+.nav-btn.active .nav-label { color: var(--brand); }
+.nav-icon { font-size: 18px; }
+.nav-btn:not(.active) .nav-icon { filter: grayscale(1) opacity(0.5); }
+.nav-label { font-size: 9px; color: #555; letter-spacing: 0.5px; }
+
+/* 共通 */
+.section { padding: 14px 14px 0; }
+.section-title { font-size: 10px; color: var(--brand); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; font-family: monospace; }
+.card { background: #0c1525; border: 1px solid #1a2a4a; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+.card.clickable { cursor: pointer; transition: border-color 0.2s; }
+.card.clickable:hover { border-color: #2a4a7a; }
+
+/* カテゴリグリッド */
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px; }
+.cat-card { background: #0c1525; border: 1px solid #1a2a4a; border-radius: 10px; padding: 14px 12px; cursor: pointer; position: relative; transition: border-color 0.2s; }
+.cat-card:hover { border-color: #2a4a7a; }
+.cat-card.has-alert { border-color: #FF980044; }
+.cat-card .cat-icon { font-size: 24px; margin-bottom: 6px; }
+.cat-card .cat-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.cat-card .cat-count { font-size: 10px; color: #555; }
+.cat-card .alert-dot { position: absolute; top: 8px; right: 8px; font-size: 10px; color: #FF9800; }
+
+/* スコアバー */
+.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.score-bar-track { flex: 1; height: 6px; background: #1a2035; border-radius: 99px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+.score-val { font-family: monospace; font-size: 13px; font-weight: 700; min-width: 28px; }
+
+/* タグ */
+.type-tag { font-size: 10px; padding: 2px 8px; border-radius: 99px; border: 1px solid; display: inline-block; }
+.tag-nhk { color: #4a9eff; background: #4a9eff22; border-color: #4a9eff44; }
+.tag-paper { color: #8BC34A; background: #8BC34A22; border-color: #8BC34A44; }
+.tag-gov { color: #FF9800; background: #FF980022; border-color: #FF980044; }
+.tag-academic { color: #9C27B0; background: #9C27B022; border-color: #9C27B044; }
+
+/* アラートバッジ */
+.alert-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 4px; font-size: 11px; cursor: pointer; border: 1px solid; }
+
+/* タブ */
+.tabs { display: flex; border-bottom: 1px solid #1a2a4a; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn { padding: 10px 14px; font-size: 11px; white-space: nowrap; border: none; background: none; color: #555; border-bottom: 2px solid transparent; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: color 0.2s; }
+.tab-btn.active { color: #4a9eff; border-bottom-color: #4a9eff; font-weight: 700; }
+
+/* 検索ボックス */
+.search-box { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; }
+.search-input { flex: 1; background: #0c1525; border: 1px solid #1a2a4a; border-radius: 8px; padding: 10px 14px; color: #e0e6f0; font-size: 14px; outline: none; font-family: 'Noto Sans JP', sans-serif; transition: border-color 0.2s; }
+.search-input:focus { border-color: #4a9eff44; }
+.search-input::placeholder { color: #444; }
+.search-btn { padding: 10px 16px; background: #4a9eff; border: none; border-radius: 8px; color: #fff; font-weight: 700; cursor: pointer; font-size: 13px; white-space: nowrap; font-family: 'Noto Sans JP', sans-serif; }
+
+/* パンくず */
+.breadcrumb { padding: 10px 14px; font-size: 12px; color: #555; display: flex; align-items: center; gap: 4px; background: #0c1830; border-bottom: 2px solid #1a3a6a; }
+.breadcrumb .crumb-link { color: #4a9eff; cursor: pointer; font-weight: 700; padding: 3px 8px; border-radius: 6px; transition: background 0.15s; }
+.breadcrumb .crumb-link:hover { background: rgba(74,158,255,0.15); }
+.breadcrumb .crumb-current { color: #e0e6f0; font-weight: 600; padding: 3px 8px; }
+.breadcrumb .crumb-sep { color: #2a4a7a; font-size: 14px; font-weight: 300; }
+.breadcrumb .back-hint { margin-left: auto; font-size: 10px; color: #2a5a9a; display: flex; align-items: center; gap: 3px; }
+
+/* タイムライン */
+.timeline-item { display: flex; gap: 12px; margin-bottom: 16px; }
+.timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+.timeline-line { width: 1px; flex: 1; background: #1a2a4a; margin-top: 4px; margin-left: 4px; }
+
+/* ポップアップ */
+#popup-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: flex-end; padding-bottom: 80px; }
+#popup-overlay.show { display: flex; }
+#popup-box { background: #0f1729; border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-width: 400px; margin: 0 auto; animation: slideUp 0.25s ease; }
+@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* 水平スクロール */
+.hscroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 14px; scrollbar-width: none; }
+.hscroll::-webkit-scrollbar { display: none; }
+.hscroll-card { flex: 0 0 auto; background: #0c1525; border: 1px solid #1a2a4a; border-radius: 10px; padding: 10px 14px; cursor: pointer; text-align: center; min-width: 80px; }
+
+/* range input */
+input[type=range] { width: 100%; accent-color: #4a9eff; }
+
+.source-card { background: #0c1525; border: 1px solid #1a2a4a; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; }
+
+.perspective-card { background: #0c1525; border: 1px solid #1a2a4a; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+
+.filter-btn { padding: 4px 10px; background: #0c1525; border: 1px solid #1a2a4a; border-radius: 99px; font-size: 11px; color: #888; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+
+.info-box { padding: 8px 12px; background: #4a9eff11; border: 1px solid #4a9eff33; border-radius: 8px; font-size: 11px; color: #4a9eff; margin-bottom: 14px; line-height: 1.6; }
+.warn-box { padding: 8px 10px; background: #FF980011; border: 1px solid #FF980044; border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <span class="logo">FACT</span>
+    <span class="logo-sub">VERIFIED INTELLIGENCE</span>
+    <span class="sensitivity-badge" id="sens-badge">感度 Lv.3<span id="color-mode-badge" style="color:#666"></span></span>
+  </div>
+  <div id="content"></div>
+  <div id="bottom-nav">
+    <button class="nav-btn active" data-nav="home" onclick="switchNav('home')">
+      <span class="nav-icon">🏠</span><span class="nav-label">ホーム</span>
+    </button>
+    <button class="nav-btn" data-nav="search" onclick="navSearch()">
+      <span class="nav-icon">🔍</span><span class="nav-label">検索</span>
+    </button>
+    <button class="nav-btn" data-nav="explore" onclick="navExplore()">
+      <span class="nav-icon">🗄️</span><span class="nav-label">記録</span>
+    </button>
+    <button class="nav-btn" data-nav="alerts" onclick="switchNav('alerts')">
+      <span class="nav-icon">⚠️</span><span class="nav-label">注意</span>
+    </button>
+    <button class="nav-btn" data-nav="amazon" onclick="switchNav('amazon')">
+      <span class="nav-icon">🛒</span><span class="nav-label">Amazon</span>
+    </button>
+    <button class="nav-btn" data-nav="settings" onclick="switchNav('settings')">
+      <span class="nav-icon">⚙️</span><span class="nav-label">設定</span>
+    </button>
+  </div>
+</div>
+
+<div id="popup-overlay" onclick="closePopup()">
+  <div id="popup-box" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <span id="popup-icon" style="font-size:20px;"></span>
+      <span id="popup-type" style="font-weight:700;font-size:14px;"></span>
+      <button onclick="closePopup()" style="margin-left:auto;background:none;border:none;color:#555;font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <p id="popup-msg" style="font-size:13px;color:#ccc;line-height:1.7;margin-bottom:16px;"></p>
+    <button style="width:100%;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;" id="popup-btn">詳細を見る →</button>
+  </div>
+</div>
+
+<script>
+// ===== データ =====
+const CATEGORIES = [
+  { id:"judicial",  label:"司法・裁判",    icon:"⚖️", count:1, alert:false },
+  { id:"intl",      label:"地政学・安保",  icon:"🌏", count:1, alert:true  },
+  { id:"economy",   label:"経済・産業",    icon:"📈", count:1, alert:true  },
+  { id:"politics",  label:"政治・行政",    icon:"🏛",  count:1, alert:false },
+  { id:"medical",   label:"医療・健康",    icon:"🏥", count:1, alert:false },
+  { id:"science",   label:"科学・環境",    icon:"🔬", count:1, alert:false },
+  { id:"society",   label:"社会・事件",    icon:"📋", count:1, alert:false },
+  { id:"tech",      label:"テクノロジー",  icon:"💻", count:1, alert:false },
+  { id:"edu",       label:"教育・子ども",  icon:"📚", count:1, alert:false },
+  { id:"food",      label:"食品・消費者",  icon:"🛡",  count:1, alert:true  },
+  { id:"disaster",  label:"災害・インフラ",icon:"🗾", count:1, alert:false },
+  { id:"history",   label:"歴史・検証",    icon:"📜", count:1, alert:true  },
+];
+
+const FACT_TOPICS = [
+  {
+    id:"hakamada_muzai", title:"袴田事件 再審無罪確定",
+    cat:"司法・裁判", score:92, sourceCount:11,
+    date:"2024年10月9日 無罪確定",
+    summary:"1966年発生の一家4人殺害事件で死刑が確定した袴田巌さんが2024年9月の再審で無罪判決。捜査機関による証拠捏造を認定した歴史的判決。逮捕から58年。",
+    tags:["再審","冤罪","死刑制度","証拠捏造"],
+    alert:{type:"bias", msg:"一部週刊誌で証拠の信憑性に関する論調が主要メディアと乖離しています。"}
+  },
+  {
+    id:"hormuz_crisis", title:"ホルムズ海峡危機 日本への影響",
+    cat:"地政学・安保", score:91, sourceCount:8,
+    date:"2026年4月3日 継続中",
+    summary:"2026年2月、米イスラエルのイラン攻撃を契機にホルムズ海峡が事実上封鎖。日本の原油輸入3割減と過去最少水準に。40カ国が再開協議中。",
+    tags:["ホルムズ海峡","イラン","原油","エネルギー安保"],
+    alert:{type:"sns", msg:"「封鎖解除合意」の誤情報がSNSで拡散中。"}
+  },
+  {
+    id:"microsoft_japan", title:"Microsoft 日本に1兆円AI投資",
+    cat:"経済・産業", score:88, sourceCount:6,
+    date:"2026年4月3日 発表",
+    summary:"米マイクロソフトが日本のデータセンター等に100億ドル（約1兆6000億円）を投資すると発表。ソフトバンク・さくらインターネットと連携しAIインフラを構築。",
+    tags:["Microsoft","AI","データセンター","日本投資"],
+    alert:{type:"bias", msg:"国内と海外メディアで評価が大きく異なります。"}
+  },
+  {
+    id:"yosan_2026", title:"2026年度本予算 4月11日自然成立",
+    cat:"政治・行政", score:85, sourceCount:5,
+    date:"2026年4月11日 自然成立予定",
+    summary:"年度内成立を断念し暫定予算で年度越えした2026年度本予算が、憲法の規定により4月11日に自然成立。共同親権導入・私立高校授業料実質無償化など新制度が4月1日から開始。",
+    tags:["2026年度予算","共同親権","高校無償化","国家情報局"]
+  },
+  {
+    id:"sudden_death_diagnosis", title:"突然死診断に新手法 細胞・血液で心臓変化を分析",
+    cat:"医療・健康", score:82, sourceCount:3,
+    date:"2026年4月1日 発表",
+    summary:"和歌山県立医科大学が突然死の死因究明に新手法を開発。細胞や血液から心臓の変化を分析し、従来より精度の高い死因判定が可能に。",
+    tags:["突然死","死因究明","法医学","和歌山医大"]
+  },
+  {
+    id:"march_high_temp", title:"2026年3月 全国的に高温・北日本と沖縄は少雨",
+    cat:"科学・環境", score:87, sourceCount:2,
+    date:"2026年4月1日 気象庁発表",
+    summary:"気象庁が2026年3月の気候まとめを発表。全国的に気温が平年を上回り、北日本と沖縄・奄美地方では降水量が少雨傾向。",
+    tags:["異常気象","温暖化","気象庁","高温"]
+  },
+  {
+    id:"enzai_cf", title:"冤罪被害者ら 再審制度改正へCF開始",
+    cat:"社会・事件", score:83, sourceCount:3,
+    date:"2026年4月1日 開始",
+    summary:"冤罪被害者らが再審制度改正の実現に向けたクラウドファンディングを4月1日に開始。袴田事件の弁護団も支持を表明。",
+    tags:["冤罪","再審制度","クラウドファンディング","司法改革"]
+  },
+  {
+    id:"ai_datacenter_japan", title:"AIデータセンター 日本誘致競争の構図",
+    cat:"テクノロジー", score:80, sourceCount:4,
+    date:"2026年4月3日 継続中",
+    summary:"Microsoft1兆円投資に続き、GoogleやAmazonも日本でのデータセンター投資を計画。データ主権・経済安保の観点から政府も積極誘致。電力需要急増が課題。",
+    tags:["AI","データセンター","データ主権","経済安保"]
+  },
+  {
+    id:"kyoiku_2026", title:"2026年4月から 私立高校授業料実質無償化・給食費無償化",
+    cat:"教育・子ども", score:86, sourceCount:4,
+    date:"2026年4月1日 施行",
+    summary:"2026年4月から私立高校授業料の実質無償化と公立小学校の給食費無償化が開始。改正民法による共同親権も導入。こども誰でも通園制度も新設。",
+    tags:["高校無償化","給食費無償化","共同親権","子育て支援"]
+  },
+  {
+    id:"food_price_hike", title:"原油高・円安で食料品価格が高騰",
+    cat:"食品・消費者", score:89, sourceCount:5,
+    date:"2026年4月3日 継続中",
+    summary:"ホルムズ海峡危機による原油高と円安が同時進行し、食料品・日用品の価格が急騰。肥料価格は5割高。家計への影響が深刻化。",
+    tags:["食料品値上げ","原油高","円安","家計負担"],
+    alert:{type:"fact", msg:"商品別の値上げ幅について報道機関間で数字が異なります。"}
+  },
+  {
+    id:"tochigi_jishin", title:"栃木で震度5弱 東北新幹線に遅れ",
+    cat:"災害・インフラ", score:84, sourceCount:3,
+    date:"2026年4月1日 発生",
+    summary:"4月1日、栃木県で最大震度5弱の地震が発生。東北新幹線が一時運転見合わせ。負傷者の報告なし。",
+    tags:["地震","栃木","新幹線","インフラ"]
+  },
+  {
+    id:"hakamada_history", title:"袴田事件が問う日本の刑事司法58年の歩み",
+    cat:"歴史・検証", score:88, sourceCount:7,
+    date:"2024年10月〜 継続検証",
+    summary:"1966年から2024年の無罪確定まで58年にわたる袴田事件は、日本の刑事司法制度の問題点を凝縮している。自白強要・人質司法・証拠開示制度の欠如という三つの課題を歴史的に検証。",
+    tags:["冤罪の歴史","刑事司法","人質司法","証拠開示"],
+    alert:{type:"bias", msg:"事件当時の報道と現在の評価の間に大きな乖離があります。"}
+  },
+];
+
+// 各トピックのタイムライン・視点・ソースデータ
+const TOPIC_DATA = {
+  hakamada_muzai: {
+    sources: null, // ALL_SOURCESを使用
+    timeline: [
+      { date:"1966年6月30日", event:"静岡県清水市で一家4人が殺害される。みそ製造会社専務宅が放火・全焼。", alert:false },
+      { date:"1966年8月18日", event:"袴田巌さん（当時30歳）が強盗殺人容疑で逮捕。その後1日平均12時間に及ぶ取調べが続く。", alert:true, msg:"取調べの非人道性について当時から問題視する声があったが、見過ごされた経緯があります。" },
+      { date:"1967年8月", event:"みそ製造工場のみそタンク内から「5点の衣類」が発見される。後に証拠捏造と認定。", alert:true, msg:"この発見の状況について、検察と弁護側で根本的な事実認識の違いがあります。" },
+      { date:"1968年9月11日", event:"静岡地裁が袴田さんに死刑判決。裁判官3名中1名が反対意見を持っていたことが後に判明。", alert:false },
+      { date:"1980年11月19日", event:"最高裁が上告を棄却し死刑確定。以降袴田さんは死刑囚として拘置所に収監。", alert:false },
+      { date:"2014年3月27日", event:"静岡地裁が再審開始と拘置執行停止を決定。袴田さんが47年7ヶ月ぶりに釈放。", alert:false },
+      { date:"2023年3月13日", event:"東京高裁が再審開始を認め、検察の即時抗告を棄却。検察は特別抗告を断念。", alert:false },
+      { date:"2024年9月26日", event:"静岡地裁が再審無罪判決。3つの証拠を捜査機関による捏造と認定。", alert:false },
+      { date:"2024年10月9日", event:"検察が控訴を断念し無罪が確定。逮捕から58年、死刑確定から44年。", alert:false },
+      { date:"2025年3月24日", event:"静岡地裁が刑事補償として2億1700万円余の支払いを決定。", alert:false },
+      { date:"2025年10月9日", event:"袴田さんが国と県を相手取り、約6億円の国家賠償請求訴訟を提訴。", alert:false },
+      { date:"2026年3月31日", event:"国賠訴訟第1回口頭弁論。国側は争う姿勢を示す。", alert:false },
+    ],
+    perspectives: [
+      { stance:"司法（再審判決）", color:"#4CAF50", summary:"静岡地裁は「5点の衣類・自白調書・ズボンの共布」の3証拠はいずれも捜査機関によって捏造されたと認定。「捜査機関以外に事実上想定できない」と断じ無罪とした。", sources:["静岡地裁判決文（2024年9月26日）"] },
+      { stance:"弁護団・支援者", color:"#4a9eff", summary:"弁護団は「みそ漬け実験」等の科学的証拠により証拠捏造を立証。一方で袴田さんが法廷に立てないほど拘禁症状が残っていることを「刑事司法の最大の恥」と訴えた。", sources:["弁護団最終弁論（2024年5月）","IPJ声明（2024年9月）"] },
+      { stance:"検察", color:"#FF9800", summary:"控訴断念の談話で「判決には到底承服できず、捏造と断じたことには強い不満がある」と表明。一方で袴田さんが長期間不安定な状況に置かれたことに「申し訳なく思う」とも述べた。", sources:["畝本検事総長談話（2024年10月8日）"] },
+      { stance:"専門家・人権団体", color:"#9C27B0", summary:"アムネスティ等は「日本の刑事司法制度の根本的な改革が必要」と指摘。「人質司法」「自白強要」「証拠開示制度の欠如」を問題の本質として訴えた。", sources:["アムネスティ国際声明（2024年9月）"] },
+    ]
+  },
+  hormuz_crisis: {
+    sources: [
+      { org:"Bloomberg Japan", type:"経済通信社", score:95, lang:"ja", articles:[
+        { title:"ホルムズ海峡 40カ国が再開協議、代替ルートも検討", date:"2026年4月2日", url:"https://www.bloomberg.com/jp/news/articles/2026-04-02/TCVVXDKGZAIS00", summary:"英国主催で日欧など40カ国余りが2日、ホルムズ海峡の再開に向けた対応を協議。制裁措置と代替ルートを検討。" },
+        { title:"ホルムズ海峡危機 深まる封鎖 米国の開放要求にイランは完全封鎖を警告", date:"2026年3月22日", url:"https://www.bloomberg.com/jp/news/articles/2026-03-22/TCB7U5KIJH9600", summary:"米国の発電所爆撃警告に対し、イランは徹底抗戦の構えを見せている。" },
+      ]},
+      { org:"時事ドットコム", type:"通信社", score:92, lang:"ja", articles:[
+        { title:"イラン、ホルムズ海峡を「武器化」 長引く原油高、拭えぬ供給不安", date:"2026年3月28日", url:"https://www.jiji.com/jc/article?k=2026032700791&g=int", summary:"米イスラエルとイランの交戦に伴う原油供給の混乱が止まらない。" },
+      ]},
+      { org:"日本経済新聞", type:"全国紙", score:90, lang:"ja", articles:[
+        { title:"日本の原油輸入量が急減 3月は3割減、4月以降一段と減少へ", date:"2026年4月3日", url:"https://www.nikkei.com/article/DGXZQOUB024AU0S6A400C2000000/", summary:"ホルムズ海峡の実質封鎖が日本の調達網を直撃。3月の原油輸入量は5203万バレルと2月から3割減。" },
+        { title:"迫る食料危機の足音 世界の肥料価格5割高、ホルムズ海峡ショック", date:"2026年4月3日", url:"https://news.google.com/search?q=site:nikkei.com&hl=ja&gl=JP", summary:"エネルギー価格の高騰が農業コストに波及。食料安全保障への影響が深刻化。" },
+      ]},
+      { org:"Al Jazeera", type:"海外放送", score:87, lang:"en", articles:[
+        { title:"UK convenes 40-nation talks to reopen Strait of Hormuz", date:"2026年4月2日", url:"https://www.aljazeera.com/news/2026/4/2/uk-convenes-40-nation-talks-hormuz", summary:"Britain hosted virtual summit with 40+ nations to discuss reopening the Strait amid Iran's blockade." },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年2月28日", event:"米国とイスラエルがイランへの協調空爆を開始。ハーメネイ師が死亡。", alert:false },
+      { date:"2026年3月初旬", event:"イランがホルムズ海峡の商船通航を禁ずる警告を発出。タンカー交通が70%減少。", alert:false },
+      { date:"2026年3月8日", event:"ブレント原油価格が4年ぶりに1バレル100ドルを突破。ピーク時126ドルに達した。", alert:false },
+      { date:"2026年3月19日", event:"米軍が封鎖打開のための軍事作戦を開始。", alert:false },
+      { date:"2026年3月28日", event:"OECDがG20の今年のインフレ率予測を4.0%に大幅上方修正。", alert:true, msg:"各国の経済見通しについて機関によって数字が異なります。" },
+      { date:"2026年4月1日", event:"日本の3月原油輸入量が2月比3割減。比較可能な2013年以降で最少。", alert:false },
+      { date:"2026年4月2日", event:"英国主催で日欧など40カ国余りがホルムズ海峡再開に向けた対応を協議。", alert:false },
+      { date:"2026年4月3日", event:"オマーン寄り航路で超大型タンカー等3隻が通過の可能性。封鎖は継続中。", alert:true, msg:"「封鎖解除合意」の誤情報がSNSで拡散中。実際には封鎖継続中。" },
+    ],
+    perspectives: [
+      { stance:"日本政府", color:"#4CAF50", summary:"「航行の安全が最重要」として外交的解決を支持。代替ルート（喜望峰回り）の確保と備蓄放出を検討。米国・G7との連携を強調。", sources:["茂木外相記者会見（2026年3月）","G7共同声明（2026年3月31日）"] },
+      { stance:"国際社会（英仏主導）", color:"#4a9eff", summary:"軍事的占領は「非現実的」（マクロン仏大統領）として外交的手段を優先。制裁措置の強化とイランへの外交的働きかけを並行して検討。", sources:["Bloomberg（2026年4月2日）"] },
+      { stance:"米国・トランプ政権", color:"#FF9800", summary:"「ホルムズ海峡の安全確保は他国が解決すること」とし他国に自力での確保を促す。イランの発電施設への攻撃もカードに圧力を強める。", sources:["トランプ大統領SNS投稿（2026年4月2日）"] },
+      { stance:"イラン（新最高指導者）", color:"#9C27B0", summary:"「ホルムズ海峡閉鎖のレバーは引き続き利用される必要がある」と主張。米国とイスラエルが攻撃を続けるなら他の戦線を開く意思があると表明。", sources:["モジタバ師声明（2026年3月12日）"] },
+    ]
+  },
+  microsoft_japan: {
+    sources: [
+      { org:"日本経済新聞", type:"全国紙", score:91, lang:"ja", articles:[
+        { title:"米マイクロソフト、日本に100億ドル投資 AIデータ基盤を構築", date:"2026年4月3日", url:"https://www.nikkei.com/article/DGXZQOUB020V30S6A400C2000000/", summary:"ソフトバンクやさくらインターネットと連携し2029年までにAIインフラを整備。" },
+        { title:"Microsoft、市場がAI戦略を不安視 1〜3月株価は金融危機以来の下げ", date:"2026年4月3日", url:"https://news.google.com/search?q=site:nikkei.com&hl=ja&gl=JP", summary:"海外投資家からはAI投資の費用対効果への疑問が浮上している。" },
+      ]},
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"マイクロソフト 日本に約1兆6000億円投資 AIデータセンター整備へ", date:"2026年4月3日", url:"https://www3.nhk.or.jp/news/html/20260403/k10014900001000.html", summary:"2029年までの4年間で国内にAIを運用するデータ基盤を構築する計画。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年4月3日", event:"米マイクロソフトが日本のデータセンター等に100億ドル（約1兆6000億円）を投資すると発表。", alert:false },
+      { date:"2026年4月3日", event:"ソフトバンク・さくらインターネットとの連携でAIインフラを構築する計画を公表。", alert:false },
+    ],
+    perspectives: [
+      { stance:"日本政府・経済界", color:"#4CAF50", summary:"経済安保・データ主権の観点から歓迎。日本のAI産業育成につながる投資として評価。", sources:["経産省コメント（2026年4月3日）"] },
+      { stance:"海外メディア・投資家", color:"#FF9800", summary:"「市場がMicrosoftのAI戦略を不安視」と報道。1〜3月のMicrosoft株価は金融危機以来の下落。投資対効果への疑問が浮上。", sources:["日経NQNスペシャル（2026年4月3日）"] },
+      { stance:"国内メディア", color:"#4a9eff", summary:"ポジティブな報道が中心。「日本のAI基盤強化」「データ主権の確保」を評価する論調が多い。", sources:["各社報道（2026年4月3日）"] },
+    ]
+  },
+  yosan_2026: {
+    sources: [
+      { org:"KSI政策ニュース", type:"専門メディア", score:85, lang:"ja", articles:[
+        { title:"2026年4月の政治・政策カレンダー：2026年度本予算が成立", date:"2026年4月", url:"https://www.policynews.jp/schedule/2026/4.html", summary:"憲法の規定により4月11日に自然成立。4月から始まる新制度の一覧も掲載。" },
+      ]},
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"国家情報局新設置するための法案 衆議院で審議入り", date:"2026年4月3日", url:"https://news.web.nhk/newsweb/na/na-k10014900001000", summary:"予算成立後、重要法案の審議が始まる。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年3月13日", event:"2026年度本予算が衆院を通過。参院での成立が焦点に。", alert:false },
+      { date:"2026年3月30日", event:"参院での年度内成立を断念。暫定予算が可決・成立。", alert:false },
+      { date:"2026年4月1日", event:"共同親権・私立高校無償化・子育て支援金徴収開始など新制度が順次開始。", alert:false },
+      { date:"2026年4月11日", event:"憲法の規定により本予算が自然成立予定。", alert:false },
+    ],
+    perspectives: [
+      { stance:"政府・与党", color:"#4CAF50", summary:"「暫定予算で年度越えしたが政策の遅延はない」と強調。重要法案の審議を7月の国会会期末に向けて進める。", sources:["KSI政策ニュース（2026年4月）"] },
+      { stance:"野党", color:"#FF9800", summary:"「予算成立の遅れは与党の国会運営の問題」と批判。審議の進め方についてSNS上で論争が続く。", sources:["東京新聞（2026年4月2日）"] },
+    ]
+  },
+  sudden_death_diagnosis: {
+    sources: [
+      { org:"時事ドットコム", type:"通信社", score:92, lang:"ja", articles:[
+        { title:"突然死診断に新手法 細胞、血液で心臓変化分析―死因究明の高度化期待・和歌山医大", date:"2026年4月1日", url:"https://www.jiji.com/jc/archives?g=soc_archive_0", summary:"和歌山県立医科大学が突然死の死因究明に新手法を開発。細胞や血液から心臓の変化を分析。" },
+      ]},
+      { org:"厚生労働省", type:"政府機関", score:95, lang:"ja", articles:[
+        { title:"死因究明拠点整備モデル事業実施団体の公募について", date:"2026年3月4日", url:"https://www.mhlw.go.jp/stf/houdou/houdou_list_202603.html", summary:"厚労省が死因究明制度の拡充に向けた取り組みを推進。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年4月1日", event:"和歌山県立医科大学が突然死診断の新手法を発表。細胞・血液から心臓変化を分析する手法。", alert:false },
+    ],
+    perspectives: [
+      { stance:"研究チーム", color:"#4CAF50", summary:"「従来の解剖中心の死因究明に加え、細胞・血液分析を組み合わせることで精度が向上する」と説明。", sources:["時事通信（2026年4月1日）"] },
+      { stance:"医療専門家", color:"#4a9eff", summary:"死因究明制度の充実につながる研究として評価。実用化までには更なる臨床研究が必要との見解も。", sources:["厚労省死因究明推進計画"] },
+    ]
+  },
+  march_high_temp: {
+    sources: [
+      { org:"気象庁", type:"政府機関", score:98, lang:"ja", articles:[
+        { title:"3月は全国的に高温 北日本と沖縄・奄美は少雨", date:"2026年4月1日", url:"https://www.jma.go.jp/jma/press/2604/01a/20260401_march_climate.html", summary:"気象庁が2026年3月の気候まとめを発表。全国的に気温が平年を上回る。" },
+      ]},
+      { org:"時事ドットコム", type:"通信社", score:92, lang:"ja", articles:[
+        { title:"３月は全国的に高温 北日本と沖縄・奄美は少雨―気象庁", date:"2026年4月1日", url:"https://www.jiji.com/jc/archives?g=soc_archive_0", summary:"気象庁発表を速報。北日本と沖縄・奄美地方での少雨傾向を詳報。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年4月1日", event:"気象庁が2026年3月の気候まとめを発表。全国的に高温、北日本と沖縄・奄美は少雨。", alert:false },
+    ],
+    perspectives: [
+      { stance:"気象庁", color:"#4CAF50", summary:"「3月は全国的に気温が平年を上回り、北日本と沖縄・奄美地方では降水量が少雨傾向だった」と発表。", sources:["気象庁発表（2026年4月1日）"] },
+      { stance:"専門家", color:"#4a9eff", summary:"「近年の高温傾向が続いており、農業や水資源への影響が懸念される」と指摘。地球温暖化対策の強化を訴える声も。", sources:["気象研究所コメント"] },
+    ]
+  },
+  enzai_cf: {
+    sources: [
+      { org:"時事ドットコム", type:"通信社", score:92, lang:"ja", articles:[
+        { title:"冤罪被害者ら、再審制度改正へクラウドファンディング支援呼び掛け", date:"2026年4月1日", url:"https://www.jiji.com/jc/archives?g=soc_archive_0", summary:"冤罪被害者らが再審制度改正実現に向けたクラウドファンディングを4月1日に開始。" },
+      ]},
+      { org:"イノセンス・プロジェクト・ジャパン", type:"NPO", score:80, lang:"ja", articles:[
+        { title:"再審制度改正クラウドファンディング開始のお知らせ", date:"2026年4月1日", url:"https://innocenceprojectjapan.org/cf2026/", summary:"袴田事件弁護団も支持を表明。証拠開示義務化・検察の不服申し立て禁止を目標に掲げる。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年4月1日", event:"冤罪被害者らが再審制度改正に向けたクラウドファンディングを開始。袴田事件の弁護団も支持を表明。", alert:false },
+    ],
+    perspectives: [
+      { stance:"冤罪被害者・弁護団", color:"#4CAF50", summary:"「再審制度を根本から変えるため、市民の力を借りたい」と訴える。証拠開示の義務化・検察の不服申し立て禁止を具体的な目標として掲げる。", sources:["時事通信（2026年4月1日）"] },
+      { stance:"法制審議会", color:"#FF9800", summary:"部会での議論は継続中。検察側が証拠開示義務化などに反対しており、合意形成に時間がかかる見通し。", sources:["東京新聞（2025年10月31日）"] },
+    ]
+  },
+  ai_datacenter_japan: {
+    sources: [
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"発電向け燃料確保に懸念 夏に向け需給見通し示す取り組み開始", date:"2026年4月3日", url:"https://www3.nhk.or.jp/news/html/20260403/k10014900001000.html", summary:"AIデータセンターによる電力需要増加とホルムズ危機による燃料確保問題が重なり、夏場の電力需給を懸念。" },
+      ]},
+      { org:"日本経済新聞", type:"全国紙", score:91, lang:"ja", articles:[
+        { title:"AIエージェントが壊す5つの常識 AIエージェント時代に台頭する「FDE」", date:"2026年4月3日", url:"https://www.nikkei.com/article/DGXZQOUB020V30S6A400C2000000/", summary:"AI産業の構造変化とデータセンター需要の関係を分析。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年4月3日", event:"Microsoft日本に100億ドル投資を発表。AIデータセンター誘致競争が本格化。", alert:false },
+    ],
+    perspectives: [
+      { stance:"日本政府", color:"#4CAF50", summary:"データ主権・経済安保の観点から積極的に誘致。外資系クラウド事業者の国内拠点整備を支援する方針。", sources:["経産省資料"] },
+      { stance:"電力業界", color:"#FF9800", summary:"データセンターによる電力需要急増が課題。ホルムズ危機による燃料確保問題と相まって夏場の電力需給が懸念される。", sources:["NHK（2026年4月3日）"] },
+    ]
+  },
+  kyoiku_2026: {
+    sources: [
+      { org:"こども家庭庁", type:"政府機関", score:97, lang:"ja", articles:[
+        { title:"こども誰でも通園制度の開始について", date:"2026年4月1日", url:"https://www.cao.go.jp/kodomotecho/kodomotecho.html", summary:"2026年4月から「こども誰でも通園制度」が開始。保育所等を利用していない子どもも通園可能に。" },
+      ]},
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"4月から私立高校授業料実質無償化・公立小給食費無償化など新制度開始", date:"2026年4月1日", url:"https://www3.nhk.or.jp/news/html/20260403/k10014900001000.html", summary:"2026年4月から複数の教育・子育て関連の新制度が一斉に開始。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年4月1日", event:"私立高校授業料の実質無償化・公立小学校給食費無償化・こども誰でも通園制度が開始。", alert:false },
+      { date:"2026年4月1日", event:"改正民法施行。離婚後の共同親権が導入される。", alert:true, msg:"共同親権については支持と反対の意見が大きく分かれており、実際の運用への影響を注視する必要があります。" },
+    ],
+    perspectives: [
+      { stance:"政府・推進派", color:"#4CAF50", summary:"「子育て支援の充実と教育格差の是正につながる」と評価。少子化対策の一環として推進。", sources:["こども家庭庁（2026年4月1日）"] },
+      { stance:"共同親権 慎重派", color:"#FF9800", summary:"「DV被害者の保護が不十分」「子どもの福祉が損なわれる恐れ」と懸念。施行後の実態を注視する必要があると主張。", sources:["弁護士団体声明"] },
+    ]
+  },
+  food_price_hike: {
+    sources: [
+      { org:"日本経済新聞", type:"全国紙", score:91, lang:"ja", articles:[
+        { title:"迫る食料危機の足音 世界の肥料価格5割高、ホルムズ海峡ショック", date:"2026年4月3日", url:"https://news.google.com/search?q=site:nikkei.com&hl=ja&gl=JP", summary:"世界の肥料価格が5割高に。食料安全保障への影響が深刻化している。" },
+      ]},
+      { org:"時事ドットコム", type:"通信社", score:92, lang:"ja", articles:[
+        { title:"イラン、ホルムズ海峡を「武器化」 長引く原油高、拭えぬ供給不安", date:"2026年3月28日", url:"https://www.jiji.com/jc/article?k=2026032700791&g=int", summary:"原油供給の混乱が食料品価格に波及。インフレ圧力も高まっている。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年3月", event:"ホルムズ危機による原油高が本格化。食料品・日用品の価格転嫁が始まる。", alert:false },
+      { date:"2026年4月3日", event:"世界の肥料価格が5割高に。日経新聞が「迫る食料危機の足音」として報道。", alert:true, msg:"値上げ幅の数字について各報道機関で異なる数字が使用されています。" },
+    ],
+    perspectives: [
+      { stance:"政府", color:"#4CAF50", summary:"「価格監視を強化し、便乗値上げを防ぐ」と表明。ガソリン補助金の継続・備蓄放出も検討。", sources:["官房長官記者会見"] },
+      { stance:"消費者団体", color:"#FF9800", summary:"「実質的な家計負担増は政府発表より大きい」と指摘。特に低所得世帯への影響を懸念。給付金などの直接支援を求める。", sources:["消費者連盟声明"] },
+    ]
+  },
+  tochigi_jishin: {
+    sources: [
+      { org:"時事ドットコム", type:"通信社", score:92, lang:"ja", articles:[
+        { title:"栃木で震度５弱 東北新幹線に遅れ", date:"2026年4月1日", url:"https://www.jiji.com/jc/archives?g=soc_archive_0", summary:"4月1日、栃木県で最大震度5弱の地震が発生。東北新幹線が一時運転見合わせ。負傷者の報告なし。" },
+      ]},
+      { org:"気象庁", type:"政府機関", score:98, lang:"ja", articles:[
+        { title:"栃木県北部の地震について（令和8年4月1日）", date:"2026年4月1日", url:"https://www.jma.go.jp/jma/press/2604/01a/20260401_march_climate.html", summary:"震源は栃木県北部、深さ約10km。津波の心配なし。余震に注意。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年4月1日", event:"栃木県で最大震度5弱の地震が発生。東北新幹線が一時運転見合わせ。", alert:false },
+      { date:"2026年4月1日", event:"被害状況の確認が進む。負傷者の報告なし。インフラへの影響は軽微。", alert:false },
+    ],
+    perspectives: [
+      { stance:"気象庁", color:"#4CAF50", summary:"「震源は栃木県北部、深さ約10km。津波の心配はなし」と発表。余震に注意が必要。", sources:["気象庁（2026年4月1日）"] },
+      { stance:"インフラ専門家", color:"#FF9800", summary:"「ホルムズ危機による燃料不足の中での災害対応能力が問われる」と指摘。発電向け燃料確保への懸念も。", sources:["NHK（2026年4月3日）"] },
+    ]
+  },
+  hakamada_history: {
+    sources: null, // ALL_SOURCESを使用
+    timeline: [
+      { date:"1966年", event:"袴田事件発生。日本の刑事司法の問題点が凝縮した事件として後に評価される。", alert:false },
+      { date:"1980年", event:"死刑確定。自白強要・人質司法・証拠開示制度の欠如という三つの課題が露わになる。", alert:true, msg:"この時代の捜査手法と現在の基準の差について、専門家の評価が分かれています。" },
+      { date:"2024年", event:"無罪確定。58年にわたる事件が日本の刑事司法改革の転換点となる。", alert:false },
+    ],
+    perspectives: [
+      { stance:"法律専門家", color:"#4CAF50", summary:"「袴田事件は日本の刑事司法が持つ構造的問題を象徴する。証拠開示制度の欠如・自白偏重主義・人質司法の三点が複合した結果」と分析。", sources:["日弁連（2024年10月）"] },
+      { stance:"検察・司法機関", color:"#FF9800", summary:"「当時の捜査手法は適法の範囲内だった」とする立場を維持しつつも、「制度改善は必要」と認める。", sources:["検事総長談話（2024年10月）"] },
+      { stance:"国際人権団体", color:"#9C27B0", summary:"「日本の死刑制度と刑事司法制度は国際基準に照らして問題がある。袴田事件はその最悪の例」と批判。制度改革を強く求める。", sources:["アムネスティ（2024年9月）"] },
+    ]
+  },
+};
+
+
+
+
+
+const SUBS = {
+  judicial: [{ label:"袴田事件 再審無罪", count:1 }, { label:"再審制度改革", count:0 }],
+  intl:     [{ label:"ホルムズ海峡危機", count:1 }, { label:"イラン情勢", count:0 }],
+  economy:  [{ label:"Microsoft日本投資", count:1 }, { label:"円安・為替", count:0 }],
+  politics: [{ label:"2026年度予算", count:1 }, { label:"国家情報局新設", count:0 }],
+  medical:  [{ label:"突然死診断新手法", count:1 }, { label:"医薬品・新薬", count:0 }],
+  science:  [{ label:"3月高温・少雨", count:1 }, { label:"気候変動", count:0 }],
+  society:  [{ label:"冤罪被害者CF", count:1 }, { label:"事件・事故", count:0 }],
+  tech:     [{ label:"AIデータセンター誘致", count:1 }, { label:"半導体", count:0 }],
+  edu:      [{ label:"高校無償化・給食費無償化", count:1 }, { label:"共同親権", count:0 }],
+  food:     [{ label:"原油高・食料品値上げ", count:1 }, { label:"食の安全", count:0 }],
+  disaster: [{ label:"栃木震度5弱", count:1 }, { label:"発電燃料確保", count:0 }],
+  history:  [{ label:"袴田事件と刑事司法58年", count:1 }, { label:"過去の冤罪事件", count:0 }],
+};
+
+
+// 記録 全ソースプール（検索対象）
+const ALL_SOURCES = [
+  { id:0, lang:"ja", org:"NHK NEWS WEB", type:"公共放送", score:97,
+    articles:[
+      { title:"再審無罪の袴田巌さんに2億1700万円余の刑事補償", date:"2025年3月24日", url:"https://news.web.nhk/newsweb/na/na-k10014758981000", summary:"無罪確定後、静岡地裁は47年7ヶ月にわたる身柄拘束への刑事補償として2億1700万円余を決定。" },
+    ]
+  },
+  { id:1, lang:"ja", org:"時事ドットコム", type:"通信社", score:94,
+    articles:[
+      { title:"袴田巌さん再審で無罪確定 関連ニュースまとめ", date:"2024年10月9日", url:"https://www.jiji.com/jc/v7?id=202303hakamata", summary:"時事通信社による袴田事件再審の経緯まとめ。無罪確定までの全経緯を時系列で整理。" },
+    ]
+  },
+  { id:2, lang:"ja", org:"東京新聞", type:"全国紙", score:88,
+    articles:[
+      { title:"袴田巌さんに再審無罪の判決、戦後5例目 事件から58年", date:"2024年9月26日", url:"https://www.tokyo-np.co.jp/article/356688", summary:"静岡地裁が再審無罪を言い渡した。証拠捏造を認定した画期的判決。" },
+      { title:"袴田さん再審で検察が控訴断念「判決は到底承服できない」", date:"2024年10月8日", url:"https://www.tokyo-np.co.jp/article/359173", summary:"検事総長が控訴断念と談話を発表。「捏造と断じたことには強い不満」と異例の反発。" },
+      { title:"袴田巌さんの再審制度見直しに暗雲？検察・裁判官が大幅変更に抵抗", date:"2025年10月31日", url:"https://www.tokyo-np.co.jp/article/445990", summary:"法制審議会部会で再審法改正の議論が進むも、検察側が証拠開示義務化などに抵抗。" },
+    ]
+  },
+  { id:3, lang:"ja", org:"日本経済新聞", type:"全国紙", score:91,
+    articles:[
+      { title:"袴田さん無罪で残る「3つの捏造」 捜査検証避けられず", date:"2024年10月8日", url:"https://www.nikkei.com/article/DGXZQOUE036BG0T01C24A0000000/", summary:"3つの証拠捏造の詳細と捜査機関の検証義務について専門家の見解を交えて詳報。", alert:{type:"bias", msg:"有料記事のため見出し・リードのみ無料で読めます。"} },
+      { title:"袴田巌さん国賠提訴 過去最高6億円請求", date:"2025年10月9日", url:"https://www.nikkei.com/article/DGXZQOUD094U70Z01C25A0000000/", summary:"国と県を相手取り約6億円の損害賠償請求訴訟を提訴。捜査機関と裁判所の責任も問う。", alert:{type:"bias", msg:"有料記事のため見出し・リードのみ無料で読めます。"} },
+    ]
+  },
+  { id:4, lang:"ja", org:"東京弁護士会", type:"専門機関", score:90,
+    articles:[
+      { title:"「袴田事件」再審無罪判決確定に関する会長声明", date:"2024年10月11日", url:"https://www.toben.or.jp/message/seimei/post-738.html", summary:"3種の証拠がいずれも捜査機関による捏造と認定されたことを歓迎し、再審制度改革の必要性を訴えた。" },
+    ]
+  },
+  { id:5, lang:"ja", org:"日本弁護士連合会", type:"専門機関", score:93,
+    articles:[
+      { title:"袴田事件（日弁連による事件解説）", date:"2024年10月9日", url:"https://www.nichibenren.or.jp/activity/criminal/deathpenalty/q12/enzaihakamada.html", summary:"事件の経緯・自白の問題・5点の衣類の捏造認定・再審制度改革の必要性を法的観点から詳細に説明。" },
+    ]
+  },
+  { id:6, lang:"ja", org:"イノセンス・プロジェクト・ジャパン", type:"NPO", score:82,
+    articles:[
+      { title:"袴田巌さんに再審無罪判決（IPJ声明）", date:"2024年9月26日", url:"https://innocenceprojectjapan.org/archives/6195", summary:"5点の衣類の血痕カラー写真の問題を詳細に解説し、一刻も早い無罪確定を求めた。" },
+    ]
+  },
+  { id:7, lang:"ja", org:"アムネスティ・インターナショナル日本", type:"国際人権機関", score:88,
+    articles:[
+      { title:"袴田巖さんが無罪に！（アムネスティ日本）", date:"2024年12月17日", url:"https://www.amnesty.or.jp/hrc/2024/1217_10547.html", summary:"袴田さんの支援活動の経緯・国際的な注目・死刑制度廃止への訴えを日本語で詳細に報告。" },
+    ]
+  },
+  { id:8, lang:"en", org:"Al Jazeera", type:"海外放送", score:87,
+    articles:[
+      { title:"Japan court acquits former boxer of murder after decades on death row", date:"2024年9月26日", url:"https://www.aljazeera.com/news/2024/9/26/japan-court-acquits-former-boxer-of-murder-after-decades-on-death-row", summary:"「世界で最も長く収監された死刑囚」として国際的注目を集めた点を強調。" },
+    ]
+  },
+  { id:9, lang:"en", org:"Amnesty International", type:"国際人権機関", score:89,
+    articles:[
+      { title:"Japan: Acquittal of man who spent 45 years on death row", date:"2024年9月30日", url:"https://www.amnesty.org/en/latest/news/2024/09/japan-acquittal-of-man-who-spent-45-years-on-death-row-pivotal-moment-for-justice/", summary:"無罪判決を歓迎し、日本に死刑制度の廃止と全死刑囚の判決見直しを求めた。" },
+    ]
+  },
+  { id:10, lang:"en", org:"CBS News", type:"海外放送", score:85,
+    articles:[
+      { title:"World's longest-serving death row inmate acquitted of 1966 murders in Japan", date:"2024年9月26日", url:"https://www.cbsnews.com/news/iwao-hakamada-longest-serving-death-row-inmate-acquitted-murder-retrial-japan/", summary:"AP通信の現地取材を含む詳細報道。姉ひで子さんのコメント・弁護団声明を掲載。" },
+    ]
+  },
+];
+// ===== メディアマスターデータ =====
+const MEDIA_MASTER = [
+  // S: 政府・公共放送
+  { id:"nhk",       name:"NHK NEWS WEB",           rank:"S", cat:"公共放送",   lang:"ja", domain:"nhk.or.jp" },
+  { id:"kantei",    name:"首相官邸",                rank:"S", cat:"政府機関",   lang:"ja", domain:"kantei.go.jp" },
+  { id:"mhlw",      name:"厚生労働省",              rank:"S", cat:"政府機関",   lang:"ja", domain:"mhlw.go.jp" },
+  { id:"mof",       name:"財務省",                  rank:"S", cat:"政府機関",   lang:"ja", domain:"mof.go.jp" },
+  { id:"mofa",      name:"外務省",                  rank:"S", cat:"政府機関",   lang:"ja", domain:"mofa.go.jp" },
+  { id:"boj",       name:"日本銀行",                rank:"S", cat:"政府機関",   lang:"ja", domain:"boj.or.jp" },
+  { id:"courts",    name:"最高裁判所",              rank:"S", cat:"政府機関",   lang:"ja", domain:"courts.go.jp" },
+  { id:"reuters",   name:"Reuters",                 rank:"S", cat:"国際通信社", lang:"en", domain:"reuters.com" },
+  { id:"afp",       name:"AFP",                     rank:"S", cat:"国際通信社", lang:"ja", domain:"afpbb.com" },
+  { id:"bloomberg", name:"Bloomberg",               rank:"S", cat:"経済通信社", lang:"ja", domain:"bloomberg.co.jp" },
+  { id:"ap",        name:"AP News",                 rank:"S", cat:"国際通信社", lang:"en", domain:"apnews.com" },
+  { id:"nichibenren",name:"日本弁護士連合会",       rank:"S", cat:"専門機関",   lang:"ja", domain:"nichibenren.or.jp" },
+  // A: 主要全国紙・テレビ局
+  { id:"nikkei",    name:"日本経済新聞",            rank:"A", cat:"全国紙",     lang:"ja", domain:"nikkei.com" },
+  { id:"yomiuri",   name:"読売新聞",                rank:"A", cat:"全国紙",     lang:"ja", domain:"yomiuri.co.jp" },
+  { id:"asahi",     name:"朝日新聞デジタル",        rank:"A", cat:"全国紙",     lang:"ja", domain:"asahi.com" },
+  { id:"mainichi",  name:"毎日新聞",                rank:"A", cat:"全国紙",     lang:"ja", domain:"mainichi.jp" },
+  { id:"sankei",    name:"産経ニュース",            rank:"A", cat:"全国紙",     lang:"ja", domain:"sankei.com" },
+  { id:"tokyo",     name:"東京新聞",                rank:"A", cat:"全国紙",     lang:"ja", domain:"tokyo-np.co.jp" },
+  { id:"jiji",      name:"時事ドットコム",          rank:"A", cat:"通信社",     lang:"ja", domain:"jiji.com" },
+  { id:"kyodo",     name:"共同通信（47NEWS）",      rank:"A", cat:"通信社",     lang:"ja", domain:"47news.jp" },
+  { id:"japantimes",name:"The Japan Times",         rank:"A", cat:"英字紙",     lang:"en", domain:"japantimes.co.jp" },
+  { id:"ntv",       name:"日テレNEWS",              rank:"A", cat:"テレビ局",   lang:"ja", domain:"ntv.co.jp" },
+  { id:"tbs",       name:"TBSニュース",             rank:"A", cat:"テレビ局",   lang:"ja", domain:"tbs.co.jp" },
+  { id:"bbc",       name:"BBC News",                rank:"A", cat:"公共放送",   lang:"en", domain:"bbc.com" },
+  { id:"guardian",  name:"The Guardian",            rank:"A", cat:"海外紙",     lang:"en", domain:"theguardian.com" },
+  { id:"aljazeera", name:"Al Jazeera",              rank:"A", cat:"海外放送",   lang:"en", domain:"aljazeera.com" },
+  { id:"nyt",       name:"New York Times",          rank:"A", cat:"海外紙",     lang:"en", domain:"nytimes.com" },
+  // B: 専門・地方・海外誌
+  { id:"nhkworld",  name:"NHK World",               rank:"B", cat:"公共放送(英)",lang:"en",domain:"nhk.or.jp" },
+  { id:"hokkaido",  name:"北海道新聞",              rank:"B", cat:"地方紙",     lang:"ja", domain:"hokkaido-np.co.jp" },
+  { id:"chunichi",  name:"中日新聞",                rank:"B", cat:"地方紙",     lang:"ja", domain:"chunichi.co.jp" },
+  { id:"okinawa",   name:"沖縄タイムス",            rank:"B", cat:"地方紙",     lang:"ja", domain:"okinawatimes.co.jp" },
+  { id:"bi",        name:"Business Insider Japan",  rank:"B", cat:"経済メディア",lang:"ja",domain:"businessinsider.jp" },
+  { id:"france24",  name:"France 24",               rank:"B", cat:"海外放送",   lang:"en", domain:"france24.com" },
+  { id:"economist", name:"The Economist",           rank:"B", cat:"海外誌",     lang:"en", domain:"economist.com" },
+  { id:"ft",        name:"Financial Times",         rank:"B", cat:"海外経済紙", lang:"en", domain:"ft.com" },
+  { id:"ipj",       name:"イノセンス・プロジェクト・ジャパン", rank:"B", cat:"NPO", lang:"ja", domain:"innocenceprojectjapan.org" },
+];
+
+function makeGNewsUrl(domain, query){
+  return "https://news.google.com/search?q=" + encodeURIComponent(query + " site:" + domain) + "&hl=ja&gl=JP&ceid=JP:ja";
+}
+
+
+
+
+
+
+
+
+
+const SOURCES = ALL_SOURCES.slice(0,5);
+
+const ALERTS = [
+  { type:"sns", sev:"high", cat:"地政学・安全保障", topicId:"hormuz_crisis",
+    title:"「ホルムズ海峡封鎖解除」の誤情報拡散",
+    msg:"「海峡が完全開通した」という未確認情報がSNSで拡散。4月3日時点でオマーン側ルートで3隻通過の可能性があるのみで封鎖は継続中。政府・主要メディアの一次情報を確認してください。", date:"2026年4月3日" },
+  { type:"bias", sev:"high", cat:"経済・産業", topicId:"microsoft_japan",
+    title:"Microsoft日本1兆円投資 報道の温度差",
+    msg:"国内メディアはポジティブ報道が中心だが、海外メディアは「市場がAI戦略を不安視」と報道。1〜3月のMicrosoft株価は金融危機以来の下落と指摘。両方の視点の確認を推奨。", date:"2026年4月3日" },
+  { type:"fact", sev:"medium", cat:"経済・金融", topicId:"food_price_hike",
+    title:"円安159円台「日銀介入検討」報道の信憑性",
+    msg:"一部メディアが「日銀が為替介入を検討」と報道しているが、日銀・財務省は公式にコメントしていない。報道の根拠が不明確な状況。一次ソースの確認を推奨。", date:"2026年4月3日" },
+  { type:"old", sev:"medium", cat:"司法・裁判", topicId:"enzai_cf",
+    title:"冤罪被害者CF開始報道の出所確認",
+    msg:"「冤罪被害者らが再審制度改正へクラウドファンディング開始」の報道は4月1日付（時事通信）。エープリルフールとの混同が一部で見られるが実際のニュース。", date:"2026年4月1日" },
+];
+
+
+const TRENDING = [
+  { rank:1, title:"能登地震 復興2年の現状", cat:"災害・インフラ", searches:12847, label:"多く調べられています" },
+  { rank:2, title:"日銀 追加利上げの影響は", cat:"経済・産業", searches:9234, label:"多く調べられています" },
+  { rank:3, title:"少子化対策 新制度の詳細", cat:"政治・行政", searches:8102, label:"多く調べられています" },
+  { rank:4, title:"鳥インフルエンザ 国内感染状況", cat:"医療・健康", searches:7455, label:"多く調べられています" },
+];
+const TAB_RANKING = {
+  alerts: {
+    hour: [
+      { rank:1, title:"ワクチン後遺症SNS拡散", cat:"医療・健康", change:"new" },
+      { rank:2, title:"選挙 誤投票情報", cat:"政治・行政", change:"↑1" },
+      { rank:3, title:"日銀報道バイアス検出", cat:"経済・産業", change:"↑2" },
+    ],
+    day: [
+      { rank:1, title:"選挙 誤投票情報", cat:"政治・行政", change:"→" },
+      { rank:2, title:"ワクチン後遺症SNS拡散", cat:"医療・健康", change:"↓1" },
+      { rank:3, title:"紛争地域 被害数乖離", cat:"国際・外交", change:"↑1" },
+    ],
+    week: [
+      { rank:1, title:"健康食品 誇大広告拡散", cat:"食品・消費者", change:"new" },
+      { rank:2, title:"気候変動 否定情報拡散", cat:"科学・環境", change:"↑3" },
+      { rank:3, title:"選挙 誤投票情報", cat:"政治・行政", change:"↓1" },
+    ],
+  },
+  trending: {
+    hour: [
+      { rank:1, title:"日銀 緊急声明の全文", cat:"経済・産業", change:"↑3" },
+      { rank:2, title:"東京震度3 震源地と詳細", cat:"災害・インフラ", change:"new" },
+      { rank:3, title:"国会 緊急動議の内容", cat:"政治・行政", change:"↑5" },
+    ],
+    day: [
+      { rank:1, title:"能登地震 復興2年の現状", cat:"災害・インフラ", change:"↑1" },
+      { rank:2, title:"日銀 追加利上げの影響は", cat:"経済・産業", change:"↓1" },
+      { rank:3, title:"少子化対策 新制度の詳細", cat:"政治・行政", change:"→" },
+    ],
+    week: [
+      { rank:1, title:"2026年春の政策変更まとめ", cat:"政治・行政", change:"→" },
+      { rank:2, title:"能登地震 復興の現状と課題", cat:"災害・インフラ", change:"↑2" },
+      { rank:3, title:"日銀利上げ 家計への影響", cat:"経済・産業", change:"↓1" },
+    ],
+  },
+  pickup: {
+    hour: [
+      { rank:1, title:"地下鉄サリン事件31年 報道の変化", cat:"歴史・検証", change:"new" },
+      { rank:2, title:"AI規制法案 委員会審議速報", cat:"テクノロジー", change:"↑2" },
+      { rank:3, title:"袴田事件 今日の司法議論", cat:"司法・裁判", change:"→" },
+    ],
+    day: [
+      { rank:1, title:"1995年3月20日 地下鉄サリン事件から31年", cat:"歴史・検証", change:"→" },
+      { rank:2, title:"AI規制法案 今国会での審議状況", cat:"テクノロジー", change:"↑1" },
+      { rank:3, title:"袴田事件 再審無罪確定後の議論", cat:"司法・裁判", change:"↑2" },
+    ],
+    week: [
+      { rank:1, title:"AI規制 国際比較と日本の立場", cat:"テクノロジー", change:"new" },
+      { rank:2, title:"冤罪事件 過去10年の検証", cat:"司法・裁判", change:"↑1" },
+      { rank:3, title:"地下鉄サリン事件 風化する記憶", cat:"歴史・検証", change:"↓1" },
+    ],
+  },
+  followup: {
+    hour: [
+      { rank:1, title:"能登地震 仮設住宅退去期限", cat:"災害・インフラ", change:"new" },
+      { rank:2, title:"日銀 総裁発言の詳細", cat:"経済・産業", change:"↑1" },
+      { rank:3, title:"袴田事件 法務省動向", cat:"司法・裁判", change:"→" },
+    ],
+    day: [
+      { rank:1, title:"能登地震 復興の最新状況", cat:"災害・インフラ", change:"→" },
+      { rank:2, title:"袴田事件 再審制度改革の議論", cat:"司法・裁判", change:"↑2" },
+      { rank:3, title:"日銀 追加利上げ観測の続報", cat:"経済・産業", change:"↑1" },
+    ],
+    week: [
+      { rank:1, title:"少子化対策 効果検証の続報", cat:"政治・行政", change:"↑1" },
+      { rank:2, title:"能登地震 住宅再建の現状", cat:"災害・インフラ", change:"↓1" },
+      { rank:3, title:"日銀利上げ 家計影響の続報", cat:"経済・産業", change:"→" },
+    ],
+  },
+};
+const RANKING = {
+  day: [
+    { rank:1, title:"ホルムズ海峡 40カ国が再開協議", cat:"地政学・安全保障", searches:124500, change:"new", topicId:"hormuz_crisis" },
+    { rank:2, title:"Microsoft 日本1兆円投資", cat:"経済・産業", searches:98200, change:"↑3", topicId:"microsoft_japan" },
+    { rank:3, title:"日経平均 475円高 半導体株高", cat:"経済・金融", searches:87300, change:"↑1", topicId:"food_price_hike" },
+    { rank:4, title:"円安 159円台 米雇用統計待ち", cat:"経済・金融", searches:76100, change:"↑2", topicId:"food_price_hike" },
+    { rank:5, title:"袴田巌 国賠訴訟 口頭弁論", cat:"司法・裁判", searches:54200, change:"↑1", topicId:"hakamada_muzai" },
+  ],
+  week: [
+    { rank:1, title:"ホルムズ海峡危機 日本への影響", cat:"地政学・安全保障", searches:892000, change:"→", topicId:"hormuz_crisis" },
+    { rank:2, title:"日本 原油輸入量3割減 過去最少", cat:"エネルギー", searches:654000, change:"↑2", topicId:"hormuz_crisis" },
+    { rank:3, title:"再審制度改革 法制審議論", cat:"司法・裁判", searches:432000, change:"↑1", topicId:"enzai_cf" },
+    { rank:4, title:"AI データセンター 日本誘致競争", cat:"科学・技術", searches:321000, change:"new", topicId:"ai_datacenter_japan" },
+    { rank:5, title:"米雇用統計 4月3日発表", cat:"経済・金融", searches:298000, change:"↑1", topicId:"food_price_hike" },
+  ],
+};
+
+
+const PICKUP = [
+  { id:0, icon:"⛽", label:"注目", cat:"地政学・安全保障", topicId:"hormuz_crisis",
+    title:"ホルムズ海峡危機 日本への影響まとめ",
+    summary:"原油輸入の約9割がホルムズ海峡経由の日本。3月の原油輸入量が2月比3割減と過去最少水準に。ガソリン・電気代高騰・円安のダブルパンチで家計への影響が深刻化。",
+    score:91, alert:{type:"fact", msg:"政府の備蓄放出・緊急対応について各社の報道に差があります。"} },
+  { id:1, icon:"⚖️", label:"注目", cat:"司法・裁判", topicId:"enzai_cf",
+    title:"再審制度改革 法制審部会の行方",
+    summary:"袴田事件を契機に再審法改正の議論が2025年10月から法制審議会部会で本格化。証拠開示の義務化・検察の不服申し立て禁止をめぐり検察側が抵抗。",
+    score:85, alert:null },
+  { id:2, icon:"🤖", label:"注目", cat:"科学・技術", topicId:"ai_datacenter_japan",
+    title:"AIデータセンター 日本誘致競争の構図",
+    summary:"MicrosoftのAI拠点投資1兆円発表に続き、GoogleやAmazonも日本でのデータセンター投資を計画。データ主権・経済安保の観点から政府も積極誘致。電力需要急増が課題。",
+    score:78, alert:null },
+];
+
+
+const FOLLOWUP = [
+  { id:0, icon:"⚖️", cat:"司法・裁判", title:"袴田事件 国家賠償訴訟", status:"進行中", statusColor:"warn", lastUpdate:"2026年3月31日",
+    topicId:"hakamada_muzai",
+    summary:"2025年10月に国と県を相手取り約6億円の損害賠償請求訴訟を提訴。国側は争う姿勢。",
+    updates:[
+      { date:"2026/03/31", text:"第1回口頭弁論。国側は争う姿勢を示し、次回期日は未定。" },
+      { date:"2025/10/09", text:"弁護団が静岡地裁に国家賠償請求訴訟を提訴。請求額は過去最高の約6億円。" },
+      { date:"2025/03/24", text:"静岡地裁が刑事補償として2億1700万円余の支払いを決定。" },
+    ]
+  },
+  { id:1, icon:"🏛️", cat:"司法・裁判", title:"再審制度改革 法制審議会", status:"審議中", statusColor:"mid", lastUpdate:"2026年4月3日",
+    topicId:"enzai_cf",
+    summary:"袴田事件を契機に再審法改正の議論が法制審議会部会で進行中。証拠開示・検察の不服申し立て禁止が焦点。",
+    updates:[
+      { date:"2026/04/03", text:"法制審議会部会が非公開会合を継続。検察側が証拠開示義務化に反対し議論が難航。" },
+      { date:"2025/10/31", text:"東京新聞が「検察・裁判官が大幅変更に抵抗」と報道。" },
+      { date:"2025/04/01", text:"冤罪被害者らが再審制度改正実現に向けたクラウドファンディングを開始。" },
+    ]
+  },
+  { id:2, icon:"🛢️", cat:"地政学・安全保障", title:"ホルムズ海峡危機と日本経済", status:"継続中", statusColor:"high", lastUpdate:"2026年4月3日",
+    topicId:"hormuz_crisis",
+    summary:"2026年2月28日のイラン攻撃以降、ホルムズ海峡が事実上封鎖。日本の原油輸入に深刻な影響。",
+    updates:[
+      { date:"2026/04/03", text:"オマーン寄り航路で超大型タンカー等3隻が通過の可能性。ただし全面解除ではない。" },
+      { date:"2026/04/02", text:"英国主催で日欧など40カ国余りが再開に向けた対応を協議。" },
+      { date:"2026/04/01", text:"日本の3月原油輸入量が2月比3割減。比較可能な2013年以降で最少水準に。" },
+    ]
+  },
+  { id:3, icon:"💱", cat:"経済・金融", title:"円安・原油高 家計への影響", status:"悪化傾向", statusColor:"danger", lastUpdate:"2026年4月3日",
+    topicId:"food_price_hike",
+    summary:"ホルムズ危機による原油高と円安が同時進行。ガソリン・電気代・食料品価格への波及が続く。",
+    updates:[
+      { date:"2026/04/03", text:"ドル円159円台半ば。日経平均は半導体株高で475円高。米3月雇用統計の結果に注目。" },
+      { date:"2026/03/31", text:"G7財務相・中銀総裁が「市場安定へあらゆる措置」の共同声明を発表。" },
+      { date:"2026/03/28", text:"OECDがG20の今年のインフレ率予測を4.0%に大幅上方修正。" },
+    ]
+  },
+];
+
+
+const PERSPECTIVES = [
+  { stance:"司法（再審判決）", color:"#4CAF50",
+    summary:"静岡地裁は2024年9月、「5点の衣類・自白調書・ズボンの共布」の3つの証拠はいずれも捜査機関によって捏造されたと認定。「捜査機関以外に事実上想定できない」と断じ、袴田さんを無罪とした。",
+    sources:["静岡地裁判決文（2024年9月26日）","東京高裁再審開始決定（2023年3月）"]
+  },
+  { stance:"弁護団・支援者", color:"#4a9eff",
+    summary:"弁護団は「みそ漬け実験」等の科学的証拠により証拠捏造を立証。「3つの捏造認定」は当然の結果と評価。一方で、袴田さんが法廷に立てないほど拘禁症状が残っていることを「刑事司法の最大の恥」と訴えた。",
+    sources:["弁護団最終弁論（2024年5月）","IPJ声明（2024年9月）"]
+  },
+  { stance:"検察", color:"#FF9800",
+    summary:"控訴断念の談話で「判決には到底承服できず、捏造と断じたことには強い不満がある」と表明。一方で袴田さんが「長期間法的地位が不安定な状況に置かれたことに申し訳なく思う」とも述べた。",
+    sources:["畝本検事総長談話（2024年10月8日）","検察の論告（2024年5月）"]
+  },
+  { stance:"専門家・人権団体", color:"#9C27B0",
+    summary:"アムネスティ・ヒューマン・ライツ・ウォッチなどは「日本の刑事司法制度の根本的な改革が必要」と指摘。「人質司法」「自白強要」「証拠開示制度の欠如」を問題の本質として訴えた。",
+    sources:["アムネスティ国際声明（2024年9月）","Human Rights Watch（2025年1月）"]
+  },
+];
+
+const TIMELINE = [
+  { date:"1966年6月30日", event:"静岡県清水市で一家4人が殺害される。みそ製造会社専務宅が放火・全焼。", alert:false },
+  { date:"1966年8月18日", event:"袴田巌さん（当時30歳）が強盗殺人容疑で逮捕。その後1日平均12時間に及ぶ取調べが続く。", alert:true, msg:"取調べの非人道性について当時から問題視する声があったが、見過ごされた経緯があります。" },
+  { date:"1967年8月", event:"みそ製造工場のみそタンク内から「5点の衣類」が発見される。後に証拠捏造と認定。", alert:true, msg:"この発見の状況について、検察と弁護側で根本的な事実認識の違いがあります。" },
+  { date:"1968年9月11日", event:"静岡地裁が袴田さんに死刑判決。裁判官3名中1名が反対意見を持っていたことが後に判明。", alert:false },
+  { date:"1980年11月19日", event:"最高裁が上告を棄却し死刑確定。以降袴田さんは死刑囚として拘置所に収監。", alert:false },
+  { date:"2014年3月27日", event:"静岡地裁（村山裁判長）が再審開始と拘置執行停止を決定。袴田さんが47年7ヶ月ぶりに釈放。", alert:false },
+  { date:"2018年6月11日", event:"東京高裁が再審開始決定を取り消し。弁護側が特別抗告。", alert:true, msg:"この高裁決定は後に最高裁に否定されましたが、さらに約5年の時間を要しました。" },
+  { date:"2023年3月13日", event:"東京高裁が再審開始を認め、検察の即時抗告を棄却。検察は特別抗告を断念し再審開始が確定。", alert:false },
+  { date:"2024年9月26日", event:"静岡地裁が再審無罪判決。「5点の衣類・自白調書・共布」の3つの証拠を捜査機関による捏造と認定。", alert:false },
+  { date:"2024年10月9日", event:"検察が控訴を断念し無罪が確定。逮捕から58年、死刑確定から44年。", alert:false },
+  { date:"2025年3月24日", event:"静岡地裁が刑事補償として2億1700万円余の支払いを決定。", alert:false },
+  { date:"2025年10月9日", event:"袴田さんが国と県を相手取り、約6億円の国家賠償請求訴訟を提訴。", alert:false },
+  { date:"2026年3月31日", event:"国賠訴訟第1回口頭弁論。国側は「検事総長談話は犯人と述べたものではない」と争う姿勢。", alert:true, msg:"検察側の主張について複数の法律専門家が「到底承服できない論理」と批判しています。" },
+];
+
+
+// ===== 状態 =====
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", sensitivity:3, colorMode:"normal", homeTab:"alerts", rankingPeriod:"day", history:["能登地震の復興状況","ワクチンの安全性は","袴田事件の詳細","円安はいつ終わるか","少子化対策の効果"], sourceDetail:null, prevNav:null, searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:false, navCount:0, adVisible:false, adType:null, adCountdown:0 };
+
+// ===== CM モックデータ =====
+const AD_MOCKS = [
+  { id:0, brand:"旅行サイト TABIGO", copy:"春の旅行は早めの予約が◎", sub:"最大30%オフキャンペーン実施中", color:"#1565C0", emoji:"✈️" },
+  { id:1, brand:"英会話 SpeakUp", copy:"1日15分で話せるようになる", sub:"無料体験レッスン受付中", color:"#2E7D32", emoji:"🗣️" },
+  { id:2, brand:"家電量販 デンキタウン", copy:"春の新生活フェア開催中", sub:"冷蔵庫・洗濯機が最大40%OFF", color:"#E65100", emoji:"🏪" },
+  { id:3, brand:"転職サービス NEXT", copy:"あなたの市場価値を確かめよう", sub:"登録無料・スカウト多数", color:"#6A1B9A", emoji:"💼" },
+  { id:4, brand:"フィットネス BodyLab", copy:"自宅で本格トレーニング", sub:"初月無料キャンペーン実施中", color:"#00838F", emoji:"💪" },
+];
+let adTimer = null;
+
+// ===== CM 表示ロジック =====
+function maybeShowAd(){
+  if(true) return; // 開発中は無効化（設定のテストボタンのみ有効）
+  if(state.isPremium) return; // 有料ユーザーはCMなし
+  state.navCount++;
+  // ランダム判定：平均5回に1回 + 10回で確実
+  const roll = Math.random();
+  const shouldShow = roll < 0.2 || state.navCount >= 10;
+  if(!shouldShow) return;
+  state.navCount = 0;
+  // 形式をランダム選択（カード50%・ハーフ45%・フル5%）
+  const r = Math.random();
+  state.adType = r < 0.50 ? 'card' : r < 0.95 ? 'half' : 'full';
+  state.adVisible = true;
+  state.adSkippable = false;
+  state.adCountdown = state.adType === 'full' ? 15 : 5;
+  state.adData = AD_MOCKS[Math.floor(Math.random() * AD_MOCKS.length)];
+  renderAd();
+  // カウントダウン開始
+  if(adTimer) clearInterval(adTimer);
+  adTimer = setInterval(()=>{
+    state.adCountdown--;
+    if(state.adType === 'full' && state.adCountdown <= 0){
+      closeAd();
+    } else if(state.adType !== 'full' && state.adCountdown <= 0){
+      state.adSkippable = true;
+    }
+    updateAdCountdown();
+  }, 1000);
+}
+
+function closeAd(){
+  if(adTimer){ clearInterval(adTimer); adTimer=null; }
+  state.adVisible = false;
+  const overlay = document.getElementById('ad-overlay');
+  if(overlay) overlay.remove();
+}
+
+function updateAdCountdown(){
+  const el = document.getElementById('ad-countdown');
+  if(!el) return;
+  if(state.adType === 'full'){
+    el.textContent = state.adCountdown + '秒';
+  } else if(state.adSkippable){
+    el.innerHTML = '<button onclick="closeAd()" style="padding:8px 20px;background:#fff;border:none;border-radius:99px;font-size:13px;font-weight:700;color:#333;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">スキップ ›</button>';
+  } else {
+    el.textContent = state.adCountdown + '秒後にスキップ';
+  }
+}
+
+function renderAd(){
+  const d = state.adData;
+  const type = state.adType;
+  const existing = document.getElementById('ad-overlay');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'ad-overlay';
+
+  if(type === 'full'){
+    // フルスクリーン：スキップ不可・3秒自動終了
+    overlay.innerHTML = `
+    <div style="position:fixed;inset:0;background:${d.color};z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;max-width:400px;left:50%;transform:translateX(-50%)">
+      <div style="font-size:64px;margin-bottom:20px">${d.emoji}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.7);letter-spacing:2px;margin-bottom:8px">AD</div>
+      <div style="font-size:24px;font-weight:900;color:#fff;margin-bottom:10px;text-align:center;padding:0 24px">${d.brand}</div>
+      <div style="font-size:16px;color:rgba(255,255,255,0.9);margin-bottom:8px;text-align:center;padding:0 24px">${d.copy}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.7);text-align:center;padding:0 24px;margin-bottom:40px">${d.sub}</div>
+      <div id="ad-countdown" style="font-size:13px;color:rgba(255,255,255,0.6);background:rgba(0,0,0,0.2);padding:6px 16px;border-radius:99px">${state.adCountdown}秒</div>
+    </div>`;
+  } else if(type === 'half'){
+    // ハーフモーダル：下から出現
+    overlay.innerHTML = `
+    <div onclick="event.stopPropagation()" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:flex;align-items:flex-end;justify-content:center;max-width:400px;left:50%;transform:translateX(-50%)" onclick="void(0)">
+      <div style="width:100%;background:#0f1729;border-radius:20px 20px 0 0;padding:24px;animation:slideUp 0.3s ease">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <span style="font-size:10px;color:#555;letter-spacing:2px">AD</span>
+          <div id="ad-countdown" style="font-size:11px;color:#555">${state.adCountdown}秒後にスキップ</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+          <div style="width:60px;height:60px;background:${d.color};border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${d.emoji}</div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#e0e6f0;margin-bottom:4px">${d.brand}</div>
+            <div style="font-size:13px;color:#aaa">${d.copy}</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">${d.sub}</div>
+          </div>
+        </div>
+        <button style="width:100%;padding:13px;background:${d.color};border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-bottom:10px">詳しく見る</button>
+      </div>
+    </div>`;
+  } else {
+    // カード型：中央ポップアップ
+    overlay.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;max-width:400px;left:50%;transform:translateX(-50%)">
+      <div style="background:#0f1729;border-radius:16px;padding:24px;width:100%;max-width:340px;animation:fadeUp 0.3s ease">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <span style="font-size:10px;color:#555;letter-spacing:2px">AD</span>
+          <div id="ad-countdown" style="font-size:11px;color:#555">${state.adCountdown}秒後にスキップ</div>
+        </div>
+        <div style="text-align:center;margin-bottom:20px">
+          <div style="font-size:48px;margin-bottom:12px">${d.emoji}</div>
+          <div style="font-size:16px;font-weight:700;color:#e0e6f0;margin-bottom:6px">${d.brand}</div>
+          <div style="font-size:14px;color:#aaa;margin-bottom:4px">${d.copy}</div>
+          <div style="font-size:11px;color:#666">${d.sub}</div>
+        </div>
+        <button style="width:100%;padding:13px;background:${d.color};border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-bottom:10px">詳しく見る</button>
+      </div>
+    </div>`;
+  }
+  document.body.appendChild(overlay);
+}
+
+// カラーパレット定義
+const PALETTES = {
+  normal:     { high:"#4CAF50", mid:"#8BC34A", warn:"#FF9800", danger:"#F44336", brand:"#4a9eff", bias:"#FF9800", fact:"#F44336", sns:"#E91E63", old:"#607D8B", conflict:"#9C27B0" },
+  protanopia: { high:"#0077BB", mid:"#33BBEE", warn:"#EE7733", danger:"#EE3377", brand:"#0077BB", bias:"#EE7733", fact:"#EE3377", sns:"#AA3377", old:"#BBBBBB", conflict:"#EE7733" },
+  tritanopia: { high:"#009E73", mid:"#56B4E9", warn:"#E69F00", danger:"#D55E00", brand:"#56B4E9", bias:"#E69F00", fact:"#D55E00", sns:"#CC79A7", old:"#999999", conflict:"#E69F00" },
+  mono:       { high:"#FFFFFF", mid:"#CCCCCC", warn:"#888888", danger:"#444444", brand:"#FFFFFF", bias:"#AAAAAA", fact:"#666666", sns:"#888888", old:"#AAAAAA", conflict:"#777777" },
+};
+function P(){ return PALETTES[state.colorMode||"normal"]; }
+function scoreSymbol(s){ return state.colorMode==="mono"?(s>=90?"◆":s>=70?"▲":s>=50?"■":"✕"):""; }
+function brandColor(){ return P().brand; }
+
+// ===== ユーティリティ =====
+function scoreColor(s){ const p=P(); return s>=90?p.high:s>=70?p.mid:s>=50?p.warn:p.danger; }
+function scoreLabel(s){ return s>=90?"高信頼":s>=70?"信頼":s>=50?"要確認":"注意"; }
+function alertColor(t){ const p=P(); return {bias:p.bias,fact:p.fact,sns:p.sns,old:p.old,conflict:p.conflict}[t]||p.warn; }
+function alertIcon(t){  return {bias:"📰",fact:"⚠️",sns:"📣",old:"🕐",conflict:"⚖️"}[t]||"⚠️"; }
+function typeClass(t){ return {公共放送:"tag-nhk",主要紙:"tag-paper",政府機関:"tag-gov",学術:"tag-academic"}[t]||""; }
+
+function scoreBarHTML(score, sm=false){
+  const c=scoreColor(score), h=sm?4:6;
+  const sym=scoreSymbol(score);
+  const pattern=state.colorMode==="mono"?"repeating-linear-gradient(45deg,"+c+","+c+" 2px,transparent 2px,transparent 6px)":"linear-gradient(90deg,"+c+"88,"+c+")";
+  return `<div class="score-bar-wrap">
+    <div class="score-bar-track" style="height:${h}px">
+      <div class="score-bar-fill" style="width:${score}%;background:${pattern}"></div>
+    </div>
+    <span class="score-val" style="color:${c};font-size:${sm?11:13}px">${sym}${score}</span>
+  </div>`;
+}
+
+function alertBadgeHTML(alert){
+  if(!alert) return "";
+  const c=alertColor(alert.type), icon=alertIcon(alert.type);
+  const data=encodeURIComponent(JSON.stringify(alert));
+  return `<span class="alert-badge" style="color:${c};background:${c}22;border-color:${c}55" onclick="showPopup(decodeURIComponent('${data}'))">${icon} 注意</span>`;
+}
+
+// ===== ポップアップ =====
+function showPopup(dataStr){
+  let d;
+  try{ d = typeof dataStr==="string" ? JSON.parse(dataStr) : dataStr; }catch(e){ return; }
+  const c=alertColor(d.type||"bias");
+  document.getElementById("popup-icon").textContent = alertIcon(d.type||"bias");
+  document.getElementById("popup-type").textContent = "注意喚起";
+  document.getElementById("popup-type").style.color = c;
+  document.getElementById("popup-msg").textContent = d.msg||d.alertMsg||"";
+  const btn=document.getElementById("popup-btn");
+d("show");
+}
+function closePopup(){ document.getElementById("popup-overlay").classList.remove("show"); }
+
+// ===== ナビ切り替え =====
+function switchNav(nav){
+  const prevNav = state.nav;
+  state.nav=nav;
+  if(nav==="explore" && state.exploreDepth===0){ state.selectedCat=null; }
+  document.querySelectorAll(".nav-btn").forEach(b=>{ b.classList.toggle("active", b.dataset.nav===nav); });
+  render();
+  // 別画面への遷移時のみCM判定
+  if(prevNav !== nav) maybeShowAd();
+}
+
+// ===== レンダリング =====
+function render(){
+  const c=document.getElementById("content");
+  c.scrollTop=0;
+  if(state.nav==="home")         c.innerHTML=renderHome();
+  if(state.nav==="search")       c.innerHTML=renderSearch();
+  if(state.nav==="explore")      c.innerHTML=renderExplore();
+  if(state.nav==="alerts")       c.innerHTML=renderAlerts();
+  if(state.nav==="settings")     c.innerHTML=renderSettings();
+  if(state.nav==="sourceDetail") c.innerHTML=renderSourceDetail();
+  if(state.nav==="amazon")       c.innerHTML=renderAmazon();
+  document.getElementById("sens-badge").textContent=`感度 Lv.${state.sensitivity}`;
+  bindEvents();
+}
+
+// ===== ホーム =====
+function renderHome(){
+  const p = P();
+  const HOME_TABS = [
+    { id:"alerts",   icon:"⚠️", label:"注意喚起" },
+    { id:"trending", icon:"🔥", label:"急上昇" },
+    { id:"pickup",   icon:"📅", label:"ピックアップ" },
+    { id:"followup", icon:"🔄", label:"続報" },
+  ];
+  const tabBar = HOME_TABS.map(t=>`
+    <button onclick="setHomeTab('${t.id}')" style="
+      flex:1;padding:9px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:2px;
+      border:none;background:none;cursor:pointer;
+      border-bottom:2px solid ${state.homeTab===t.id?p.brand:'transparent'};
+      transition:border-color 0.2s;">
+      <span style="font-size:16px">${t.icon}</span>
+      <span style="font-size:9px;color:${state.homeTab===t.id?p.brand:'#555'};font-weight:${state.homeTab===t.id?700:400};letter-spacing:0.3px">${t.label}</span>
+    </button>`).join('');
+
+  return `
+  <div style="padding:14px 14px 0;">
+    <div class="search-box">
+      <input class="search-input" id="home-search" placeholder="今日、何を知りたいですか？" value="${state.searchQuery}">
+      <button class="search-btn" onclick="doSearch()">調べる</button>
+    </div>
+  </div>
+
+  <div style="display:flex;border-bottom:1px solid #1a2a4a;background:#0c1525;position:sticky;top:0;z-index:10;">
+    ${tabBar}
+  </div>
+
+  <div style="padding:14px">
+    ${renderRankingSection()}
+    ${renderHomeTab(state.homeTab)}
+  </div>
+
+  <div style="padding:14px 14px 0">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="section-title" style="margin-bottom:0">🛒 Amazonで探す</div>
+      <span style="font-size:10px;color:#555">購入でFACT支援</span>
+    </div>
+    <div class="card" style="padding:14px">${amazonSearchHTML('home')}</div>
+  </div>
+  <div style="height:20px"></div>`;
+}
+
+function setHomeTab(tab){
+  state.homeTab = tab;
+  // followupタブはそのままrenderHomeTabで処理
+  render();
+}
+
+function renderHomeTab(tab){
+  const p = P();
+  const alertCount = state.sensitivity>=3 ? 4 : 2;
+
+  if(tab === 'alerts') return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="section-title" style="margin-bottom:0">⚠️ 今日の注意喚起</div>
+      <span style="font-size:10px;color:#555">AIが自動検出</span>
+    </div>
+    ${ALERTS.slice(0,alertCount).map(a=>{
+      const c=alertColor(a.type), icon=alertIcon(a.type);
+      const d=encodeURIComponent(JSON.stringify(a));
+      return `<div class="card clickable" onclick="showPopup(decodeURIComponent('${d}'))">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <span style="font-size:11px;color:#555">${a.cat}</span>
+          <span style="font-size:10px;color:${c};background:${c}22;padding:1px 7px;border-radius:99px;border:1px solid ${c}44">${a.sev==="high"?"重要":"注意"}</span>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">${icon} ${a.title}</div>
+        <div style="font-size:11px;color:#888;line-height:1.5">${a.msg.slice(0,60)}...</div>
+        ${archiveLinkHTML(a.topicId)}
+      </div>`;
+    }).join("")}`;
+
+  if(tab === 'trending'){
+    var rp = state.rankingPeriod || 'day';
+    var rankData = RANKING[rp] || RANKING.day;
+    return rankData.map(function(t){
+      var chColor = t.change.startsWith('↑') ? p.high : t.change.startsWith('↓') ? p.danger : t.change==='new' ? p.warn : '#555';
+      var kNum = t.searches >= 10000 ? (t.searches/1000).toFixed(0)+'k' : (t.searches/1000).toFixed(1)+'k';
+      var onclickFn = t.topicId ? 'goTopic(\'' + t.topicId + '\')' : 'setSearchQuery(this.dataset.title)';
+      return '<div class="card clickable" style="display:flex;align-items:center;gap:10px" onclick="' + onclickFn + '" data-title="' + t.title.replace(/"/g,'&quot;') + '">' +
+        '<div style="font-family:monospace;font-size:18px;font-weight:900;color:#1a3a6a;min-width:22px;text-align:center">' + t.rank + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13px;font-weight:600;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.title + '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px">' +
+        '<span style="font-size:10px;color:#555">' + t.cat + '</span>' +
+        '<span style="font-size:10px;color:' + chColor + ';font-family:monospace">' + t.change + '</span>' +
+        '</div></div>' +
+        '<div style="font-size:11px;color:#2a5a9a;font-family:monospace;flex-shrink:0">' + kNum + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+
+
+  if(tab === 'pickup'){
+    return '<div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
+      '<div class="section-title" style="margin-bottom:0">📅 今日のピックアップ</div>' +
+      '<span style="font-size:10px;color:#555">編集部セレクト</span>' +
+      '</div>' +
+      PICKUP.map(function(item){
+        var alertBadge = item.alert ?
+          '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px">⚠️</span>' : '';
+        return '<div class="card clickable" style="margin-bottom:10px" onclick="goTopic(\'' + item.topicId + '\')">' +
+          '<div style="display:flex;align-items:flex-start;gap:10px">' +
+          '<div style="font-size:24px;margin-top:2px;flex-shrink:0">' + item.icon + '</div>' +
+          '<div style="flex:1">' +
+          '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">' +
+          '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '22;padding:2px 8px;border-radius:99px;border:1px solid ' + p.warn + '44">' + item.label + '</span>' +
+          '<span style="font-size:10px;color:#555">' + item.cat + '</span>' +
+          alertBadge +
+          '</div>' +
+          '<div style="font-size:14px;font-weight:700;line-height:1.5;margin-bottom:6px;color:#e0e6f0">' + item.title + '</div>' +
+          '<div style="font-size:12px;color:#777;line-height:1.7;margin-bottom:8px">' + item.summary + '</div>' +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+          '<div style="flex:1;height:4px;background:#1a2035;border-radius:99px;overflow:hidden">' +
+          '<div style="width:' + item.score + '%;height:100%;background:' + scoreColor(item.score) + ';border-radius:99px"></div>' +
+          '</div>' +
+          '<span style="font-family:monospace;font-size:12px;color:' + scoreColor(item.score) + ';font-weight:700">' + item.score + 'pt</span>' +
+          '</div></div></div></div>';
+      }).join('') +
+      '</div>';
+  }
+
+  
+
+  if(tab === 'followup'){
+    return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="section-title" style="margin-bottom:0">🔄 続報</div>
+      <span style="font-size:10px;color:#555">追いかけているニュース</span>
+    </div>
+    ${FOLLOWUP.map(f=>{
+      const statusColors = { high: p.high, warn: p.warn, mid: p.mid, danger: p.danger };
+      const sc = statusColors[f.statusColor] || p.warn;
+      return `<div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px">
+          <span style="font-size:20px;margin-top:1px">${f.icon}</span>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <span style="font-size:13px;font-weight:700;color:#e0e6f0">${f.title}</span>
+              <span style="font-size:10px;color:${sc};background:${sc}22;padding:2px 8px;border-radius:99px;border:1px solid ${sc}44;white-space:nowrap;margin-left:8px">${f.status}</span>
+            </div>
+            <div style="font-size:10px;color:#555;margin-bottom:5px">${f.cat} · ${f.lastUpdate}に更新</div>
+            <div style="font-size:12px;color:#aaa;line-height:1.5;margin-bottom:8px">${f.summary}</div>
+          </div>
+        </div>
+        <div style="border-top:1px solid #0f1a2e;padding-top:8px">
+          ${f.updates.map((u,i)=>`
+            <div style="display:flex;gap:8px;margin-bottom:${i<f.updates.length-1?6:0}px">
+              <div style="display:flex;flex-direction:column;align-items:center;padding-top:3px">
+                <div style="width:6px;height:6px;border-radius:50%;background:${i===0?sc:'#2a3a5a'};flex-shrink:0"></div>
+                ${i<f.updates.length-1?`<div style="width:1px;flex:1;background:#1a2a4a;margin-top:3px"></div>`:''}
+              </div>
+              <div style="flex:1;padding-bottom:${i<f.updates.length-1?6:0}px">
+                <div style="font-size:10px;color:#555;font-family:monospace;margin-bottom:2px">${u.date}</div>
+                <div style="font-size:12px;color:#ccc;line-height:1.5">${u.text}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid #0f1a2e;display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="goTopic('${f.topicId}')" style="font-size:11px;color:${p.brand};background:${p.brand}11;border:1px solid ${p.brand}33;padding:5px 14px;border-radius:99px;cursor:pointer;font-family:'Noto Sans JP',sans-serif">詳しく調べる →</button>
+          <button onclick="goExploreCat('${f.cat}')" style="font-size:11px;color:#4a9eff;background:#4a9eff11;border:1px solid #4a9eff33;padding:5px 14px;border-radius:99px;cursor:pointer;font-family:'Noto Sans JP',sans-serif">🗄️ 記録を閲覧 →</button>
+        </div>
+      </div>`;
+    }).join('')}`;
+  }
+
+  return '';
+}
+
+function renderRankingSection(){
+  var p = P();
+  var tab = state.homeTab || 'alerts';
+  var rp = state.rankingPeriod || 'day';
+  var tabData = TAB_RANKING[tab] || TAB_RANKING.alerts;
+  var rankData = tabData[rp] || [];
+  var labels = {hour:'時', day:'日', week:'週'};
+  var periods = ['hour','day','week'];
+  var html = '<div style="margin-bottom:4px;border-bottom:1px solid #1a2a4a;padding-bottom:8px">';
+  html += '<div style="display:flex;align-items:center;gap:6px;padding:8px 0 6px">';
+  periods.forEach(function(period){
+    var active = rp === period;
+    var bc = active ? p.brand : '#1a2a4a';
+    var tc = active ? p.brand : '#666';
+    var bg = active ? p.brand+'22' : 'transparent';
+    html += '<button onclick="state.rankingPeriod=&quot;' + period + '&quot;;render()" style="padding:4px 14px;background:' + bg + ';border:1px solid ' + bc + ';border-radius:99px;font-size:11px;color:' + tc + ';cursor:pointer;font-family:sans-serif">' + labels[period] + 'ランキング</button>';
+  });
+  html += '</div>';
+  rankData.forEach(function(t){
+    var chColor = t.change.indexOf('↑')>=0 ? p.high : t.change.indexOf('↓')>=0 ? p.danger : t.change==='new' ? p.warn : '#555';
+    html += '<div class="card clickable" style="display:flex;align-items:center;gap:10px;margin-bottom:6px" onclick="t.topicId?goTopic(t.topicId):setSearchQuery(t.title)" data-title="' + t.title.replace(/"/g,'&quot;') + '">';
+    html += '<div style="font-family:monospace;font-size:16px;font-weight:900;color:#1a3a6a;min-width:20px;text-align:center">' + t.rank + '</div>';
+    html += '<div style="flex:1;min-width:0">';
+    html += '<div style="font-size:12px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.title + '</div>';
+    html += '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:#555">' + t.cat + '</span><span style="font-size:10px;color:' + chColor + ';font-family:monospace">' + t.change + '</span></div>';
+    html += '</div></div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+// カテゴリ名→記録IDマッピング
+function catNameToId(catName){
+  const map = {
+    '政治・行政':'politics','司法・裁判':'judicial','経済・産業':'economy',
+    '医療・健康':'medical','科学・環境':'science','社会・事件':'society',
+    '国際・外交':'intl','テクノロジー':'tech','教育・子ども':'edu',
+    '食品・消費者':'food','災害・インフラ':'disaster','歴史・検証':'history'
+  };
+  return map[catName] || null;
+}
+
+function goExploreCat(catName){
+  const id = catNameToId(catName);
+  if(id) goExplore(id);
+  else switchNav('explore');
+}
+
+function archiveLinkHTML(catOrTopicId){
+  if(!catOrTopicId) return '';
+  // topicIdがFACT_TOPICSに存在するか確認
+  var t = FACT_TOPICS.find(function(x){ return x.id===catOrTopicId; });
+  if(t){
+    return '<button onclick="goTopic(\'' + catOrTopicId + '\')" style="font-size:11px;color:#4a9eff;background:#4a9eff11;border:1px solid #4a9eff33;padding:4px 12px;border-radius:99px;cursor:pointer;margin-top:8px;font-family:sans-serif">📋 記録を閲覧 →</button>';
+  }
+  return '';
+}
+function goExplore(catId){
+  state.selectedCat=CATEGORIES.find(c=>c.id===catId);
+  state.exploreDepth=1;
+  state.selectedSub=null;
+  switchNav("explore");
+}
+
+// ===== 検索 =====
+function toggleFilter(type, value){
+  if(type==='cat'){
+    const idx=state.filters.cats.indexOf(value);
+    if(idx>=0) state.filters.cats.splice(idx,1);
+    else state.filters.cats.push(value);
+  } else if(type==='types'){
+    if(!state.filters.types) state.filters.types=[];
+    const idx=state.filters.types.indexOf(value);
+    if(idx>=0) state.filters.types.splice(idx,1);
+    else state.filters.types.push(value);
+  } else {
+    state.filters[type] = state.filters[type]===value ? '' : value;
+  }
+  render();
+}
+
+function clearFilters(){
+  state.filters = { cats:[], types:[], trust:"", period:"", alert:"" };
+  render();
+}
+
+function getFilteredSources(){
+  const q = state.searchQuery.toLowerCase();
+  const f = state.filters;
+  return ALL_SOURCES.filter(s=>{
+    // キーワード検索（タイトル・発行元・カテゴリ・要約）
+    if(q && !s.title.toLowerCase().includes(q) &&
+       !s.org.toLowerCase().includes(q) &&
+       !s.cat.toLowerCase().includes(q) &&
+       !(s.summary||'').toLowerCase().includes(q)) return false;
+    // カテゴリフィルター
+    if(f.cats.length>0 && !f.cats.includes(s.cat)) return false;
+    // ソース種別
+    if(f.types && f.types.length>0 && !f.types.includes(s.type)) return false;
+    // 信頼度
+    if(f.trust==='high' && s.score<90) return false;
+    if(f.trust==='mid' && (s.score<50||s.score>=90)) return false;
+    if(f.trust==='low' && s.score>=50) return false;
+    // 期間
+    if(f.period && s.period!==f.period) return false;
+    // 注意喚起
+    if(f.alert==='yes' && !s.alert) return false;
+    if(f.alert==='no' && s.alert) return false;
+    return true;
+  }).sort((a,b)=>b.score-a.score);
+}
+
+function hasActiveFilter(){
+  const f=state.filters;
+  return f.cats.length>0||(f.types&&f.types.length>0)||f.trust||f.period||f.alert;
+}
+
+function renderFilterTags(){
+  const p=P(), f=state.filters;
+  const TAG_GROUPS = [
+    { type:'cat',    label:'分野',     values: CATEGORIES.map(c=>c.label) },
+    { type:'types',  label:'種別',     values:['政府機関','公共放送','主要紙','学術'] },
+    { type:'trust',  label:'信頼度',   values:[{v:'high',l:'高信頼90+'},{v:'mid',l:'要確認50-89'},{v:'low',l:'注意-49'}] },
+    { type:'period', label:'期間',     values:[{v:'today',l:'今日'},{v:'week',l:'今週'},{v:'month',l:'今月'},{v:'year',l:'今年'}] },
+    { type:'alert',  label:'注意喚起', values:[{v:'yes',l:'⚠あり'},{v:'no',l:'なし'}] },
+  ];
+  const activeCount = (f.cats.length) + (f.types?f.types.length:0) + (f.trust?1:0) + (f.period?1:0) + (f.alert?1:0);
+  return `<div style="padding:8px 14px 4px;border-bottom:1px solid #0f1a2e">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:10px;color:#555;letter-spacing:1px">絞り込み</span>
+      ${activeCount>0?`<button onclick="clearFilters()" style="padding:2px 10px;background:transparent;border:1px solid #333;border-radius:99px;font-size:10px;color:#888;cursor:pointer;font-family:'Noto Sans JP',sans-serif">× ${activeCount}件クリア</button>`:''}
+    </div>
+    ${TAG_GROUPS.map(g=>{
+      const tags = g.values.map(v=>{
+        const val = typeof v==='object'?v.v:v;
+        const lbl = typeof v==='object'?v.l:v;
+        let active;
+        if(g.type==='cat') active=f.cats.includes(val);
+        else if(g.type==='types') active=f.types&&f.types.includes(val);
+        else active=f[g.type]===val;
+        const bc = active?p.brand:'#1a2a4a';
+        const tc = active?p.brand:'#aaa';
+        const bg = active?p.brand+'22':'#0c1525';
+        return `<button onclick="toggleFilter('${g.type}','${val}')" style="flex-shrink:0;padding:5px 12px;background:${bg};border:1px solid ${bc};border-radius:99px;font-size:11px;color:${tc};cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif">${active?'✓ ':''}${lbl}</button>`;
+      }).join('');
+      return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch">
+        <span style="font-size:10px;color:#444;flex-shrink:0;min-width:40px;padding-right:4px">${g.label}</span>
+        <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1">${tags}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+
+function goTopicDetail(el){
+  var tid = el.getAttribute('data-tid');
+  var ttl = el.getAttribute('data-ttl');
+  state.currentTopicId = tid;
+  state.searchQuery = ttl;
+  state.searched = true;
+  state.searchPhase = 'detail';
+  state.searchTab = 0;
+  switchNav('search');
+  render();
+}
+
+function openUrl(url){ window.open(url,"_blank"); }
+
+function showAlertByEl(el){
+  var type = el.getAttribute('data-type') || 'bias';
+  var msg  = el.getAttribute('data-msg')  || '';
+  showPopup(JSON.stringify({type:type, msg:msg}));
+}
+
+
+function showAlertDetail(type, msg){
+  showPopup(JSON.stringify({type:type, msg:msg}));
+}
+
+
+function renderSearch(){
+  var p = P();
+
+  // フォーカス中：履歴フルスクリーン
+  if(!state.searched && state.searchFocused){
+    return renderSearchFocused(p);
+  }
+
+  // 検索前：通常の検索画面
+  if(!state.searched){
+    return renderSearchEmpty(p);
+  }
+
+  // 検索後 Phase1：結果一覧
+  if(state.searchPhase !== 'detail'){
+    return renderSearchResults(p);
+  }
+
+  // 検索後 Phase2：詳細分析（5タブ）
+  return renderSearchDetail(p);
+}
+
+
+function renderSearchResults(p){
+  var q = state.searchQuery;
+
+
+  // クエリに該当するトピックを検索（本番はセマンティック検索）
+  var results = FACT_TOPICS.filter(function(t){
+    return t.title.indexOf(q) >= 0 ||
+           t.summary.indexOf(q) >= 0 ||
+           t.tags.some(function(tag){ return q.indexOf(tag) >= 0 || tag.indexOf(q) >= 0; }) ||
+           q.indexOf('袴田') >= 0 || q.indexOf('再審') >= 0;
+  });
+
+  // 結果なしの場合も袴田事件を表示（デモ用）
+  if(results.length === 0) results = FACT_TOPICS;
+
+  var cards = results.map(function(t){
+    var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
+    var alertBadge = t.alert ?
+      '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px">⚠️ 注意</span>' : '';
+    var tags = (t.tags||[]).map(function(tag){
+      return '<span style="font-size:10px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + tag + '</span>';
+    }).join('');
+
+    return '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer"' +
+      ' data-tid="' + t.id + '" data-ttl="' + t.title.replace(/"/g,'&quot;') + '"' +
+      ' onclick="goTopicDetail(this)">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+      '<div style="display:flex;align-items:center;gap:6px">' +
+      '<span style="font-size:11px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
+      alertBadge +
+      '</div>' +
+      '<div style="display:flex;align-items:baseline;gap:2px">' +
+      '<span style="font-family:monospace;font-size:18px;font-weight:900;color:' + rankColor + '">' + t.score + '</span>' +
+      '<span style="font-size:11px;color:' + rankColor + '">pt</span>' +
+      '</div></div>' +
+      '<div style="font-size:16px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:8px">' + t.title + '</div>' +
+      '<div style="font-size:12px;color:#777;line-height:1.7;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + t.summary + '</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between">' +
+      '<div style="display:flex;align-items:center;gap:10px">' +
+      '<span style="font-size:11px;color:#555">📰 ' + t.sourceCount + '件のソースを分析</span>' +
+      '<span style="font-size:11px;color:#555">📅 ' + t.date + '</span>' +
+      '</div>' +
+      '<div style="font-size:12px;color:' + p.brand + ';font-weight:600">詳細を見る →</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:10px">' + tags + '</div>' +
+      '</div>';
+  }).join('');;
+
+  return '<div style="padding-bottom:20px">' +
+
+    // 検索バー
+    '<div style="padding:10px 14px;border-bottom:1px solid #1a2a4a;background:#0c1525;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:8px">' +
+    '<span style="font-size:14px;color:#555">🔍</span>' +
+    '<span style="font-size:14px;color:#e0e6f0;flex:1;font-weight:600">' + q + '</span>' +
+    '<button onclick="state.searchFocused=true;state.searched=false;render()" style="padding:5px 12px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:#555;font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">変更</button>' +
+    '</div>' +
+
+    // 結果件数・説明
+    '<div style="padding:12px 14px 8px">' +
+    '<div style="font-size:13px;font-weight:700;color:#e0e6f0;margin-bottom:3px">' + results.length + '件のFACT分析が見つかりました</div>' +
+    '<div style="font-size:11px;color:#555">タップするとAIによる詳細分析・ソース一覧を確認できます</div>' +
+    '</div>' +
+
+    // トピックカード一覧
+    '<div style="padding:4px 14px 0">' + cards + '</div>' +
+
+    // 区切り
+    '<div style="padding:8px 14px">' +
+    '<div style="border-top:1px solid #1a2a4a;padding-top:14px">' +
+    '<div style="font-size:11px;color:#555;text-align:center">FACTのDBに存在しないトピックはAIが新規分析します（有料機能）</div>' +
+    '</div>' +
+    '</div>' +
+    '</div>';
+}
+
+
+
+function renderSearchDetail(p){
+  var q = state.searchQuery;
+  var TABS = ['📋 要約','🕐 時系列','📰 ソース','⚖️ 多角的視点','🔗 関連'];
+  // 現在のクエリに合致するトピックを特定
+  var currentTopic = FACT_TOPICS.find(function(t){ return t.title === q; }) || FACT_TOPICS[0];
+  var currentData = TOPIC_DATA[currentTopic.id] || TOPIC_DATA['hakamada_muzai'];
+  var score = currentTopic.score;
+
+  return '<div>' +
+    // 検索バー＋戻るボタン
+    '<div style="padding:10px 14px;border-bottom:1px solid #1a2a4a;background:#0c1525;position:sticky;top:0;z-index:10">' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
+    '<button onclick="state.searchPhase=\'results\';render()" style="padding:5px 10px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:#4a9eff;font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 検索結果</button>' +
+    '<span style="font-size:13px;color:#e0e6f0;flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + q + '</span>' +
+    '</div>' +
+    // タブバー
+    '<div style="display:flex;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none">' +
+    TABS.map(function(t,i){
+      var active = state.searchTab===i;
+      return '<button onclick="state.searchTab=' + i + ';render()" style="padding:8px 10px;background:transparent;border:none;border-bottom:2px solid ' + (active?p.brand:'transparent') + ';color:' + (active?p.brand:'#555') + ';font-size:11px;cursor:pointer;white-space:nowrap;font-family:\'Noto Sans JP\',sans-serif;font-weight:' + (active?'700':'400') + '">' + t + '</button>';
+    }).join('') +
+    '</div>' +
+    '</div>' +
+    // タブコンテンツ
+    '<div style="padding:14px">' +
+    renderSearchTab(state.searchTab, score) +
+    '</div>' +
+    '</div>';
+}
+
+
+function renderSearchFocused(p){
+  var history = state.history || [];
+  return '<div style="position:fixed;inset:0;background:#080e1e;z-index:100;display:flex;flex-direction:column;padding-bottom:70px">' +
+    '<div style="padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1a2a4a">' +
+    '<div style="flex:1;display:flex;align-items:center;background:#0c1525;border:1px solid #2a4a7a;border-radius:99px;padding:10px 14px;gap:8px">' +
+    '<span style="color:#4a9eff;font-size:14px">🔍</span>' +
+    '<input id="search-input-focused" class="search-input" placeholder="キーワードで検索..." value="' + (state.searchQuery||'') + '" style="flex:1;background:none;border:none;color:#e0e6f0;font-size:14px;outline:none;font-family:\'Noto Sans JP\',sans-serif"' +
+    ' oninput="state.searchQuery=this.value;updateSearchSuggestions()"' +
+    ' oncompositionend="state.searchQuery=this.value;updateSearchSuggestions()"' +
+    ' onkeydown="if(event.key===\'Enter\'&&!event.isComposing&&state.searchQuery.trim()){state.searchFocused=false;doSearch()}">' +
+    '<button id="search-clear-btn" onclick="state.searchQuery=\'\';document.getElementById(\'search-input-focused\').value=\'\';updateSearchSuggestions()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;display:none">×</button>' +
+    '</div>' +
+    '<button onclick="state.searchFocused=false;render()" style="background:none;border:none;color:#4a9eff;font-size:13px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;white-space:nowrap">キャンセル</button>' +
+    '</div>' +
+    (history.length > 0 ?
+      '<div style="flex:1;overflow-y:auto;padding:8px 0">' +
+      '<div style="font-size:11px;color:#555;padding:8px 16px">最近の検索</div>' +
+      history.map(function(h){
+        return '<div style="display:flex;align-items:center;padding:12px 16px;cursor:pointer;border-bottom:1px solid #0a1020" onclick="state.searchQuery=\'' + h.replace(/'/g,"\\'") + '\';state.searchFocused=false;doSearch()">' +
+          '<span style="color:#555;margin-right:12px;font-size:14px">🕐</span>' +
+          '<span style="font-size:14px;color:#aaa">' + h + '</span>' +
+          '</div>';
+      }).join('') +
+      '</div>' :
+      '<div style="flex:1;display:flex;align-items:center;justify-content:center">' +
+      '<div style="text-align:center;color:#555;font-size:13px">検索履歴はありません</div>' +
+      '</div>'
+    ) +
+    '</div>';
+}
+
+
+function renderSearchEmpty(p){
+  return '<div style="padding:14px">' +
+    // 検索入力バー
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">' +
+    '<div style="flex:1;display:flex;align-items:center;background:#0c1525;border:1px solid #2a4a7a;border-radius:99px;padding:10px 14px;gap:8px">' +
+    '<span style="color:#4a9eff;font-size:16px">🔍</span>' +
+    '<input id="search-input-main" class="search-input" placeholder="キーワードで検索..." style="flex:1;background:none;border:none;outline:none;font-size:14px;color:#e0e6f0;font-family:\'Noto Sans JP\',sans-serif" ' +
+    'oninput="state.searchQuery=this.value" ' +
+    'oncompositionend="state.searchQuery=this.value" ' +
+    'onkeydown="if(event.key===\'Enter\'&&!event.isComposing&&state.searchQuery.trim()){doSearch()}">' +
+    '</div>' +
+    '<button onclick="doSearch()" style="padding:10px 16px;background:' + p.brand + ';border:none;border-radius:99px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;white-space:nowrap">調べる</button>' +
+    '</div>' +
+    // 中央メッセージ
+    '<div style="text-align:center;margin-bottom:24px">' +
+    '<div style="font-size:40px;margin-bottom:12px">🔍</div>' +
+    '<div style="font-size:15px;color:#aaa;margin-bottom:6px;font-weight:600">何を調べますか？</div>' +
+    '<div style="font-size:12px;color:#555">キーワードを入力してください</div>' +
+    '</div>' +
+    // 検索例
+    '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:12px;padding:16px">' +
+    '<div style="font-size:11px;color:#555;margin-bottom:10px">検索例</div>' +
+    ['袴田事件 再審無罪', 'ホルムズ海峡 日本への影響', '日銀 利上げ 影響', 'Microsoft 日本 AI投資'].map(function(q){
+      return '<div style="padding:10px 0;border-bottom:1px solid #0f1a2e;cursor:pointer;font-size:13px;color:#aaa;display:flex;align-items:center;gap:8px" onclick="state.searchQuery=\'' + q + '\';doSearch()">' +
+        '<span style="color:#4a9eff">🔍</span>' + q + '</div>';
+    }).join('') +
+    '</div>' +
+    '</div>';
+}
+
+
+
+
+function renderSearchTab(tab, score){
+  if(tab===0) return renderSummaryTab();
+  if(tab===1) return renderTimelineTab();
+  if(tab===2) return renderSourcesTab();
+  if(tab===3) return renderPerspectivesTab();
+  if(tab===4) return renderRelatedTab();
+  return "";
+}
+
+function renderSummaryTab(){
+  var p = P();
+
+  // 現在のトピックを特定
+  var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
+  var currentData = TOPIC_DATA[currentTopic.id] || {};
+  var c = scoreColor(currentTopic.score);
+
+  // トピック別スコア根拠
+  var scoreReasonMap = {
+    hakamada_muzai:        'S・A級ソース5件以上が判決内容を一致して確認。法曹機関の公式声明も複数存在。',
+    hormuz_crisis:         'Bloomberg・時事・NHK等の複数の一次情報ソースが事実を確認。ただし状況は日々変化中。',
+    microsoft_japan:       '日経・NHK等が発表を確認。ただし投資効果については評価が分かれており注意が必要。',
+    yosan_2026:            '政府公式情報・複数メディアが成立予定を確認。新制度の詳細は内閣府発表を参照のこと。',
+    sudden_death_diagnosis:'和歌山医大の発表を時事通信が確認。査読論文は未確認のため中程度の信頼度。',
+    march_high_temp:       '気象庁の公式発表に基づく。一次情報ソースとして最高水準の信頼性。',
+    enzai_cf:              '時事通信が確認。弁護団の公式発表と一致。内容は事実として確認済み。',
+    ai_datacenter_japan:   '複数メディアが報道。ただし各社の計画詳細は未発表のものも含む。',
+    kyoiku_2026:           '内閣府・こども家庭庁の公式情報に基づく。制度の詳細は各省庁発表を参照のこと。',
+    food_price_hike:       '複数ソースが価格上昇を確認。ただし商品別の数字は報道機関によって異なる。',
+    tochigi_jishin:        '気象庁・時事通信が確認。震度・被害状況は公式発表に基づく。',
+    hakamada_history:      '日弁連・アムネスティ等の専門機関による分析に基づく。歴史的評価は確立されつつある。',
+  };
+
+  // トピック別サマリー（FACT_TOPICSのsummaryを使用し、詳細版を用意）
+  var summaryDetailMap = {
+    hakamada_muzai: '1966年6月、静岡県清水市で一家4人が殺害された袴田事件。当時プロボクサーだった袴田巌さんが逮捕され、1968年に死刑判決を受けた。一貫して無罪を主張したが1980年に死刑が確定。以降、世界最長の死刑囚として国際的にも注目を集めた。\n\n2014年、静岡地裁は「5点の衣類証拠に捏造の疑いがある」として再審開始と釈放を決定。しかし検察の即時抗告により法廷闘争が続いた。2023年に最高裁が再審開始を維持し、2024年9月の再審公判で静岡地裁は無罪判決を言い渡した。判決は捜査機関による証拠捏造の可能性を認定した歴史的なものとなった。\n\n2024年10月9日、検察が控訴を断念し無罪が確定。逮捕から58年、日本の再審制度改革に向けた議論が本格化している。',
+    hormuz_crisis: '2026年2月28日、米国とイスラエルがイランへの協調空爆を開始（エピック・フューリー作戦）。イランの最高指導者ハーメネイ師が死亡し、イランはホルムズ海峡の商船通航を禁ずる警告を発出。\n\n世界の石油供給の約20%が通過するホルムズ海峡の実質封鎖により、ブレント原油価格は1バレル126ドルまで高騰。日本の3月原油輸入量は2月比3割減と過去最少水準に。\n\n4月2日、英国主催で日欧など40カ国余りが再開に向けた対応を協議。制裁措置の強化とイランへの外交的働きかけを検討中。4月3日現在も封鎖は継続。',
+    microsoft_japan: '2026年4月3日、米マイクロソフトが日本のデータセンター等に100億ドル（約1兆6000億円）を投資すると発表。2029年までの4年間で、ソフトバンクやさくらインターネットと連携し人工知能（AI）を国内で運用するデータ基盤を構築する。\n\nデータ主権・経済安保の観点から、重要データを自国内で管理する「データ主権」の重要性が高まる中での大型投資。日本政府も積極的に誘致してきた。\n\n一方、海外メディアは「市場がMicrosoftのAI戦略を不安視」と報道。1〜3月のMicrosoft株価は金融危機以来の下落と指摘しており、投資効果への疑問も浮上している。',
+    yosan_2026: '2026年度（令和8年度）本予算は、参院での年度内成立を断念し、暫定予算で年度越えした後、憲法の規定（衆院の議決が優先）により4月11日に自然成立する見通し。\n\n4月1日からは多くの新制度が既に開始。私立高校授業料の実質無償化・公立小学校給食費無償化・改正民法による共同親権導入・こども誰でも通園制度の新設・自転車の交通違反への青切符導入などが含まれる。\n\n予算成立後は7月17日の特別国会会期末に向けて、「国家情報局」新設・防災庁設置など重要法案の審議が始まる予定。',
+    sudden_death_diagnosis: '和歌山県立医科大学の研究チームが、突然死の死因究明に新手法を開発したと4月1日に発表した。\n\n従来の突然死診断は解剖が中心だったが、新手法では細胞や血液から心臓の変化を分析することで、より精度の高い死因判定が可能になるとしている。法医学の死因究明精度向上への応用が期待されている。\n\n今後の実用化には更なる臨床研究が必要とされるが、日本の死因究明制度強化の文脈で注目される研究成果。',
+    march_high_temp: '気象庁が2026年4月1日に発表した2026年3月の気候まとめによると、全国的に気温が平年を上回った。\n\n特に北日本と沖縄・奄美地方では降水量が少雨傾向で、農業や水資源への影響が懸念される。近年続く高温傾向と地球温暖化の影響との関連を専門家が分析している。\n\nホルムズ危機による原油高と相まって、夏場の電力需要増加が懸念されており、政府は電力需給の見通しを示す取り組みを開始。',
+    enzai_cf: '冤罪被害者らが、再審制度改正の実現に向けたクラウドファンディングを2026年4月1日に開始した（時事通信4月1日報道）。\n\n具体的な目標は、①証拠開示の義務化、②検察の不服申し立て禁止の2点。袴田事件の弁護団も支持を表明している。\n\n法制審議会部会では既に議論が進んでいるが、検察側が証拠開示義務化などに反対しており合意形成に時間がかかる見通し。市民からの直接的な働きかけで議論を加速させる狙い。',
+    ai_datacenter_japan: 'Microsoft日本への100億ドル投資発表（4月3日）を機に、AIデータセンターの日本誘致競争が本格化している。\n\nGoogleやAmazonも日本でのデータセンター投資を計画しており、政府も経済安保・データ主権の観点から積極的に誘致している。\n\n一方で、データセンターによる電力需要の急増が課題。ホルムズ海峡危機による燃料確保問題と相まって、夏場の電力需給が懸念されている。NHKは「発電向け燃料確保に懸念」として報道。',
+    kyoiku_2026: '2026年4月1日から、複数の教育・子育て関連の新制度が一斉に開始された。\n\n主な変更点：私立高校授業料の実質無償化・公立小学校給食費の実質無償化・こども誰でも通園制度の新設・公立中学校35人学級の段階的開始・子ども・子育て支援金の徴収開始。\n\nまた改正民法の施行により、離婚後の「共同親権」が導入された。これについては、DV被害者の保護が不十分との懸念から、支持と反対の声が大きく分かれている。',
+    food_price_hike: 'ホルムズ海峡危機による原油高と円安（159円台）が同時進行し、食料品・日用品の価格が急騰している。\n\n世界の肥料価格は5割高（日経4月3日）。食料品への価格転嫁が進み、家計への影響が深刻化している。OECDはG20の今年のインフレ率予測を4.0%に大幅上方修正（3月26日）。\n\n政府は価格監視を強化し便乗値上げを防ぐとしているが、消費者団体からは「実際の家計負担増は政府発表より大きい」との指摘もある。',
+    tochigi_jishin: '2026年4月1日、栃木県北部を震源とする最大震度5弱の地震が発生。東北新幹線が一時運転見合わせとなったが、その後運転を再開した。\n\n気象庁によると震源の深さは約10km。津波の心配はなく、負傷者の報告もなかった。ただし余震への注意を呼びかけている。\n\nホルムズ海峡危機による燃料不足の状況での災害対応能力が問われる形となり、「発電向け燃料確保に懸念」（NHK）として報道されている。',
+    hakamada_history: '1966年の逮捕から2024年の無罪確定まで58年にわたる袴田事件は、日本の刑事司法制度が持つ構造的問題を凝縮した事件として歴史的に重要な意義を持つ。\n\n日弁連は「自白強要（1日平均12時間の取調べ）」「人質司法（証拠捏造した状態での長期拘禁）」「証拠開示制度の欠如（弁護側への証拠隠蔽）」という三つの課題を指摘している。\n\n国際的にはアムネスティ・ヒューマン・ライツ・ウォッチが「日本の死刑制度と刑事司法制度は国際基準に照らして問題がある」と批判。2024年の無罪確定を機に、再審制度改革の議論が本格化している。',
+  };
+
+  var summary = summaryDetailMap[currentTopic.id] || currentTopic.summary;
+  var scoreReason = scoreReasonMap[currentTopic.id] || 'S・A級ソースが内容を確認。';
+
+  var alertType = currentTopic.alert ? currentTopic.alert.type : null;
+  var alertMsg = currentTopic.alert ? currentTopic.alert.msg : null;
+  var alertHtml = (alertType && alertMsg && state.sensitivity>=2) ?
+    '<div class="warn-box" style="margin-bottom:12px;cursor:pointer" onclick="showAlertByEl(this)" data-type="' + alertType + '" data-msg="' + alertMsg + '">' +
+    '<span>' + alertIcon(alertType) + '</span>' +
+    '<div><div style="font-size:11px;color:' + alertColor(alertType) + ';font-weight:700;margin-bottom:2px">注意喚起あり — タップで詳細</div>' +
+    '<div style="font-size:11px;color:#888">' + alertMsg.slice(0,45) + '...</div></div></div>' : '';
+
+  // ソース一覧（ALL_SOURCESは袴田事件専用のためトピックによって表示を調整）
+  var showSources = currentTopic.id === 'hakamada_muzai' || currentTopic.id === 'hakamada_history';
+  var sourcesHtml = '';
+  if(showSources){
+    ALL_SOURCES.forEach(function(s){
+      var fa = (s.articles && s.articles[0]) ? s.articles[0] : {};
+      var title = fa.title || s.org;
+      var date = fa.date || '';
+      var url = fa.url || '';
+      var articleCount = s.articles ? s.articles.length : 0;
+      var countBadge = articleCount > 1 ? '<span style="font-size:10px;color:#4a9eff;margin-left:4px">+' + (articleCount-1) + '件</span>' : '';
+      var readBtn = url ? ('<button onclick="event.stopPropagation();openUrl(decodeURIComponent(this.dataset.u))" data-u="' + encodeURIComponent(url) + '" style="font-size:10px;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:3px 10px;border-radius:99px;cursor:pointer;white-space:nowrap">読む ↗</button>') : '';
+      sourcesHtml +=
+        '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #0f1a2e;cursor:pointer" onclick="state.searchTab=2;state.expandedMediaId=' + s.id + ';render()">' +
+        '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:12px;font-weight:700;color:#aaa;margin-bottom:3px">' + s.org + countBadge + '</div>' +
+        '<div style="font-size:12px;font-weight:600;color:#ddd;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + title + '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px">' +
+        '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px">' + s.type + '</span>' +
+        '<span style="font-size:10px;color:#555">' + date + '</span>' +
+        '</div></div>' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">' +
+        '<span style="font-family:monospace;font-size:13px;color:' + scoreColor(s.score) + ';font-weight:700">' + s.score + 'pt</span>' +
+        readBtn + '</div></div>';
+    });
+  } else {
+    // 袴田以外のトピックは参考メディアのリスト表示
+    var mediaList = ['NHK NEWS WEB','時事ドットコム','日本経済新聞','東京新聞','Bloomberg Japan'];
+    mediaList.slice(0, currentTopic.sourceCount).forEach(function(name, i){
+      sourcesHtml += '<div style="padding:8px 0;border-bottom:1px solid #0f1a2e;display:flex;align-items:center;justify-content:space-between">' +
+        '<span style="font-size:13px;color:#ddd">' + name + '</span>' +
+        '<span style="font-size:11px;color:#555">確認済み</span>' +
+        '</div>';
+    });
+  }
+
+  return '<div class="card" style="margin-bottom:12px">' +
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
+    '<div class="section-title" style="margin-bottom:0">AIサマリー</div>' +
+    '<span style="font-size:10px;color:' + p.brand + ';background:' + p.brand + '11;padding:2px 8px;border-radius:99px;border:1px solid ' + p.brand + '33">Claude AI</span>' +
+    '</div>' +
+    '<p style="font-size:13px;line-height:1.9;color:#ccc;white-space:pre-line">' + summary + '</p>' +
+    '</div>' +
+    alertHtml +
+    '<div class="card" style="margin-bottom:12px">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+    '<div class="section-title" style="margin-bottom:0">信頼度スコア</div>' +
+    '<span style="font-family:monospace;font-size:24px;color:' + c + ';font-weight:900">' + currentTopic.score + '</span>' +
+    '</div>' +
+    '<div style="height:8px;background:#1a2035;border-radius:99px;overflow:hidden;margin-bottom:6px">' +
+    '<div style="width:' + currentTopic.score + '%;height:100%;background:linear-gradient(90deg,' + c + '88,' + c + ');border-radius:99px"></div>' +
+    '</div>' +
+    '<div style="font-size:11px;color:' + c + ';font-weight:600;margin-bottom:6px">● ' + scoreLabel(currentTopic.score) + '</div>' +
+    '<div style="font-size:11px;color:#555;line-height:1.6">' + scoreReason + '</div>' +
+    '</div>' +
+    '<div style="margin-bottom:4px">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+    '<div class="section-title" style="margin-bottom:0">ソース一覧</div>' +
+    '<span style="font-size:10px;color:#555">' + currentTopic.sourceCount + '件確認</span>' +
+    '</div>' +
+    sourcesHtml +
+    '</div>';
+}
+
+function renderTimelineTab(){
+  var p = P();
+  var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
+  var currentData = TOPIC_DATA[currentTopic.id] || TOPIC_DATA['hakamada_muzai'];
+  var items = (currentData && currentData.timeline) || [];
+  if(state.timelineOrder === undefined) state.timelineOrder = 'asc';
+  var ordered = state.timelineOrder === 'desc' ? items.slice().reverse() : items;
+  var alertItems = items.filter(function(x){ return x.alert; }).length;
+  var span = items.length > 0 ? (items[items.length-1].date.slice(0,4) - items[0].date.slice(0,4)) : 0;
+
+  var header = '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">' +
+    '<div style="font-size:12px;color:#555">' + items.length + '件' + (span>0 ? '・' + span + '年間（' + items[0].date.slice(0,4) + '〜' + items[items.length-1].date.slice(0,4) + '年）' : '') + '</div>' +
+    '<div style="display:flex;gap:6px">' +
+    '<button onclick="state.timelineOrder=\"asc\";render()" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='asc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='asc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='asc'?p.brand:'#555') + ';font-size:11px;cursor:pointer;font-family:sans-serif">古い順</button>' +
+    '<button onclick="state.timelineOrder=\"desc\";render()" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='desc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='desc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='desc'?p.brand:'#555') + ';font-size:11px;cursor:pointer;font-family:sans-serif">新しい順</button>' +
+    '</div></div>';
+
+  var legend = '<div style="display:flex;gap:12px;margin-bottom:14px">' +
+    '<div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:' + p.brand + '"></div><span style="font-size:11px;color:#555">通常</span></div>' +
+    (alertItems>0 ? '<div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:' + p.warn + '"></div><span style="font-size:11px;color:#555">注意喚起あり</span></div>' : '') +
+    '</div>';
+
+  var rows = ordered.map(function(item, i){
+    var isLatest = state.timelineOrder==='desc' ? i===0 : i===ordered.length-1;
+    var dotColor = item.alert ? p.warn : p.brand;
+    var alertBox = item.alert && state.sensitivity>=2 ?
+      '<div style="background:' + p.warn + '11;border:1px solid ' + p.warn + '33;border-radius:8px;padding:8px 10px;margin-top:8px;display:flex;align-items:flex-start;gap:8px">' +
+      '<span style="font-size:12px;flex-shrink:0">📰</span>' +
+      '<div style="font-size:11px;color:' + p.warn + ';line-height:1.6">' + item.msg + '</div></div>' : '';
+
+    return '<div style="display:flex;gap:12px;margin-bottom:16px">' +
+      '<div style="display:flex;flex-direction:column;align-items:center;padding-top:4px;flex-shrink:0">' +
+      '<div style="width:10px;height:10px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;position:relative">' +
+      (isLatest ? '<div style="position:absolute;top:-3px;left:-3px;width:16px;height:16px;border-radius:50%;background:' + dotColor + '33;"></div>' : '') +
+      '</div>' +
+      (i<ordered.length-1 ? '<div style="width:1px;flex:1;background:#1a2a4a;margin-top:4px;min-height:20px"></div>' : '') +
+      '</div>' +
+      '<div style="flex:1;padding-bottom:8px">' +
+      '<div style="font-size:13px;font-weight:700;color:' + dotColor + ';margin-bottom:4px">' + item.date + (isLatest?' <span style="font-size:10px;background:'+dotColor+'22;border:1px solid '+dotColor+'44;padding:1px 6px;border-radius:99px;margin-left:4px">最新</span>':'') + '</div>' +
+      '<div style="font-size:13px;color:#ccc;line-height:1.7">' + item.event + '</div>' +
+      alertBox +
+      '</div></div>';
+  }).join('');
+
+  return header + legend + rows;
+}
+
+
+function renderSourcesTab(){
+  var p = P();
+  var q = state.searchQuery;
+  if(state.sourceSort === undefined) state.sourceSort = 'score';
+  if(state.showOtherMedia === undefined) state.showOtherMedia = false;
+  if(state.expandedMediaId === undefined) state.expandedMediaId = null;
+
+  // 現在のトピックを特定
+  var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
+  var currentData = TOPIC_DATA[currentTopic.id] || {};
+
+  // ソースデータ：null = ALL_SOURCES（袴田事件）を使用
+  var sourceList = (currentData.sources !== null && currentData.sources) ? currentData.sources : ALL_SOURCES;
+
+  var btnStyle = function(active){
+    return 'padding:4px 12px;border-radius:99px;border:1px solid ' +
+      (active?p.brand:'#1a2a4a') + ';background:' + (active?p.brand+'22':'transparent') +
+      ';color:' + (active?p.brand:'#555') +
+      ';font-size:11px;cursor:pointer;font-family:"Noto Sans JP",sans-serif';
+  };
+
+  var jaSources = sourceList.filter(function(s){ return s.lang==='ja'; });
+  var enSources = sourceList.filter(function(s){ return s.lang==='en'; });
+
+  if(state.sourceSort === 'score'){
+    jaSources.sort(function(a,b){ return b.score-a.score; });
+    enSources.sort(function(a,b){ return b.score-a.score; });
+  }
+
+  var makeMediaCard = function(s){
+    var rankColor = s.score>=90 ? p.high : s.score>=75 ? p.brand : p.mid;
+    var isExpanded = state.expandedMediaId === s.id;
+    var articleCount = s.articles ? s.articles.length : 0;
+
+    var articleList = '';
+    if(isExpanded && s.articles){
+      articleList = '<div style="margin-top:12px;border-top:1px solid #1a2a4a;padding-top:12px">' +
+        s.articles.map(function(a){
+          var safeUrl = a.url || '';
+          return '<div style="padding:10px 0;border-bottom:1px solid #0f1a2e">' +
+            '<div style="font-size:13px;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:4px">' + (a.title||'') + '</div>' +
+            '<div style="font-size:11px;color:#555;margin-bottom:4px">📅 ' + (a.date||'') + '</div>' +
+            '<div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px">' + (a.summary||'') + '</div>' +
+            (safeUrl ? '<button onclick="event.stopPropagation();openUrl(decodeURIComponent(this.dataset.u))" data-u="' + encodeURIComponent(safeUrl) + '" style="font-size:11px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:4px 14px;border-radius:99px;cursor:pointer">記事を読む ↗</button>' : '') +
+            '</div>';
+        }).join('') + '</div>';
+    }
+
+    return '<div style="background:#0c1525;border:1px solid ' + (isExpanded?p.brand+'66':'#1a2a4a') + ';border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="state.expandedMediaId=(state.expandedMediaId===\'' + s.id + '\'?null:\'' + s.id + '\');render()">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between">' +
+      '<div>' +
+      '<span style="font-size:15px;font-weight:700;color:#e0e6f0">' + s.org + '</span>' +
+      '<div style="display:flex;align-items:center;gap:6px;margin-top:4px">' +
+      '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px">' + s.type + '</span>' +
+      '<span style="font-size:11px;color:#555">' + articleCount + '件の記事</span>' +
+      '</div></div>' +
+      '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
+      '<span style="font-family:monospace;font-size:18px;font-weight:900;color:' + rankColor + '">' + s.score + '</span>' +
+      '<span style="font-size:10px;color:' + rankColor + '">pt</span>' +
+      '<span style="font-size:14px;color:#555">' + (isExpanded?'▼':'›') + '</span>' +
+      '</div></div>' +
+      articleList + '</div>';
+  };
+
+  // 他のメディアセクション
+  var otherHtml = '';
+  if(state.showOtherMedia){
+    var showEn = state.showEnMedia !== false;
+    var groups = [
+      { rank:'S', label:'S — 政府・公共放送・国際通信社', color:p.high },
+      { rank:'A', label:'A — 主要全国紙・テレビ局・海外主要紙', color:p.brand },
+      { rank:'B', label:'B — 専門・地方・海外誌', color:p.mid },
+    ];
+    otherHtml = '<div style="padding:12px 0">' +
+      groups.map(function(g){
+        var medias = MEDIA_MASTER.filter(function(m){ return m.rank===g.rank && (showEn||m.lang==='ja'); });
+        if(!medias.length) return '';
+        return '<div style="margin-bottom:16px">' +
+          '<div style="font-size:11px;font-weight:700;color:' + g.color + ';margin-bottom:8px">' + g.label + '</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+          medias.map(function(m){
+            var url = makeGNewsUrl(m.domain, q);
+            return '<div onclick="openUrl(\'' + url + '\')" style="cursor:pointer;padding:6px 12px;background:#0c1525;border:1px solid #1a2a4a;border-radius:99px;display:flex;align-items:center;gap:3px">' +
+              '<span style="font-size:12px;color:#e0e6f0">' + m.name + '</span>' +
+              (m.lang==='en'?'<span style="font-size:10px;color:#888;margin-left:2px">EN</span>':'') +
+              '<span style="font-size:10px;color:#2a5a9a">↗</span></div>';
+          }).join('') + '</div></div>';
+      }).join('') + '</div>';
+  }
+
+  var totalArticles = sourceList.reduce(function(sum,s){ return sum+(s.articles?s.articles.length:0); }, 0);
+
+  return '<div>' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">' +
+    '<div><div style="font-size:15px;font-weight:700;color:#e0e6f0">確認済みソース</div>' +
+    '<div style="font-size:11px;color:#555;margin-top:3px">' + sourceList.length + 'メディア · ' + totalArticles + '件の記事を収集</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:4px">' +
+    '<button onclick="state.sourceSort=\'score\';render()" style="' + btnStyle(state.sourceSort==='score') + '">信頼度順</button>' +
+    '<button onclick="state.sourceSort=\'date\';render()" style="' + btnStyle(state.sourceSort==='date') + '">新しい順</button>' +
+    '</div></div>' +
+    (jaSources.length ? '<div style="font-size:11px;font-weight:700;color:#555;margin-bottom:10px">🇯🇵 国内メディア（' + jaSources.length + '）</div>' + jaSources.map(makeMediaCard).join('') : '') +
+    (enSources.length ? '<div style="border-top:1px solid #1a2a4a;margin:14px 0"></div><div style="font-size:11px;font-weight:700;color:#555;margin-bottom:10px">🌐 海外メディア（' + enSources.length + '）</div>' + enSources.map(makeMediaCard).join('') : '') +
+    '<div style="border-top:1px solid #1a2a4a;margin:16px 0"></div>' +
+    '<div onclick="state.showOtherMedia=!state.showOtherMedia;render()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0">' +
+    '<div><div style="font-size:13px;font-weight:600;color:#aaa">他のメディアでも探す</div>' +
+    '<div style="font-size:11px;color:#555;margin-top:2px">Google News 経由で' + MEDIA_MASTER.length + 'メディアを検索</div>' +
+    '</div><span style="font-size:14px;color:#555">' + (state.showOtherMedia?'▲':'▼') + '</span>' +
+    '</div>' + otherHtml + '</div>';
+}
+
+
+function renderPerspectivesTab(){
+  var p = P();
+  var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
+  var currentData = TOPIC_DATA[currentTopic.id] || TOPIC_DATA['hakamada_muzai'];
+  var items = (currentData && currentData.perspectives) || [];
+
+  var disclaimer = '<div style="background:#1a2a4a22;border:1px solid #1a2a4a;border-radius:10px;padding:12px;margin-bottom:14px;display:flex;align-items:flex-start;gap:8px">' +
+    '<span style="font-size:18px">🔍</span>' +
+    '<div><div style="font-size:12px;font-weight:700;color:' + p.brand + ';margin-bottom:4px">FACTは断定しません</div>' +
+    '<div style="font-size:11px;color:#555;line-height:1.7">複数の立場の見解を並列提示します。情報の取捨選択と最終的な判断はあなたが行います。</div></div></div>';
+
+  var cards = items.map(function(item){
+    var srcBadges = (item.sources||[]).map(function(s){
+      return '<span style="font-size:10px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + s + '</span>';
+    }).join('');
+
+    return '<div style="border-left:3px solid ' + item.color + ';background:#0c1525;border-radius:0 12px 12px 0;padding:14px;margin-bottom:12px">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
+      '<div style="width:28px;height:28px;border-radius:50%;background:' + item.color + '33;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">💬</div>' +
+      '<div style="font-size:14px;font-weight:700;color:' + item.color + '">' + item.stance + '</div>' +
+      '</div>' +
+      '<div style="font-size:13px;color:#ccc;line-height:1.8;margin-bottom:10px">' + item.summary + '</div>' +
+      (srcBadges ? '<div style="font-size:11px;color:#555;margin-bottom:6px">根拠ソース</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">' + srcBadges + '</div>' : '') +
+      '<div style="font-size:11px;color:#444;border-top:1px solid #1a2a4a;padding-top:8px">FACTはこの立場を支持・否定しません。判断はあなたが行います。</div>' +
+      '</div>';
+  }).join('');
+
+  return disclaimer + cards +
+    '<div style="margin-top:12px;padding:10px;background:#0c1525;border:1px solid #1a2a4a;border-radius:10px;text-align:center">' +
+    '<div style="font-size:11px;color:#555">他の立場のソースはソースタブで確認できます</div>' +
+    '<button onclick="state.searchTab=2;render()" style="margin-top:6px;font-size:11px;color:' + p.brand + ';background:transparent;border:none;cursor:pointer;font-family:sans-serif">📰 ソースタブを開く →</button>' +
+    '</div>';
+}
+
+
+function renderRelatedTab(){
+  var p = P();
+  var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
+
+  // トピック別の関連記事
+  var relatedMap = {
+    hakamada_muzai: [
+      { title:'袴田巌さん冤罪で始まった「再審制度見直し」に暗雲？', org:'東京新聞', date:'2025年10月31日', lang:'ja', summary:'法制審議会部会で再審制度改革の議論が進むも、検察・裁判官側が大幅変更に抵抗。', url:'https://www.tokyo-np.co.jp/article/445990' },
+      { title:'袴田巌さん国賠提訴 過去最高6億円請求', org:'日本経済新聞', date:'2025年10月9日', lang:'ja', summary:'袴田さんが国と県を相手取り約6億円の損害賠償請求訴訟を提訴。', url:'https://www.nikkei.com/article/DGXZQOUD094U70Z01C25A0000000/' },
+      { title:'冤罪被害者ら、再審制度改正へクラウドファンディング', org:'時事通信', date:'2026年4月1日', lang:'ja', summary:'冤罪被害者らが再審制度改正実現に向けたCFを開始。袴田弁護団も支持。', url:'https://www.jiji.com/jc/archives?g=soc_archive_0' },
+      { title:'Japan acquits former boxer Iwao Hakamada after 45 years on death row', org:'Amnesty International', date:'2024年9月30日', lang:'en', summary:'Amnesty welcomes the acquittal and calls for abolition of the death penalty in Japan.', url:'https://www.amnesty.org/en/latest/news/2024/09/japan-acquittal-of-man-who-spent-45-years-on-death-row-pivotal-moment-for-justice/' },
+      { title:"World's longest-serving death row inmate acquitted", org:'CBS News', date:'2024年9月26日', lang:'en', summary:"Iwao Hakamada acquitted of 1966 murders after spending 45 years on death row.", url:'https://www.cbsnews.com/news/iwao-hakamada-longest-serving-death-row-inmate-acquitted-murder-retrial-japan/' },
+    ],
+    hormuz_crisis: [
+      { title:'ホルムズ海峡「通航料」の実態、秘密のコードと元決済で航行許可', org:'Bloomberg Japan', date:'2026年4月1日', lang:'ja', summary:'ペルシャ湾で足止めされた原油タンカーへの「通航料」提案の実態を報道。', url:'https://www.bloomberg.com/jp/news/articles/2026-04-01/TCTZI1T96OSL00' },
+      { title:'16世紀の大航海時代に「ホルムズ軍事占領」、なぜ歴史が繰り返されるのか', org:'ダイヤモンドオンライン', date:'2026年4月2日', lang:'ja', summary:'ホルムズ海峡の地政学的重要性を歴史的観点から分析。', url:'https://diamond.jp/articles/-/387164' },
+      { title:'日本の原油輸入量が急減 3月は3割減', org:'日本経済新聞', date:'2026年4月3日', lang:'ja', summary:'ホルムズ海峡封鎖の直撃を受け2月比3割減。比較可能な2013年以降で最少。', url:'https://www.nikkei.com/article/DGXZQOUB024AU0S6A400C2000000/' },
+      { title:'UK convenes 40-nation talks to reopen Strait of Hormuz', org:'Arab News Japan', date:'2026年4月2日', lang:'en', summary:'Britain hosts virtual summit with 40+ nations discussing measures to reopen the strait.', url:'https://www.arabnews.jp/article/middle-east/article_173358/' },
+    ],
+    microsoft_japan: [
+      { title:'Microsoftの株価下落と投資家の懸念', org:'日本経済新聞', date:'2026年4月3日', lang:'ja', summary:'1〜3月のMicrosoft株価は金融危機以来の下落。AI投資の費用対効果に疑問。', url:'https://www.nikkei.com/article/DGXZQOUB020V30S6A400C2000000/' },
+      { title:'AIデータセンター 日本誘致競争の構図', org:'NHK', date:'2026年4月3日', lang:'ja', summary:'Microsoft投資に続きGoogleやAmazonも日本でのデータセンター投資を計画。', url:'https://www3.nhk.or.jp/news/html/20260403/k10014900001000.html' },
+    ],
+    yosan_2026: [
+      { title:'2026年4月の政治・政策カレンダー', org:'KSI政策ニュース', date:'2026年4月', lang:'ja', summary:'4月11日自然成立予定の本予算と4月から始まる新制度の一覧。', url:'https://www.policynews.jp/schedule/2026/4.html' },
+      { title:'予算成立遅れは野党の怠慢？SNSで批判飛び交う', org:'東京新聞', date:'2026年4月2日', lang:'ja', summary:'土日審議拒否に対するSNS上の批判と「大衆迎合的な議論」への懸念。', url:'https://www.tokyo-np.co.jp/n/politics' },
+    ],
+    sudden_death_diagnosis: [
+      { title:'死因究明拠点整備モデル事業実施団体の公募について', org:'厚生労働省', date:'2026年3月4日', lang:'ja', summary:'厚労省が死因究明制度の拡充に向けた取り組みを推進。', url:'https://www.mhlw.go.jp/stf/houdou/houdou_list_202603.html' },
+    ],
+    march_high_temp: [
+      { title:'3月は全国的に高温 北日本と沖縄・奄美は少雨', org:'時事ドットコム', date:'2026年4月1日', lang:'ja', summary:'気象庁発表。全国的に高温、北日本と沖縄・奄美地方では降水量が少雨傾向。', url:'https://www.jiji.com/jc/archives?g=soc_archive_0' },
+      { title:'発電向け燃料確保に懸念 夏に向け需給見通し示す取り組み開始', org:'NHK', date:'2026年4月3日', lang:'ja', summary:'高温と燃料不足が重なる夏の電力需給に懸念。政府が対応開始。', url:'https://news.web.nhk/newsweb/na/na-k10014900001000' },
+    ],
+    enzai_cf: [
+      { title:'袴田巌さん冤罪で始まった「再審制度見直し」に暗雲？', org:'東京新聞', date:'2025年10月31日', lang:'ja', summary:'法制審議会部会で再審制度改革の議論が進むも、検察・裁判官側が大幅変更に抵抗。', url:'https://www.tokyo-np.co.jp/article/445990' },
+      { title:'袴田事件 再審制度改正への道', org:'日弁連', date:'2024年10月9日', lang:'ja', summary:'日弁連による再審制度の問題点と改正に向けた提言。', url:'https://www.nichibenren.or.jp/activity/criminal/deathpenalty/q12/enzaihakamada.html' },
+    ],
+    ai_datacenter_japan: [
+      { title:'Microsoft 日本に1兆円AI投資', org:'NHK', date:'2026年4月3日', lang:'ja', summary:'ソフトバンク・さくらインターネットと連携しAIインフラを構築。', url:'https://news.web.nhk/newsweb/na/na-k10014900001000' },
+      { title:'発電向け燃料確保に懸念 夏に向け需給見通し', org:'NHK', date:'2026年4月3日', lang:'ja', summary:'データセンター電力需要増加とホルムズ危機による燃料確保問題が重なる。', url:'https://news.web.nhk/newsweb/na/na-k10014900001000' },
+    ],
+    kyoiku_2026: [
+      { title:'共同親権導入 DV被害者からの懸念', org:'東京新聞', date:'2026年4月1日', lang:'ja', summary:'改正民法による共同親権導入について支持と反対の声が分かれている。', url:'https://www.tokyo-np.co.jp/n/politics' },
+      { title:'私立高校授業料実質無償化 4月から開始', org:'NHK', date:'2026年4月1日', lang:'ja', summary:'2026年4月から複数の教育・子育て関連の新制度が一斉に開始。', url:'https://news.web.nhk/newsweb/na/na-k10014900001000' },
+    ],
+    food_price_hike: [
+      { title:'迫る食料危機の足音 世界の肥料価格5割高', org:'日本経済新聞', date:'2026年4月3日', lang:'ja', summary:'ホルムズ海峡ショックが農業コストに波及。食料安全保障への影響が深刻化。', url:'https://news.google.com/search?q=site:nikkei.com&hl=ja&gl=JP' },
+      { title:'イラン、ホルムズ海峡を「武器化」 長引く原油高', org:'時事ドットコム', date:'2026年3月28日', lang:'ja', summary:'原油供給の混乱が食料品価格に波及。インフレ圧力も高まっている。', url:'https://www.jiji.com/jc/article?k=2026032700791&g=int' },
+    ],
+    tochigi_jishin: [
+      { title:'栃木で震度5弱 東北新幹線に遅れ', org:'時事ドットコム', date:'2026年4月1日', lang:'ja', summary:'栃木県で最大震度5弱の地震が発生。負傷者の報告なし。', url:'https://www.jiji.com/jc/archives?g=soc_archive_0' },
+      { title:'発電向け燃料確保に懸念', org:'NHK', date:'2026年4月3日', lang:'ja', summary:'ホルムズ危機による燃料不足の状況での災害対応能力が問われる。', url:'https://news.web.nhk/newsweb/na/na-k10014900001000' },
+    ],
+    hakamada_history: [
+      { title:'袴田事件 再審無罪確定', org:'東京新聞', date:'2024年10月9日', lang:'ja', summary:'1966年発生から58年。証拠捏造を認定した歴史的判決が確定。', url:'https://www.tokyo-np.co.jp/article/356688' },
+      { title:'再審制度改革 法制審部会の行方', org:'東京新聞', date:'2025年10月31日', lang:'ja', summary:'袴田事件を契機に再審法改正の議論が本格化。検察側が抵抗。', url:'https://www.tokyo-np.co.jp/article/445990' },
+      { title:"Japan: Acquittal of man who spent 45 years on death row", org:'Amnesty International', date:'2024年9月30日', lang:'en', summary:"Pivotal moment for justice. Japan must abolish the death penalty.", url:'https://www.amnesty.org/en/latest/news/2024/09/japan-acquittal-of-man-who-spent-45-years-on-death-row-pivotal-moment-for-justice/' },
+    ],
+  };
+
+  var articles = relatedMap[currentTopic.id] || relatedMap['hakamada_muzai'];
+  var jaArticles = articles.filter(function(a){ return a.lang==='ja'; });
+  var enArticles = articles.filter(function(a){ return a.lang==='en'; });
+
+  var makeCard = function(a){
+    return '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:12px;padding:14px;margin-bottom:10px">' +
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">' +
+      '<span style="font-size:10px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + a.org + '</span>' +
+      '<span style="font-size:10px;color:#555">📅 ' + a.date + '</span>' +
+      (a.lang==='en'?'<span style="font-size:10px;color:#888;background:#1a2a4a;padding:2px 6px;border-radius:99px">EN</span>':'') +
+      '</div>' +
+      '<div style="font-size:14px;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:8px">' + a.title + '</div>' +
+      '<div style="font-size:12px;color:#666;line-height:1.7;margin-bottom:10px">' + a.summary + '</div>' +
+      '<button onclick="openUrl(decodeURIComponent(this.dataset.u))" data-u="' + encodeURIComponent(a.url) + '" style="font-size:11px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:5px 14px;border-radius:99px;cursor:pointer">記事を読む ↗</button>' +
+      '</div>';
+  };
+
+  return '<div>' +
+    (jaArticles.length ? '<div style="font-size:11px;font-weight:700;color:#555;margin-bottom:10px">🇯🇵 国内記事（' + jaArticles.length + '件）</div>' + jaArticles.map(makeCard).join('') : '') +
+    (enArticles.length ? '<div style="border-top:1px solid #1a2a4a;margin:14px 0"></div><div style="font-size:11px;font-weight:700;color:#555;margin-bottom:10px">🌐 海外記事（' + enArticles.length + '件）</div>' + enArticles.map(makeCard).join('') : '') +
+    '</div>';
+}
+
+
+function renderExplore(){
+  var cat = state.selectedCat;
+  var sub = state.selectedSub;
+  var depth = state.exploreDepth;
+  var p = P();
+
+  var breadcrumb = '<div class="breadcrumb">' +
+    '<span class="' + (depth>0?'crumb-link':'crumb-current') + '" onclick="setExploreDepth(0)">🗄️ FACT</span>' +
+    (cat ? '<span class="crumb-sep">›</span><span class="' + (depth>=2?'crumb-link':'crumb-current') + '" onclick="' + (depth>=2?'setExploreDepth(1)':'') + '">' + cat.label + '</span>' : '') +
+    (sub && depth>=2 ? '<span class="crumb-sep">›</span><span class="crumb-current">' + sub.label + '</span>' : '') +
+    '</div>';
+
+  if(depth===0){
+    var cards = CATEGORIES.map(function(c){
+      var isEmpty = c.count === 0;
+      return '<div class="cat-card ' + (c.alert&&!isEmpty?'has-alert':'') + '"' +
+        (isEmpty ? ' style="opacity:0.35;cursor:not-allowed"' : ' style="cursor:pointer" onclick="selectCat(\'' + c.id + '\')"') + '>' +
+        (c.alert&&!isEmpty ? '<span class="alert-dot">⚠️</span>' : '') +
+        '<div class="cat-icon">' + c.icon + '</div>' +
+        '<div class="cat-name">' + c.label + '</div>' +
+        '<div class="cat-count">' + (isEmpty ? '準備中' : c.count + '件') + '</div>' +
+        '</div>';
+    }).join('');
+    return breadcrumb + '<div class="cat-grid">' + cards + '</div>';
+  }
+
+  if(depth===1){
+    var subs = (cat && SUBS[cat.id]) || [];
+    var subcards = subs.map(function(s, i){
+      var isEmpty = s.count === 0;
+      return '<div class="cat-card"' +
+        (isEmpty ? ' style="opacity:0.35;cursor:not-allowed"' : ' style="cursor:pointer" onclick="selectSub(' + i + ',\'' + s.label + '\')"') + '>' +
+        '<div class="cat-name">' + s.label + '</div>' +
+        '<div class="cat-count">' + (isEmpty ? '準備中' : s.count + '件') + '</div>' +
+        '</div>';
+    }).join('');
+    return breadcrumb + '<div class="cat-grid">' + subcards + '</div>';
+  }
+
+  if(depth===2){
+    var catLabel = cat ? cat.label : '';
+    var topics = FACT_TOPICS.filter(function(t){ return t.cat === catLabel; });
+
+    if(topics.length === 0){
+      return breadcrumb +
+        '<div style="padding:40px 14px;text-align:center">' +
+        '<div style="font-size:32px;margin-bottom:12px">📭</div>' +
+        '<div style="font-size:14px;color:#555;margin-bottom:8px">このカテゴリのFACT分析は準備中です</div>' +
+        '<div style="font-size:12px;color:#444">検索から調べることができます</div>' +
+        '</div>';
+    }
+
+    var topicCards = topics.map(function(t){
+      var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
+      var alertBadge = t.alert ?
+        '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px;margin-left:6px">⚠️</span>' : '';
+      var tags = (t.tags||[]).map(function(tag){
+        return '<span style="font-size:10px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + tag + '</span>';
+      }).join('');
+
+      return '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer"' +
+        ' data-tid="' + t.id + '" data-ttl="' + t.title.replace(/"/g,'&quot;') + '"' +
+        ' onclick="goTopicDetail(this)">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+        '<div style="display:flex;align-items:center;gap:6px">' +
+        '<span style="font-size:11px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
+        alertBadge + '</div>' +
+        '<div style="display:flex;align-items:baseline;gap:2px">' +
+        '<span style="font-family:monospace;font-size:18px;font-weight:900;color:' + rankColor + '">' + t.score + '</span>' +
+        '<span style="font-size:11px;color:' + rankColor + '">pt</span>' +
+        '</div></div>' +
+        '<div style="font-size:16px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:8px">' + t.title + '</div>' +
+        '<div style="font-size:12px;color:#777;line-height:1.7;margin-bottom:10px">' + t.summary + '</div>' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+        '<span style="font-size:11px;color:#555">📰 ' + t.sourceCount + '件のソースを分析 · ' + t.date + '</span>' +
+        '<span style="font-size:12px;color:' + p.brand + ';font-weight:600">詳細を見る →</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:4px;flex-wrap:wrap">' + tags + '</div>' +
+        '</div>';
+    }).join('');
+
+    return breadcrumb + '<div style="padding:4px 0">' + topicCards + '</div>';
+  }
+
+  return '';
+}
+
+
+// ===== 注意喚起 =====
+function renderAlerts(){
+  return `<div style="padding:14px">
+    <div class="section-title">⚠️ 今日の注意喚起 — AI検出レポート</div>
+    ${ALERTS.map(a=>{
+      const c=alertColor(a.type), icon=alertIcon(a.type);
+      const d=encodeURIComponent(JSON.stringify(a));
+      return `<div class="card clickable" style="border-left:3px solid ${c}" onclick="showPopup(decodeURIComponent('${d}'))">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:10px;color:#555">${a.cat}</span>
+          <span style="font-size:10px;color:${c};background:${c}22;padding:1px 7px;border-radius:99px">${icon} ${a.sev==="high"?"重要":"注意"}</span>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px">${a.title}</div>
+        <div style="font-size:11px;color:#888;line-height:1.6">${a.msg}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+          <div style="font-size:11px;color:#4a9eff">詳細を見る →</div>
+          ${archiveLinkHTML(a.cat)}
+        </div>
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+
+// ===== 設定 =====
+function renderSettings(){
+  const levels=["最小","低め","標準","高め","最大"];
+  const descs=["科学的に完全否定された情報のみ表示します","明確な誤情報と政府公式と大きく矛盾する情報を表示します","標準：主要メディア間の論調の乖離も含めて表示します","専門家見解との軽微な差異も表示します","すべての不確実性・未確認情報に反応します"];
+  const plans=[
+    ["無料プラン","現在利用中","#555"],
+    ["ライト — ¥280/月","CM非表示・テーマ変更","#4a9eff"],
+    ["スタンダード — ¥580/月","プラグイン（基本）","#8BC34A"],
+    ["プレミアム — ¥980/月","プラグイン（フル）・全テーマ","#FF9800"],
+  ];
+  return `<div style="padding:14px">
+    <div class="section-title">注意喚起の感度設定</div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:13px">現在のレベル</span>
+        <span style="font-family:monospace;font-weight:700;color:#4a9eff" id="sens-label">Lv.${state.sensitivity} — ${levels[state.sensitivity-1]}</span>
+      </div>
+      <input type="range" min="1" max="5" value="${state.sensitivity}" id="sens-slider" oninput="updateSensitivity(this.value)">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:#555;margin-top:4px">
+        ${levels.map(l=>`<span>${l}</span>`).join("")}
+      </div>
+      <div style="margin-top:12px;padding:8px 10px;background:#4a9eff11;border-radius:6px;font-size:11px;color:#4a9eff" id="sens-desc">${descs[state.sensitivity-1]}</div>
+    </div>
+
+    <div class="section-title">色覚サポートモード</div>
+    <div class="card" style="margin-bottom:20px">
+      <div style="font-size:11px;color:#888;line-height:1.6;margin-bottom:12px">色だけに依存せず、記号・パターンを組み合わせて情報を判別できるよう配色を切り替えます。</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${[
+          ["normal","標準","緑・赤・青","#4CAF50","#F44336","#4a9eff"],
+          ["protanopia","P型・D型","赤緑色弱/色盲","#0077BB","#EE3377","#EE7733"],
+          ["tritanopia","T型","青黄色弱/色盲","#009E73","#D55E00","#56B4E9"],
+          ["mono","モノクローム","白黒＋記号","#FFFFFF","#444444","#AAAAAA"],
+        ].map(([mode,name,desc,c1,c2,c3])=>{
+          const active=state.colorMode===mode;
+          return `<div onclick="updateColorMode('${mode}'\)" style="background:${active?"#4a9eff22":"#0a1020"};border:1px solid ${active?"#4a9eff":"#1a2a4a"};border-radius:10px;padding:12px;cursor:pointer;transition:all 0.2s">
+            <div style="display:flex;gap:4px;margin-bottom:8px">
+              <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${c1}"></span>
+              <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${c2}"></span>
+              <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${c3}"></span>
+              ${mode==="mono"?"<span style='font-size:10px;color:#888'>◆▲■✕</span>":""}
+            </div>
+            <div style="font-size:12px;font-weight:700;color:${active?"#4a9eff":"#ccc"}">${name}</div>
+            <div style="font-size:10px;color:#666;margin-top:2px">${desc}</div>
+            ${active?"<div style='font-size:9px;color:#4a9eff;margin-top:4px'>✓ 適用中</div>":""}
+          </div>`;
+        }).join("")}
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:20px">プラン</div>
+    <div style="margin-bottom:12px;padding:10px 12px;background:#1a2a4a22;border:1px solid #1a2a4a;border-radius:8px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:12px;color:#888">CM表示テスト（デモ用）</span>
+      <button onclick="state.navCount=9;maybeShowAd()" style="padding:5px 14px;background:#4a9eff22;border:1px solid #4a9eff44;border-radius:99px;color:#4a9eff;font-size:11px;cursor:pointer;font-family:'Noto Sans JP',sans-serif">今すぐ表示</button>
+    </div>
+    ${plans.map(([name,desc,color])=>`
+      <div class="card" style="margin-bottom:8px">
+        <div style="font-size:13px;font-weight:600;color:${color};margin-bottom:3px">${name}</div>
+        <div style="font-size:11px;color:#555">${desc}</div>
+      </div>`).join("")}
+
+    <div class="section-title" style="margin-top:20px">FACTを支援する</div>
+    <div class="card" style="border-color:#4a9eff44">
+      <div style="font-size:13px;color:#4a9eff;font-weight:600;margin-bottom:6px">寄付バッジ（時限性・1年）</div>
+      <div style="font-size:11px;color:#888;line-height:1.6;margin-bottom:10px">FACTの理念に共感していただける方の任意支援です。広告は一切付きません。バッジは1年後に消滅します。</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${["¥500","¥1,000","¥3,000","任意"].map(a=>`<button style="padding:6px 14px;background:#4a9eff22;border:1px solid #4a9eff44;border-radius:99px;color:#4a9eff;font-size:12px;cursor:pointer;font-family:'Noto Sans JP',sans-serif">${a}</button>`).join("")}
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:20px">
+    <div class="section-title">🛒 Amazonで探す</div>
+    <div class="card" style="padding:14px">
+      ${amazonSearchHTML('settings')}
+    </div>
+  </div>
+  </div>`;
+}
+
+// ===== イベント =====
+function bindEvents(){
+  const hs=document.getElementById("home-search");
+  if(hs){ hs.addEventListener("input",e=>state.searchQuery=e.target.value); hs.addEventListener("keydown",e=>e.key==="Enter"&&doSearch()); }
+  // main-search は廃止（ホーム検索窓に統一）
+}
+
+function doSearch(){
+  const hs=document.getElementById("home-search");
+  const ss=document.getElementById("search-input");
+  if(hs) state.searchQuery=hs.value;
+  if(ss) state.searchQuery=ss.value;
+  if(!state.searchQuery.trim()) return;
+  // 履歴に追加（重複除去・最大10件）
+  state.history = [state.searchQuery, ...state.history.filter(h=>h!==state.searchQuery)].slice(0,10);
+  state.searched=true;
+  state.searchTab=0;
+  state.searchPhase='results';
+  state.currentTopicId=null;
+  state.currentTopicId=null;
+  switchNav("search");
+}
+
+function setTab(i){ state.searchTab=i; render(); }
+function setSearchQuery(q){
+  state.searchQuery=q;
+  state.history=[q,...state.history.filter(h=>h!==q)].slice(0,10);
+  state.searched=true;
+  state.searchTab=0;
+  // タイトルからIDを逆引き
+  var matched = FACT_TOPICS.find(function(t){ return t.title===q; });
+  state.currentTopicId = matched ? matched.id : null;
+  state.searchPhase = matched ? 'detail' : 'results';
+  switchNav('search');
+}
+
+function goTopic(topicId){
+  var t = FACT_TOPICS.find(function(x){ return x.id===topicId; });
+  if(!t) return;
+  state.currentTopicId = topicId;
+  state.searchQuery = t.title;
+  state.history=[t.title,...state.history.filter(h=>h!==t.title)].slice(0,10);
+  state.searched = true;
+  state.searchTab = 0;
+  state.searchPhase = 'detail';
+  switchNav('search');
+  render();
+}
+function setExploreDepth(d){ state.exploreDepth=d; if(d===0){state.selectedCat=null;state.selectedSub=null;} render(); }
+function selectCat(id){ state.selectedCat=CATEGORIES.find(c=>c.id===id); state.exploreDepth=1; state.selectedSub=null; render(); }
+function selectSub(i,label){ state.selectedSub={label}; state.exploreDepth=2; render(); }
+function updateSensitivity(v){
+  state.sensitivity=Number(v);
+  const levels=["最小","低め","標準","高め","最大"];
+  const descs=["科学的に完全否定された情報のみ表示します","明確な誤情報と政府公式と大きく矛盾する情報を表示します","標準：主要メディア間の論調の乖離も含めて表示します","専門家見解との軽微な差異も表示します","すべての不確実性・未確認情報に反応します"];
+  const sl=document.getElementById("sens-label");
+  const sd=document.getElementById("sens-desc");
+  if(sl) sl.textContent=`Lv.${v} — ${levels[v-1]}`;
+  if(sd) sd.textContent=descs[v-1];
+  document.getElementById("sens-badge").textContent=`感度 Lv.${v}`;
+}
+
+function focusSearch(){
+  state.searchFocused = true;
+  render();
+  setTimeout(()=>{
+    const el = document.getElementById('search-input-focused');
+    if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+  }, 30);
+}
+
+function blurSearch(){
+  state.searchFocused = false;
+  render();
+}
+
+function refocusSearch(id){
+  setTimeout(()=>{
+    const el = document.getElementById(id);
+    if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+  }, 10);
+}
+
+function fromHistoryFocused(query){
+  state.searchQuery = query;
+  state.searchFocused = false;
+  state.history = [query, ...state.history.filter(h=>h!==query)].slice(0,10);
+  state.searched = true;
+  state.searchTab = 0;
+  render();
+}
+
+function onSearchInput(val){
+  state.searchQuery = val;
+  render();
+  setTimeout(()=>{
+    const el = document.getElementById("search-input");
+    if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+  }, 10);
+}
+
+function clearSearch(){
+  state.searchQuery = "";
+  clearFilters();
+  render();
+  setTimeout(()=>{ const el=document.getElementById("search-input"); if(el) el.focus(); }, 10);
+}
+
+function backToSearch(){
+  state.searched = false;
+  state.searchFocused = false;
+  render();
+}
+
+// ===== Amazon アソシエイト検索ウィジェット =====
+function amazonSearchHTML(context){
+  // context: 'full'=専用画面, 'settings'=設定内, 'home'=ホーム内
+  const isCompact = context !== 'full';
+  return `
+  <div style="background:${isCompact?'#0c1525':'#080e1e'};${isCompact?'':'padding:14px'}">
+    ${!isCompact?`
+    <div style="text-align:center;padding:20px 14px 16px">
+      <div style="font-size:36px;margin-bottom:8px">🛒</div>
+      <div style="font-size:15px;font-weight:700;color:#FF9900;margin-bottom:6px">Amazonで探す</div>
+      <div style="font-size:12px;color:#666;line-height:1.7">ここから購入していただくと<br>FACTの運営支援になります</div>
+    </div>`:
+    `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:16px">🛒</span>
+      <span style="font-size:13px;font-weight:700;color:#FF9900">Amazonで探す</span>
+      <span style="font-size:10px;color:#555;margin-left:auto">購入でFACT支援</span>
+    </div>`}
+    <div style="display:flex;gap:8px;margin-bottom:${isCompact?8:12}px">
+      <input id="amz-input-${context}" class="search-input"
+        placeholder="商品名・キーワードを入力..."
+        style="flex:1;font-size:13px"
+        onkeydown="if(event.key==='Enter')doAmazonSearch('${context}')">
+      <button onclick="doAmazonSearch('${context}')"
+        style="padding:10px 16px;background:#FF9900;border:none;border-radius:8px;color:#111;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif">検索</button>
+    </div>
+    ${!isCompact?`
+    <div style="padding:0 14px">
+      <div style="font-size:10px;color:#444;letter-spacing:1px;margin-bottom:8px">よく検索されるキーワード</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+        ${['防災グッズ','健康食品','ビジネス書','スマホアクセサリー','キッチン用品','掃除用品'].map(k=>`
+          <button onclick="setAmazonQuery('${k}','${context}')"
+            style="padding:5px 12px;background:#0c1525;border:1px solid #1a2a4a;border-radius:99px;font-size:11px;color:#aaa;cursor:pointer;font-family:'Noto Sans JP',sans-serif">${k}</button>`).join('')}
+      </div>
+    </div>
+    <div style="margin:0 14px;padding:12px;background:#FF990011;border:1px solid #FF990033;border-radius:8px">
+      <div style="font-size:11px;color:#FF9900;margin-bottom:4px">📋 Amazonアソシエイトについて</div>
+      <div style="font-size:11px;color:#666;line-height:1.6">FACTはAmazonアソシエイト・プログラムに参加しています。このリンクから商品を購入された場合、売上の一部がFACTの運営費用に充てられます。商品価格に変わりはありません。</div>
+    </div>`:
+    `<div style="font-size:10px;color:#555;line-height:1.5">Amazonアソシエイト参加中 · 購入額に変わりはありません</div>`}
+  </div>`;
+}
+
+function doAmazonSearch(context){
+  const el = document.getElementById('amz-input-'+context);
+  if(!el || !el.value.trim()) return;
+  const q = encodeURIComponent(el.value.trim());
+  // 実際はアソシエイトタグ付きURLに遷移
+  // window.open('https://www.amazon.co.jp/s?k='+q+'&tag=YOUR_ASSOCIATE_TAG', '_blank');
+  alert('Amazon検索：「' + el.value + '」\n（本実装時はアソシエイトタグ付きURLに遷移します）');
+}
+
+function setAmazonQuery(keyword, context){
+  const el = document.getElementById('amz-input-'+context);
+  if(el){ el.value = keyword; el.focus(); }
+}
+
+function renderAmazon(){
+  const p = P();
+  return `
+  <div style="padding:14px 14px 0">
+    <div class="section-title">🛒 Amazon で探す</div>
+  </div>
+  ${amazonSearchHTML('full')}
+  <div id="sec-amazon" style="padding:14px 14px 0;display:${state.nav === 'amazon' ? 'none' : 'block'}">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="section-title" style="margin-bottom:0">🛒 Amazonで探す</div>
+      <span style="font-size:10px;color:#555">購入でFACT支援</span>
+    </div>
+    <div class="card" style="padding:14px">${amazonSearchHTML('home')}</div>
+  </div>
+  <div style="height:20px"></div>`;
+}
+
+function navSearch(){
+  if(state.nav !== "search"){
+    // 他画面から来た場合：検索画面を表示（フォーカスはしない）
+    state.searched = false;
+    state.searchFocused = false;
+    switchNav("search");
+  } else if(state.searched){
+    // 結果画面から：未検索状態に戻す（フォーカスはしない）
+    state.searched = false;
+    state.searchFocused = false;
+    render();
+  }
+  // 検索画面にいる場合は何もしない
+}
+
+function openSourceDetail(sourceId){
+  // ALL_SOURCESから取得（SOURCESはスライスなので全件対応）
+  var found = ALL_SOURCES.find(function(s){ return s.id === sourceId; });
+  state.sourceDetail = found || ALL_SOURCES[sourceId] || null;
+  if(!state.sourceDetail) return;
+  state.prevNav = state.nav;
+  state.nav = 'sourceDetail';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  render();
+}
+
+function closeSourceDetail(){
+  state.sourceDetail = null;
+  state.nav = state.prevNav || 'search';
+  // ソースタブから来た場合はdetailフェーズに戻す
+  if(state.nav === 'search') state.searchPhase = 'detail';
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.nav === state.nav);
+  });
+  render();
+}
+
+function renderSourceDetail(){
+  const s = state.sourceDetail;
+  if(!s) return '';
+  const p = P();
+  const c = scoreColor(s.score);
+  const rankColors = { S: p.high, A: p.mid, B: p.warn };
+  const rankKey = s.scoreDetail.rank.charAt(0);
+  const rankColor = rankColors[rankKey] || p.warn;
+
+  return `
+  <div style="background:#0c1525;border-bottom:1px solid #1a2a4a;padding:12px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;">
+    <button onclick="closeSourceDetail()" style="background:none;border:none;color:#4a9eff;font-size:20px;cursor:pointer;padding:0;line-height:1">‹</button>
+    <span style="font-size:13px;font-weight:700;color:#e0e6f0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.org}</span>
+    <span style="font-family:monospace;font-size:14px;color:${c};font-weight:900">${s.score}pt</span>
+  </div>
+
+  <div style="padding:16px 14px 0">
+
+    <div style="margin-bottom:16px">
+      <span class="type-tag ${typeClass(s.type)}" style="margin-bottom:8px;display:inline-block">${s.type}</span>
+      <div style="font-size:15px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:6px">${s.title}</div>
+      <div style="font-size:11px;color:#555;font-family:monospace">${s.date}</div>
+    </div>
+
+    <div style="margin-bottom:4px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <div style="flex:1;height:8px;background:#1a2035;border-radius:99px;overflow:hidden">
+          <div style="width:${s.score}%;height:100%;background:linear-gradient(90deg,${c}88,${c});border-radius:99px"></div>
+        </div>
+        <span style="font-family:monospace;font-size:16px;color:${c};font-weight:900;min-width:32px">${s.score}</span>
+      </div>
+      <div style="font-size:11px;color:${c};font-weight:600;margin-bottom:16px">● ${scoreLabel(s.score)}</div>
+    </div>
+
+    ${s.alert && state.sensitivity>=2 ? `
+    <div onclick="showPopup(decodeURIComponent('${encodeURIComponent(JSON.stringify(s.alert))}'))" style="padding:10px 12px;background:${alertColor(s.alert.type)}11;border:1px solid ${alertColor(s.alert.type)}44;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:16px">
+      <span style="font-size:16px">${alertIcon(s.alert.type)}</span>
+      <div>
+        <div style="font-size:11px;color:${alertColor(s.alert.type)};font-weight:700;margin-bottom:2px">注意喚起あり</div>
+        <div style="font-size:11px;color:#888">${s.alert.msg}</div>
+      </div>
+    </div>` : ''}
+
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-title">AIによる要約</div>
+      <p style="font-size:13px;line-height:1.8;color:#ccc">${s.summary}</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="section-title">信頼度スコアの根拠</div>
+      ${[
+        ['発行元ランク', s.scoreDetail.rank, rankColor],
+        ['他ソースとの一致度', s.scoreDetail.match, p.mid],
+        ['情報の新しさ', s.scoreDetail.freshness, p.brand],
+        ['一次ソースへの遡及', s.scoreDetail.primary, p.mid],
+      ].map(([label, val, col])=>`
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid #0f1a2e">
+          <span style="font-size:11px;color:#555;flex-shrink:0;margin-right:8px">${label}</span>
+          <span style="font-size:11px;color:${col};text-align:right;font-weight:600">${val}</span>
+        </div>`).join('')}
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <a href="${s.url}" target="_blank" style="flex:1;text-decoration:none">
+        <div style="background:${p.brand}22;border:1px solid ${p.brand}44;border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:13px;font-weight:700;color:${p.brand};margin-bottom:2px">元記事を読む →</div>
+          <div style="font-size:10px;color:#555">${s.org}</div>
+        </div>
+      </a>
+      <div style="flex:1;background:#1a2a4a22;border:1px solid #1a2a4a;border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="goExploreCat('${s.cat||''}')">
+        <div style="font-size:13px;font-weight:700;color:#4a9eff;margin-bottom:2px">🗄️ 記録を閲覧 →</div>
+        <div style="font-size:10px;color:#555">${s.cat||'関連カテゴリ'}</div>
+      </div>
+    </div>
+
+  </div>`;
+}
+
+function navExplore(){
+  if(state.nav !== "explore"){
+    // 他画面から探索へ：現在の深さを維持
+    switchNav("explore");
+    return;
+  }
+  // 探索画面内：1階層戻る
+  if(state.exploreDepth === 2){
+    state.exploreDepth = 1;
+    state.selectedSub = null;
+    render();
+    flashNav("explore");
+  } else if(state.exploreDepth === 1){
+    state.exploreDepth = 0;
+    state.selectedCat = null;
+    state.selectedSub = null;
+    render();
+    flashNav("explore");
+  } else {
+    // すでにトップ：軽くフラッシュして「ここがトップ」を伝える
+    flashNav("explore");
+  }
+}
+
+function flashNav(navId){
+  const btn = document.querySelector(`.nav-btn[data-nav="${navId}"]`);
+  if(!btn) return;
+  btn.style.background = "rgba(74,158,255,0.15)";
+  setTimeout(()=>{ btn.style.background = ""; }, 200);
+}
+
+function updateColorMode(mode){
+  state.colorMode=mode;
+  applyColorMode();
+  render();
+}
+function applyColorMode(){
+  const p=P();
+  document.documentElement.style.setProperty('--brand', p.brand);
+  // モノクロ時はbodyにfilterをかけない（記号で区別するため）
+  const label = {normal:'標準',protanopia:'P型/D型（赤緑）',tritanopia:'T型（青黄）',mono:'モノクローム'}[state.colorMode]||'標準';
+  const badge=document.getElementById('color-mode-badge');
+  if(badge) badge.textContent=state.colorMode==='normal'?'':' | '+label;
+}
+
+// 初期描画
+render();
+</script>
+</body>
+</html>
