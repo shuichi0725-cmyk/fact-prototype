@@ -646,7 +646,24 @@ function makeGNewsUrl(domain, query){
   return "https://news.google.com/search?q=" + encodeURIComponent(query + " site:" + domain) + "&hl=ja&gl=JP&ceid=JP:ja";
 }
 
-
+// 架空・無効URLを検出してGoogle News検索にフォールバック
+function getArticleUrl(article, orgName){
+  var url = article.url || '';
+  // 2026年以降のURL、news.web.nhk（存在しない形式）はフォールバック
+  var isFake = !url
+    || /\/(2026|2027|2028|2029)/.test(url)
+    || /202603|202604/.test(url)
+    || url.indexOf('news.web.nhk') !== -1
+    || url === '#';
+  if(isFake){
+    var media = MEDIA_MASTER.find(function(m){ return m.name === orgName; });
+    var domain = media ? media.domain : '';
+    return domain
+      ? makeGNewsUrl(domain, article.title)
+      : 'https://www.google.com/search?q=' + encodeURIComponent(article.title);
+  }
+  return url;
+}
 
 
 
@@ -1695,10 +1712,10 @@ function renderSummaryTab(){
       var fa = (s.articles && s.articles[0]) ? s.articles[0] : {};
       var title = fa.title || s.org;
       var date = fa.date || '';
-      var url = fa.url || '';
       var articleCount = s.articles ? s.articles.length : 0;
       var countBadge = articleCount > 1 ? '<span style="font-size:10px;color:#4a9eff;margin-left:4px">+' + (articleCount-1) + '件</span>' : '';
-      var readBtn = url ? ('<a href="' + url + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:10px;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:3px 10px;border-radius:99px;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block">読む ↗</a>') : '';
+      var resolvedUrl = getArticleUrl(fa, s.org);
+      var readBtn = resolvedUrl ? ('<a href="' + resolvedUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:10px;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:3px 10px;border-radius:99px;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block">読む ↗</a>') : '';
       sourcesHtml +=
         '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #0f1a2e;cursor:pointer" onclick="state.searchTab=2;state.expandedMediaId=' + s.id + ';render()">' +
         '<div style="flex:1;min-width:0">' +
@@ -1837,7 +1854,7 @@ function renderSourcesTab(){
     if(isExpanded && s.articles){
       articleList = '<div style="margin-top:12px;border-top:1px solid #1a2a4a;padding-top:12px">' +
         s.articles.map(function(a){
-          var safeUrl = a.url || '';
+          var safeUrl = getArticleUrl(a, s.org);
           return '<div style="padding:10px 0;border-bottom:1px solid #0f1a2e">' +
             '<div style="font-size:13px;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:4px">' + (a.title||'') + '</div>' +
             '<div style="font-size:11px;color:#555;margin-bottom:4px">📅 ' + (a.date||'') + '</div>' +
@@ -2020,7 +2037,7 @@ function renderRelatedTab(){
       '</div>' +
       '<div style="font-size:14px;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:8px">' + a.title + '</div>' +
       '<div style="font-size:12px;color:#666;line-height:1.7;margin-bottom:10px">' + a.summary + '</div>' +
-      '<a href="' + a.url + '" target="_blank" rel="noopener" style="font-size:11px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:5px 14px;border-radius:99px;cursor:pointer;text-decoration:none;display:inline-block">記事を読む ↗</a>' +
+      '<a href="' + getArticleUrl(a, a.org) + '" target="_blank" rel="noopener" style="font-size:11px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:5px 14px;border-radius:99px;cursor:pointer;text-decoration:none;display:inline-block">記事を読む ↗</a>' +
       '</div>';
   };
 
