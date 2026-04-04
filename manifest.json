@@ -1,0 +1,21 @@
+{
+  "name": "FACT — Verified Intelligence",
+  "short_name": "FACT",
+  "description": "AIが事実確認・バイアス検出・多角的視点を提供するニュース分析アプリ",
+  "start_url": "/fact-prototype/",
+  "scope": "/fact-prototype/",
+  "display": "standalone",
+  "background_color": "#080e1e",
+  "theme_color": "#080e1e",
+  "orientation": "portrait",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23080e1e'/%3E%3Ctext x='96' y='130' font-family='monospace' font-weight='900' font-size='80' fill='%234a9eff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["news", "utilities"]
+}

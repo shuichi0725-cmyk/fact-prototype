@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#080e1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FACT">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23080e1e'/%3E%3Ctext x='96' y='130' font-family='monospace' font-weight='900' font-size='80' fill='%234a9eff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
 <title>FACT — Verified Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -875,8 +881,29 @@ const TIMELINE = [
 ];
 
 
+// ===== localStorage 永続化 =====
+function loadPersistedState(){
+  try {
+    return {
+      sensitivity:  parseInt(localStorage.getItem('fact_sensitivity')) || 3,
+      colorMode:    localStorage.getItem('fact_colorMode') || 'normal',
+      history:      JSON.parse(localStorage.getItem('fact_history')) || ["能登地震の復興状況","ワクチンの安全性は","袴田事件の詳細","円安はいつ終わるか","少子化対策の効果"],
+      isPremium:    localStorage.getItem('fact_isPremium') === 'true',
+    };
+  } catch(e){ return {}; }
+}
+function persistState(){
+  try {
+    localStorage.setItem('fact_sensitivity', state.sensitivity);
+    localStorage.setItem('fact_colorMode',   state.colorMode);
+    localStorage.setItem('fact_history',     JSON.stringify(state.history));
+    localStorage.setItem('fact_isPremium',   state.isPremium);
+  } catch(e){}
+}
+
 // ===== 状態 =====
-let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", sensitivity:3, colorMode:"normal", homeTab:"alerts", rankingPeriod:"day", history:["能登地震の復興状況","ワクチンの安全性は","袴田事件の詳細","円安はいつ終わるか","少子化対策の効果"], sourceDetail:null, prevNav:null, searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:false, navCount:0, adVisible:false, adType:null, adCountdown:0 };
+const _persisted = loadPersistedState();
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, prevNav:null, searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, navCount:0, adVisible:false, adType:null, adCountdown:0 };
 
 // ===== CM モックデータ =====
 const AD_MOCKS = [
@@ -2250,8 +2277,9 @@ function doSearch(){
   if(hs) state.searchQuery=hs.value;
   if(ss) state.searchQuery=ss.value;
   if(!state.searchQuery.trim()) return;
-  // 履歴に追加（重複除去・最大10件）
+  // 履歴に追加（重複除去・最大10件）・localStorage保存
   state.history = [state.searchQuery, ...state.history.filter(h=>h!==state.searchQuery)].slice(0,10);
+  persistState();
   state.searched=true;
   state.searchTab=0;
   state.searchPhase='results';
@@ -2297,6 +2325,7 @@ function updateSensitivity(v){
   if(sl) sl.textContent=`Lv.${v} — ${levels[v-1]}`;
   if(sd) sd.textContent=descs[v-1];
   document.getElementById("sens-badge").textContent=`感度 Lv.${v}`;
+  persistState();
 }
 
 function focusSearch(){
@@ -2598,6 +2627,7 @@ function flashNav(navId){
 function updateColorMode(mode){
   state.colorMode=mode;
   applyColorMode();
+  persistState();
   render();
 }
 function applyColorMode(){
@@ -2609,7 +2639,15 @@ function applyColorMode(){
   if(badge) badge.textContent=state.colorMode==='normal'?'':' | '+label;
 }
 
-// 初期描画
+// ===== Service Worker 登録 =====
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+
+// 初期描画（保存済みカラーモードを適用してから）
+applyColorMode();
 render();
 </script>
 </body>
