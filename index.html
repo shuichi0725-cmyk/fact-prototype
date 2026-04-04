@@ -1013,7 +1013,17 @@ function showPopup(dataStr){
   document.getElementById("popup-type").style.color = c;
   document.getElementById("popup-msg").textContent = d.msg||d.alertMsg||"";
   const btn=document.getElementById("popup-btn");
-d("show");
+  if(btn){
+    btn.style.background = c;
+    btn.style.color = "#fff";
+    if(d.topicId){
+      btn.onclick = function(){ closePopup(); goTopic(d.topicId); };
+      btn.style.display = "";
+    } else {
+      btn.style.display = "none";
+    }
+  }
+  document.getElementById("popup-overlay").classList.add("show");
 }
 function closePopup(){ document.getElementById("popup-overlay").classList.remove("show"); }
 
@@ -2415,9 +2425,25 @@ function renderSourceDetail(){
   if(!s) return '';
   const p = P();
   const c = scoreColor(s.score);
+
+  // ALL_SOURCES にはarticlesが入っているので最初の記事から情報を取得
+  const firstArticle = (s.articles && s.articles[0]) || {};
+  const title = firstArticle.title || s.org;
+  const date = firstArticle.date || '';
+  const summary = firstArticle.summary || '';
+  const url = firstArticle.url || '';
+
+  // MEDIA_MASTER からランク取得
+  const mediaMeta = MEDIA_MASTER.find(function(m){ return m.name === s.org; });
+  const rank = mediaMeta ? mediaMeta.rank : (s.score >= 90 ? 'S' : s.score >= 80 ? 'A' : 'B');
   const rankColors = { S: p.high, A: p.mid, B: p.warn };
-  const rankKey = s.scoreDetail.rank.charAt(0);
-  const rankColor = rankColors[rankKey] || p.warn;
+  const rankColor = rankColors[rank] || p.warn;
+  const scoreDetail = {
+    rank: rank + ' — ' + (mediaMeta ? mediaMeta.cat : s.type),
+    match: s.score >= 90 ? '高（複数ソースと一致）' : s.score >= 70 ? '中（一部一致）' : '低（要確認）',
+    freshness: date ? '最新情報あり' : '不明',
+    primary: s.score >= 90 ? '一次ソース確認済み' : '二次ソース含む',
+  };
 
   return `
   <div style="background:#0c1525;border-bottom:1px solid #1a2a4a;padding:12px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;">
@@ -2430,8 +2456,8 @@ function renderSourceDetail(){
 
     <div style="margin-bottom:16px">
       <span class="type-tag ${typeClass(s.type)}" style="margin-bottom:8px;display:inline-block">${s.type}</span>
-      <div style="font-size:15px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:6px">${s.title}</div>
-      <div style="font-size:11px;color:#555;font-family:monospace">${s.date}</div>
+      <div style="font-size:15px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:6px">${title}</div>
+      <div style="font-size:11px;color:#555;font-family:monospace">${date}</div>
     </div>
 
     <div style="margin-bottom:4px">
@@ -2444,27 +2470,19 @@ function renderSourceDetail(){
       <div style="font-size:11px;color:${c};font-weight:600;margin-bottom:16px">● ${scoreLabel(s.score)}</div>
     </div>
 
-    ${s.alert && state.sensitivity>=2 ? `
-    <div onclick="showPopup(decodeURIComponent('${encodeURIComponent(JSON.stringify(s.alert))}'))" style="padding:10px 12px;background:${alertColor(s.alert.type)}11;border:1px solid ${alertColor(s.alert.type)}44;border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:16px">
-      <span style="font-size:16px">${alertIcon(s.alert.type)}</span>
-      <div>
-        <div style="font-size:11px;color:${alertColor(s.alert.type)};font-weight:700;margin-bottom:2px">注意喚起あり</div>
-        <div style="font-size:11px;color:#888">${s.alert.msg}</div>
-      </div>
-    </div>` : ''}
-
+    ${summary ? `
     <div class="card" style="margin-bottom:12px">
       <div class="section-title">AIによる要約</div>
-      <p style="font-size:13px;line-height:1.8;color:#ccc">${s.summary}</p>
-    </div>
+      <p style="font-size:13px;line-height:1.8;color:#ccc">${summary}</p>
+    </div>` : ''}
 
     <div class="card" style="margin-bottom:16px">
       <div class="section-title">信頼度スコアの根拠</div>
       ${[
-        ['発行元ランク', s.scoreDetail.rank, rankColor],
-        ['他ソースとの一致度', s.scoreDetail.match, p.mid],
-        ['情報の新しさ', s.scoreDetail.freshness, p.brand],
-        ['一次ソースへの遡及', s.scoreDetail.primary, p.mid],
+        ['発行元ランク', scoreDetail.rank, rankColor],
+        ['他ソースとの一致度', scoreDetail.match, p.mid],
+        ['情報の新しさ', scoreDetail.freshness, p.brand],
+        ['一次ソースへの遡及', scoreDetail.primary, p.mid],
       ].map(([label, val, col])=>`
         <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid #0f1a2e">
           <span style="font-size:11px;color:#555;flex-shrink:0;margin-right:8px">${label}</span>
@@ -2472,16 +2490,27 @@ function renderSourceDetail(){
         </div>`).join('')}
     </div>
 
+    ${s.articles && s.articles.length > 1 ? `
+    <div class="card" style="margin-bottom:16px">
+      <div class="section-title">記事一覧（${s.articles.length}件）</div>
+      ${s.articles.map(a=>`
+        <div style="padding:10px 0;border-bottom:1px solid #0f1a2e">
+          <div style="font-size:13px;font-weight:600;color:#ddd;margin-bottom:4px">${a.title||''}</div>
+          <div style="font-size:11px;color:#555;margin-bottom:6px">📅 ${a.date||''}</div>
+          ${a.url ? `<button onclick="openUrl(decodeURIComponent(this.dataset.u))" data-u="${encodeURIComponent(a.url)}" style="font-size:11px;color:${p.brand};background:${p.brand}15;border:1px solid ${p.brand}44;padding:3px 10px;border-radius:99px;cursor:pointer">記事を読む ↗</button>` : ''}
+        </div>`).join('')}
+    </div>` : ''}
+
     <div style="display:flex;gap:8px;margin-bottom:16px">
-      <a href="${s.url}" target="_blank" style="flex:1;text-decoration:none">
+      ${url ? `<a href="${url}" target="_blank" style="flex:1;text-decoration:none">
         <div style="background:${p.brand}22;border:1px solid ${p.brand}44;border-radius:10px;padding:12px;text-align:center">
           <div style="font-size:13px;font-weight:700;color:${p.brand};margin-bottom:2px">元記事を読む →</div>
           <div style="font-size:10px;color:#555">${s.org}</div>
         </div>
-      </a>
-      <div style="flex:1;background:#1a2a4a22;border:1px solid #1a2a4a;border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="goExploreCat('${s.cat||''}')">
+      </a>` : ''}
+      <div style="flex:1;background:#1a2a4a22;border:1px solid #1a2a4a;border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="switchNav('explore')">
         <div style="font-size:13px;font-weight:700;color:#4a9eff;margin-bottom:2px">🗄️ 記録を閲覧 →</div>
-        <div style="font-size:10px;color:#555">${s.cat||'関連カテゴリ'}</div>
+        <div style="font-size:10px;color:#555">カテゴリを見る</div>
       </div>
     </div>
 
