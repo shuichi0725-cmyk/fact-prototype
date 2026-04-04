@@ -659,21 +659,49 @@ function makeGNewsUrl(domain, query){
   return "https://news.google.com/search?q=" + encodeURIComponent(query + " site:" + domain) + "&hl=ja&gl=JP&ceid=JP:ja";
 }
 
-// 架空・無効URLを検出してGoogle News検索にフォールバック
+// ドメインごとの自社検索URL
+function getOrgSearchUrl(domain, title){
+  var q = encodeURIComponent(title);
+  var map = {
+    'bloomberg.co.jp':   'https://www.bloomberg.co.jp/search?query=' + q,
+    'jiji.com':          'https://www.jiji.com/jc/search?q=' + q,
+    'nhk.or.jp':         'https://www3.nhk.or.jp/news/nsearch/query.html?q=' + q,
+    'nikkei.com':        'https://www.nikkei.com/search?keyword=' + q,
+    'asahi.com':         'https://www.asahi.com/search/?q=' + q,
+    'yomiuri.co.jp':     'https://www.yomiuri.co.jp/search/?q=' + q,
+    'mainichi.jp':       'https://mainichi.jp/search/?q=' + q,
+    'sankei.com':        'https://www.sankei.com/search/?q=' + q,
+    'tokyo-np.co.jp':    'https://www.tokyo-np.co.jp/search?q=' + q,
+    'aljazeera.com':     'https://www.aljazeera.com/search/?q=' + q,
+    'reuters.com':       'https://www.reuters.com/search/news?blob=' + q,
+    'bbc.com':           'https://www.bbc.com/search?q=' + q,
+    'theguardian.com':   'https://www.theguardian.com/search?q=' + q,
+    'nytimes.com':       'https://www.nytimes.com/search?query=' + q,
+    'japantimes.co.jp':  'https://www.japantimes.co.jp/search/' + q,
+    'afpbb.com':         'https://www.afpbb.com/articles/search/?q=' + q,
+    'ntv.co.jp':         'https://news.ntv.co.jp/search/' + q,
+    'tbs.co.jp':         'https://newsdig.tbs.co.jp/search?q=' + q,
+  };
+  return map[domain] || (domain ? makeGNewsUrl(domain, title) : 'https://www.google.com/search?q=' + q);
+}
+
+// 架空・無効URLを検出して自社検索URLにフォールバック
 function getArticleUrl(article, orgName){
   var url = article.url || '';
-  // 2026年以降のURL、news.web.nhk（存在しない形式）はフォールバック
   var isFake = !url
     || /\/(2026|2027|2028|2029)/.test(url)
     || /202603|202604/.test(url)
     || url.indexOf('news.web.nhk') !== -1
     || url === '#';
   if(isFake){
-    var media = MEDIA_MASTER.find(function(m){ return m.name === orgName; });
+    // 名前の部分一致でメディアを探す（"Bloomberg Japan" → "Bloomberg" など）
+    var media = MEDIA_MASTER.find(function(m){
+      return m.name === orgName
+        || orgName.indexOf(m.name) >= 0
+        || m.name.indexOf(orgName) >= 0;
+    });
     var domain = media ? media.domain : '';
-    return domain
-      ? makeGNewsUrl(domain, article.title)
-      : 'https://www.google.com/search?q=' + encodeURIComponent(article.title);
+    return getOrgSearchUrl(domain, article.title);
   }
   return url;
 }
