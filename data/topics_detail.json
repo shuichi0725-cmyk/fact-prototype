@@ -2386,6 +2386,151 @@
         "carbon_neutral",
         "iran_josei"
       ]
+    },
+    "trump_tariff_auto": {
+      "detailSummary": "トランプ大統領（第2期）は2026年4月9日、日本製自動車への関税を既存の25%に加え追加25%（合計50%）に引き上げると発表した。日米の二国間貿易協議は約3ヶ月の交渉の末に決裂。米側は「対日貿易赤字の解消と米国内生産の促進」を要求し、日本側の「日本車メーカーの米国内雇用への貢献」という主張は退けられた。トヨタ・ホンダ・日産は米国内生産をさらにシフトする方針を表明したが、部品調達網の再構築には2〜3年かかる見通し。内閣府はGDPへの影響を▲0.6%と試算。円安（159円台）が追い打ちをかけており、対米輸出企業の収益圧迫は避けられない状況だ。",
+      "scoreReason": "ホワイトハウス発表・経産省・NHK・ブルームバーグが一次情報として報道。GDP試算は内閣府の公式資料に基づく。",
+      "sources": [
+        {
+          "org": "NHK NEWS WEB",
+          "type": "公共放送",
+          "score": 96,
+          "lang": "ja",
+          "articles": [
+            {
+              "title": "トランプ政権 日本製自動車に追加25%関税 日米交渉決裂",
+              "date": "2026年4月9日",
+              "url": "https://www3.nhk.or.jp/news/html/20260409/k10014910501000.html",
+              "summary": "日本製自動車への関税が合計50%に。トヨタ・ホンダが米国内生産シフトを加速する方針。"
+            }
+          ]
+        },
+        {
+          "org": "Bloomberg",
+          "type": "経済メディア",
+          "score": 92,
+          "lang": "en",
+          "articles": [
+            {
+              "title": "Trump Doubles Car Tariffs on Japan as Trade Talks Collapse",
+              "date": "2026年4月9日",
+              "url": "https://www.bloomberg.com/news/articles/2026-04-09/trump-japan-auto-tariff-50-percent",
+              "summary": "Japan-made vehicles now face 50% total tariffs as bilateral trade talks break down after three months."
+            }
+          ]
+        },
+        {
+          "org": "経済産業省",
+          "type": "政府機関",
+          "score": 97,
+          "lang": "ja",
+          "articles": [
+            {
+              "title": "米国の追加関税措置に対する日本政府の対応方針",
+              "date": "2026年4月9日",
+              "url": "https://www.meti.go.jp/press/2026/04/20260409001/20260409001.html",
+              "summary": "WTOへの提訴手続き開始を表明。国内自動車産業への緊急支援策も検討。"
+            }
+          ]
+        },
+        {
+          "org": "日本経済新聞",
+          "type": "経済紙",
+          "score": 90,
+          "lang": "ja",
+          "articles": [
+            {
+              "title": "関税50%の衝撃 トヨタ・ホンダ、米生産前倒しへ",
+              "date": "2026年4月9日",
+              "url": "https://www.nikkei.com/article/DGXZQOUC090000Z00C26A4000000/",
+              "summary": "対米輸出から現地生産へのシフトが加速。部品メーカーへの影響も深刻。"
+            }
+          ]
+        },
+        {
+          "org": "内閣府",
+          "type": "政府機関",
+          "score": 98,
+          "lang": "ja",
+          "articles": [
+            {
+              "title": "米国追加関税の日本経済への影響試算",
+              "date": "2026年4月9日",
+              "url": "https://www5.cao.go.jp/keizai3/2026/04/index.html",
+              "summary": "日本のGDPへの影響は▲0.6%（年率）。輸出額は最大3兆円規模の減少と試算。"
+            }
+          ]
+        }
+      ],
+      "timeline": [
+        {
+          "date": "2025年11月",
+          "event": "トランプ政権（第2期）が対日貿易赤字解消を最優先課題に設定。自動車関税引き上げを示唆。",
+          "alert": false
+        },
+        {
+          "date": "2026年1月",
+          "event": "日米二国間貿易協議が開始。日本側は「米国内雇用への貢献」を主張。",
+          "alert": false
+        },
+        {
+          "date": "2026年3月",
+          "event": "交渉が膠着。トランプ大統領がSNSで「日本は公平な貿易をしていない」と批判。",
+          "alert": true,
+          "msg": "SNSの投稿内容が正式交渉の立場と一致するか不明確な部分があります。"
+        },
+        {
+          "date": "2026年4月5日",
+          "event": "日米閣僚級協議が決裂。日本側が最終提案を拒否されたと発表。",
+          "alert": false
+        },
+        {
+          "date": "2026年4月9日",
+          "event": "トランプ大統領が追加25%関税を発表。合計50%に。日本政府はWTO提訴を表明。",
+          "alert": false
+        }
+      ],
+      "perspectives": [
+        {
+          "stance": "米トランプ政権",
+          "color": "#FF5722",
+          "summary": "「対日貿易赤字は年間7兆円超。日本車は米市場で売れても米国車は日本で売れない。関税で公平性を確保する」と主張。",
+          "sources": [
+            "ホワイトハウス声明（2026年4月9日）"
+          ]
+        },
+        {
+          "stance": "日本政府・経産省",
+          "color": "#2196F3",
+          "summary": "「日本メーカーは米国で40万人以上を雇用しており不公平な措置」とWTO提訴へ。一方で交渉継続の余地も模索。",
+          "sources": [
+            "経産省発表（2026年4月9日）",
+            "外務省声明"
+          ]
+        },
+        {
+          "stance": "トヨタ・ホンダ等自動車各社",
+          "color": "#FF9800",
+          "summary": "米国内生産を拡大する方針を表明しつつ、「急激な変更は雇用・部品調達網に混乱をもたらす」と懸念。",
+          "sources": [
+            "トヨタ・ホンダ各社プレスリリース（2026年4月）"
+          ]
+        },
+        {
+          "stance": "経済専門家",
+          "color": "#9C27B0",
+          "summary": "「関税50%は日本の対米自動車輸出を事実上停止させる水準。円安と重なり日本経済へのダメージは甚大」と警告。",
+          "sources": [
+            "日本経済研究センター試算（2026年4月）"
+          ]
+        }
+      ],
+      "relatedTopics": [
+        "endaka_2026",
+        "microsoft_japan",
+        "food_price_hike",
+        "hormuz_crisis"
+      ]
     }
   }
 }
