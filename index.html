@@ -1482,7 +1482,7 @@ function persistState(){
 
 // ===== 状態 =====
 const _persisted = loadPersistedState();
-let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, prevNav:null, searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, navCount:0, adVisible:false, adType:null, adCountdown:0, readAlerts:_persisted.readAlerts||[], alertFilter:'all' };
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, navCount:0, adVisible:false, adType:null, adCountdown:0, readAlerts:_persisted.readAlerts||[], alertFilter:'all' };
 
 // ===== CM モックデータ =====
 const AD_MOCKS = [
@@ -1677,6 +1677,26 @@ function switchNav(nav){
   render();
   // 別画面への遷移時のみCM判定
   if(prevNav !== nav) maybeShowAd();
+}
+
+// ===== ナビスタック =====
+function pushNav(){
+  state.navStack.push({
+    nav: state.nav, exploreDepth: state.exploreDepth,
+    selectedCat: state.selectedCat, selectedSub: state.selectedSub,
+    searchPhase: state.searchPhase, currentTopicId: state.currentTopicId,
+    searchTab: state.searchTab, homeTab: state.homeTab,
+    searchQuery: state.searchQuery, searched: state.searched
+  });
+}
+function popNav(){
+  var prev = state.navStack.pop();
+  if(!prev){ switchNav('home'); return; }
+  Object.assign(state, prev);
+  document.querySelectorAll('.nav-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.nav === state.nav);
+  });
+  render();
 }
 
 // ===== レンダリング =====
@@ -2028,6 +2048,7 @@ function renderFilterTags(){
 function goTopicDetail(el){
   var tid = el.getAttribute('data-tid');
   var ttl = el.getAttribute('data-ttl');
+  pushNav();
   state.currentTopicId = tid;
   state.searchQuery = ttl;
   state.searched = true;
@@ -2256,7 +2277,7 @@ function renderSearchDetail(p){
     // 検索バー＋戻るボタン
     '<div style="padding:10px 14px;border-bottom:1px solid #1a2a4a;background:#0c1525;position:sticky;top:0;z-index:10">' +
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
-    '<button onclick="state.searchPhase=\'results\';render()" style="padding:5px 10px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:#4a9eff;font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 検索結果</button>' +
+    '<button onclick="popNav()" style="padding:5px 10px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:#4a9eff;font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 戻る</button>' +
     '<span style="font-size:13px;color:#e0e6f0;flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + q + '</span>' +
     '</div>' +
     // タブバー
@@ -3107,6 +3128,7 @@ function setSearchQuery(q){
 function goTopic(topicId){
   var t = FACT_TOPICS.find(function(x){ return x.id===topicId; });
   if(!t) return;
+  pushNav();
   state.currentTopicId = topicId;
   state.searchQuery = t.title;
   state.history=[t.title,...state.history.filter(h=>h!==t.title)].slice(0,10);
@@ -3327,7 +3349,7 @@ function openSourceDetail(sourceId){
   var found = ALL_SOURCES.find(function(s){ return s.id === sourceId; });
   state.sourceDetail = found || ALL_SOURCES[sourceId] || null;
   if(!state.sourceDetail) return;
-  state.prevNav = state.nav;
+  pushNav();
   state.nav = 'sourceDetail';
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   render();
@@ -3335,13 +3357,7 @@ function openSourceDetail(sourceId){
 
 function closeSourceDetail(){
   state.sourceDetail = null;
-  state.nav = state.prevNav || 'search';
-  // ソースタブから来た場合はdetailフェーズに戻す
-  if(state.nav === 'search') state.searchPhase = 'detail';
-  document.querySelectorAll('.nav-btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.nav === state.nav);
-  });
-  render();
+  popNav();
 }
 
 function renderSourceDetail(){
