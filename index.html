@@ -620,6 +620,31 @@ const TOPIC_DATA = {
       { stance:"国際人権団体", color:"#9C27B0", summary:"「日本の死刑制度と刑事司法制度は国際基準に照らして問題がある。袴田事件はその最悪の例」と批判。制度改革を強く求める。", sources:["アムネスティ（2024年9月）"] },
     ]
   },
+  kyodoshinken: {
+    sources: [
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"共同親権 4月施行後 家庭裁判所への申し立て急増", date:"2026年4月3日", url:"https://www3.nhk.or.jp/news/html/20260403/k10014900003000.html", summary:"改正民法施行後、共同親権をめぐる家裁への申し立てが急増。DV被害者からの懸念も相次ぐ。" },
+      ]},
+      { org:"東京新聞", type:"全国紙", score:88, lang:"ja", articles:[
+        { title:"共同親権「DV加害者から逃げられない」 被害者団体が緊急声明", date:"2026年4月2日", url:"https://www.tokyo-np.co.jp/article/325001", summary:"DV被害者支援団体が共同親権導入に対する緊急声明を発表。制度の見直しを求める。" },
+        { title:"共同親権 弁護士に相談殺到 「どう対応すればいいか」", date:"2026年4月1日", url:"https://www.tokyo-np.co.jp/article/324500", summary:"施行初日から弁護士事務所への相談が急増。特に元配偶者からDVを受けたケースで対応に苦慮。" },
+      ]},
+      { org:"法務省", type:"政府機関", score:96, lang:"ja", articles:[
+        { title:"改正民法（共同親権）施行について", date:"2026年4月1日", url:"https://www.moj.go.jp/MINJI/minji07_00314.html", summary:"2026年4月1日施行の改正民法における共同親権制度の概要・Q&Aを公表。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2024年5月", event:"改正民法が国会で成立。離婚後の共同親権を導入（2年以内に施行）。", alert:false },
+      { date:"2025年", event:"施行に向けた準備。DV被害者団体や女性団体が強く反対を表明。", alert:false },
+      { date:"2026年4月1日", event:"改正民法施行。共同親権制度が正式に導入。施行初日から家裁への相談・申し立てが急増。", alert:true, msg:"共同親権がDV被害者に与える影響について、政府と支援団体の見解が大きく異なります。" },
+      { date:"2026年4月2日", event:"DV被害者支援団体が緊急声明。「加害者から逃げられなくなる」と訴える。", alert:false },
+    ],
+    perspectives: [
+      { stance:"政府・法務省", color:"#4CAF50", summary:"「子の利益を最優先に、DVがある場合は単独親権を選択できる」と説明。裁判所が適切に判断するとして懸念を否定。", sources:["法務省Q&A（2026年4月1日）"] },
+      { stance:"DV被害者・支援団体", color:"#FF9800", summary:"「DVがあっても証明が困難。加害者が共同親権を使って接触・支配を続けられる」と強く反対。即時の法改正を求める。", sources:["全国女性シェルターネット声明（2026年4月2日）"] },
+      { stance:"共同親権推進派", color:"#4a9eff", summary:"「子どもが両親と関わる権利を守るため共同親権は必要」と評価。運用の改善で問題は解決できるとの立場。", sources:["共同親権推進議員連盟（2026年）"] },
+    ]
+  },
   rapidus: {
     sources: [
       { org:"日本経済新聞", type:"全国紙", score:91, lang:"ja", articles:[
