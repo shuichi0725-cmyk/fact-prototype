@@ -620,6 +620,30 @@ const TOPIC_DATA = {
       { stance:"国際人権団体", color:"#9C27B0", summary:"「日本の死刑制度と刑事司法制度は国際基準に照らして問題がある。袴田事件はその最悪の例」と批判。制度改革を強く求める。", sources:["アムネスティ（2024年9月）"] },
     ]
   },
+  carbon_neutral: {
+    sources: [
+      { org:"環境省", type:"政府機関", score:97, lang:"ja", articles:[
+        { title:"2030年度温室効果ガス46%削減目標の進捗状況", date:"2026年4月1日", url:"https://www.env.go.jp/earth/ondanka/ghg-monitoring/index.html", summary:"2024年度の温室効果ガス排出量は2013年度比で約21%減。目標達成には更なる加速が必要。" },
+      ]},
+      { org:"日本経済新聞", type:"全国紙", score:91, lang:"ja", articles:[
+        { title:"再エネ普及ペース鈍化 ホルムズ危機が化石燃料依存を再確認", date:"2026年4月2日", url:"https://www.nikkei.com/article/DGXZQOUB020V30S6A400C2000000/", summary:"ホルムズ危機でLNG調達が困難になる中、再生可能エネルギーへの転換を急ぐ必要性が再認識される一方、電力安定供給との両立が課題。" },
+      ]},
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"太陽光・風力発電 2030年目標達成へ「大幅加速が必要」専門家指摘", date:"2026年3月30日", url:"https://www3.nhk.or.jp/news/html/20260330/k10014890001000.html", summary:"現在の普及ペースでは2030年目標未達の可能性。専門家が対策強化を求める。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2021年", event:"政府が2030年度46%削減・2050年カーボンニュートラルを宣言。", alert:false },
+      { date:"2025年", event:"太陽光発電の普及は進むが、洋上風力建設の遅れが顕在化。", alert:false },
+      { date:"2026年2月", event:"ホルムズ海峡危機でLNG調達困難に。火力発電への依存が再確認される。", alert:false },
+      { date:"2026年4月1日", event:"環境省が進捗報告。2024年度排出量は2013年比約21%減。目標の46%削減まで道半ば。", alert:true, msg:"削減量の計算方法・基準年の取り方をめぐり、政府と一部専門家の間で見解に差があります。" },
+    ],
+    perspectives: [
+      { stance:"政府・環境省", color:"#4CAF50", summary:"「2030年目標は堅持する。再エネ拡大・省エネ・原子力再稼働の3本柱で達成を目指す」と説明。ホルムズ危機はむしろ脱化石燃料の必要性を高めると強調。", sources:["環境省発表（2026年4月1日）"] },
+      { stance:"産業界・電力会社", color:"#FF9800", summary:"「ホルムズ危機のような緊急時に備えるためにも、火力のバックアップ機能維持は不可欠」と主張。急速な再エネ移行には電力安定供給上のリスクがあると指摘。", sources:["電気事業連合会（2026年3月）"] },
+      { stance:"環境NGO・専門家", color:"#4a9eff", summary:"「目標達成には現在の3倍以上のペースで再エネを導入する必要がある」と試算。石炭火力の早期廃止と洋上風力の規制緩和を求める。", sources:["気候ネットワーク（2026年3月）"] },
+    ]
+  },
   shinyaku_2026: {
     sources: [
       { org:"厚生労働省", type:"政府機関", score:98, lang:"ja", articles:[
