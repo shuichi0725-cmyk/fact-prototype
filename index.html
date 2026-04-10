@@ -1893,8 +1893,8 @@ function renderHomeTab(tab){
 function renderRankingSection(){
   var p = P();
   var tab = state.homeTab || 'alerts';
-  // trendingタブでは非表示（タブ自体がランキングコンテンツ）
-  if(tab === 'trending') return '';
+  // trending以外では非表示
+  if(tab !== 'alerts') return '';
   var rp = state.rankingPeriod || 'day';
   var tabData = TAB_RANKING[tab] || TAB_RANKING.alerts;
   var rankData = tabData[rp] || [];
