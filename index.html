@@ -620,6 +620,30 @@ const TOPIC_DATA = {
       { stance:"国際人権団体", color:"#9C27B0", summary:"「日本の死刑制度と刑事司法制度は国際基準に照らして問題がある。袴田事件はその最悪の例」と批判。制度改革を強く求める。", sources:["アムネスティ（2024年9月）"] },
     ]
   },
+  shinyaku_2026: {
+    sources: [
+      { org:"厚生労働省", type:"政府機関", score:98, lang:"ja", articles:[
+        { title:"2026年第1四半期 医薬品承認情報一覧", date:"2026年4月1日", url:"https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000189849.html", summary:"2026年1〜3月に承認された医薬品の一覧。抗がん剤・希少疾患治療薬を中心に複数の新薬が承認。" },
+      ]},
+      { org:"日本経済新聞", type:"全国紙", score:91, lang:"ja", articles:[
+        { title:"AI創薬 開発期間を半分に 2026年承認ラッシュの背景", date:"2026年4月2日", url:"https://www.nikkei.com/article/DGXZQOUB020V30S6A400C2000000/", summary:"AIによる創薬加速で新薬の開発期間が従来の半分以下に短縮。承認件数が増加している背景を解説。" },
+      ]},
+      { org:"時事ドットコム", type:"通信社", score:92, lang:"ja", articles:[
+        { title:"抗がん剤PD-1阻害剤 新たな固形がんへの適応追加を承認", date:"2026年3月28日", url:"https://www.jiji.com/jc/article?k=2026032800401&g=soc", summary:"既存の免疫チェックポイント阻害剤が新たながん種への適応拡大。治療選択肢が広がる。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年1月", event:"厚労省が第1四半期の新薬審査を加速。AI創薬由来の候補物質が初めて承認申請段階に到達。", alert:false },
+      { date:"2026年3月28日", event:"PD-1阻害剤の新たな固形がんへの適応拡大を承認。", alert:false },
+      { date:"2026年4月1日", event:"2026年第1四半期承認薬一覧を公表。抗がん剤中心に複数承認。", alert:false },
+      { date:"2026年4月2日", event:"薬価収載をめぐる議論が活発化。新薬の高額薬価と保険財政への影響が焦点に。", alert:true, msg:"薬価の妥当性については製薬企業・厚労省・患者団体で評価が大きく異なります。" },
+    ],
+    perspectives: [
+      { stance:"製薬企業・研究機関", color:"#4CAF50", summary:"「AI創薬により開発コストが下がり、希少疾患治療薬の開発が現実的になった」と評価。革新的新薬の薬価維持を求める。", sources:["日本製薬工業協会（2026年）"] },
+      { stance:"厚生労働省", color:"#4a9eff", summary:"承認審査の迅速化を推進しつつ、薬価の適正化も並行して進める方針。費用対効果評価の導入を拡大。", sources:["厚労省審議会資料（2026年4月）"] },
+      { stance:"患者団体・医療経済専門家", color:"#FF9800", summary:"「新薬が承認されても高額で使えない患者が多い」と薬価問題を指摘。公平なアクセス確保を求める声が高まっている。", sources:["日本患者会情報センター（2026年）"] },
+    ]
+  },
   kokka_jouhou: {
     sources: [
       { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
