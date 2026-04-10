@@ -864,6 +864,34 @@ const TOPIC_DATA = {
       { stance:"農業・食品業界", color:"#4a9eff", summary:"「国際基準との整合性は重要。科学的根拠に基づく基準が適切」と基準見直しを支持する立場。", sources:["食品産業センター（2026年）"] },
     ]
   },
+  nenryo_kakuho: {
+    sources: [
+      { org:"資源エネルギー庁", type:"政府機関", score:97, lang:"ja", articles:[
+        { title:"2026年夏の電力需給見通し（第1回）", date:"2026年4月2日", url:"https://www.enecho.meti.go.jp/category/electricity_and_gas/electricity_measures/2026summer_demand.html", summary:"夏の電力需給は全国的に厳しい見通し。LNG調達難と需要増が重なり、最大3%の供給余力不足の可能性。" },
+      ]},
+      { org:"日本経済新聞", type:"全国紙", score:91, lang:"ja", articles:[
+        { title:"LNG調達難 電力各社が代替燃料を緊急確保 夏の停電リスク", date:"2026年4月3日", url:"https://www.nikkei.com/article/DGXZQOUB030B20T0C26A4000000/", summary:"ホルムズ海峡危機でLNG輸入が滞り、電力各社が石炭・石油での代替を模索。燃料コスト急騰も懸念。" },
+        { title:"AIデータセンター電力需要 2030年に現在の2倍超 電力網に限界", date:"2026年3月28日", url:"https://www.nikkei.com/article/DGXZQOUB280Y70Y6A320C2000000/", summary:"国内AI・データセンターの電力需要が急増。2030年には現在の2倍超の見通しで、送電網の増強が急務。" },
+      ]},
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"ホルムズ危機でLNG調達難 夏の電力不足 政府が緊急対策", date:"2026年4月2日", url:"https://www3.nhk.or.jp/news/html/20260402/k10014899001000.html", summary:"政府が夏の電力需給逼迫に備え、LNG代替調達・節電要請・原発再稼働前倒し検討を開始。" },
+      ]},
+      { org:"電気事業連合会", type:"業界団体", score:87, lang:"ja", articles:[
+        { title:"2026年夏の電力安定供給確保に向けた取り組み", date:"2026年4月3日", url:"https://www.fepc.or.jp/news/2026/0403_power_summer.html", summary:"電力各社が燃料在庫の積み増しと需給管理の強化を表明。節電協力を消費者・産業界に呼びかけ。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年1月〜", event:"ホルムズ海峡での緊張が高まり、日本向けLNGタンカーの通過が不安定化。", alert:false },
+      { date:"2026年3月", event:"電力各社がLNG在庫水準の低下を確認。代替燃料調達を開始。", alert:false },
+      { date:"2026年4月2日", event:"資源エネルギー庁が「夏の電力需給見通し」を公表。供給余力3%不足の可能性。", alert:true, msg:"「計画停電確定」の情報は現時点で未確認です。公式発表を確認してください。" },
+      { date:"2026年4月3日", event:"政府が緊急対策を検討開始。原発再稼働前倒し・石炭火力稼働延長などが俎上に。", alert:false },
+    ],
+    perspectives: [
+      { stance:"政府・資源エネルギー庁", color:"#4CAF50", summary:"「燃料多様化と節電要請で夏の需給を乗り切れる」と説明。原発再稼働も「安全性を確認した上で」検討する姿勢。", sources:["エネ庁発表（2026年4月）"] },
+      { stance:"電力会社", color:"#FF9800", summary:"「LNG調達難は深刻。代替燃料は高コストで電気料金への影響は避けられない」と率直に表明。", sources:["電気事業連合会（2026年4月3日）"] },
+      { stance:"脱原発・環境団体", color:"#9C27B0", summary:"「危機を口実に原発再稼働を急ぐな。再生可能エネルギーの緊急導入こそ解決策」と主張。", sources:["原発ゼロ市民会議（2026年4月）"] },
+    ]
+  },
 };
 
 
