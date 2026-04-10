@@ -112,21 +112,28 @@ body { background: var(--bg); color: var(--text-1); font-family: 'Noto Sans JP',
 .card.clickable:hover { border-color: var(--border-2); box-shadow: 0 0 0 1px var(--brand-dim), 0 4px 16px rgba(0,0,0,0.3); background: var(--surface-2); }
 .card.clickable:active { background: var(--surface-2); transform: scale(0.992); transition: transform 0.1s, background 0.1s; }
 
-/* カテゴリグリッド */
-.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px; }
-.cat-card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-  padding: 14px 12px; cursor: pointer; position: relative;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  transition: border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast), background var(--t-fast);
+/* カテゴリリスト（1列） */
+.cat-grid {
+  display: flex; flex-direction: column; gap: 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; margin: 8px 14px;
 }
-.cat-card:hover { border-color: var(--border-2); box-shadow: 0 0 0 1px var(--brand-dim), 0 6px 20px rgba(0,0,0,0.35); background: var(--surface-2); }
-.cat-card:active { transform: scale(0.96); }
-.cat-card.has-alert { border-color: #FF980044; }
-.cat-card .cat-icon { font-size: 24px; margin-bottom: 6px; }
-.cat-card .cat-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
-.cat-card .cat-count { font-size: 10px; color: var(--text-2); }
-.cat-card .alert-dot { position: absolute; top: 8px; right: 8px; font-size: 10px; color: var(--warn); }
+.cat-card {
+  background: transparent; border: none;
+  border-bottom: 1px solid var(--border); border-radius: 0;
+  padding: 13px 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: none;
+  transition: background var(--t-fast);
+}
+.cat-card:last-child { border-bottom: none; }
+.cat-card:hover { background: var(--surface-2); box-shadow: none; border-color: var(--border); }
+.cat-card:active { transform: scale(0.99); background: var(--surface-3); }
+.cat-card.has-alert { border-color: var(--border); }
+.cat-card .cat-icon  { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; margin-bottom: 0; }
+.cat-card .cat-name  { flex: 1; font-size: 13px; font-weight: 600; margin-bottom: 0; }
+.cat-card .cat-count { font-size: 12px; color: var(--text-2); flex-shrink: 0; }
+.cat-card .alert-dot { position: static; font-size: 12px; color: var(--warn); flex-shrink: 0; margin-left: 0; }
 
 /* スコアバー */
 .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
@@ -2777,18 +2784,17 @@ function buildExploreResults(){
   var p = P();
 
   if(!eq){
-    // カテゴリグリッド（通常表示）
+    // カテゴリリスト（横並び1列）
     var cards = CATEGORIES.map(function(c){
       var isEmpty = c.count === 0;
-      return '<div class="cat-card ' + (c.alert&&!isEmpty?'has-alert':'') + '"' +
-        (isEmpty
-          ? ' style="cursor:default;position:relative;overflow:hidden"'
-          : ' style="cursor:pointer" onclick="selectCat(\'' + c.id + '\')"') + '>' +
-        (isEmpty ? '<div style="position:absolute;inset:0;background:#080e1e88;border-radius:10px;display:flex;align-items:center;justify-content:center;z-index:1"><span style="font-size:10px;color:#3a4a6a;font-family:monospace;letter-spacing:1px">COMING SOON</span></div>' : '') +
+      var op = isEmpty ? 'opacity:0.4;' : '';
+      return '<div class="cat-card' + (c.alert&&!isEmpty?' has-alert':'') + '"' +
+        (isEmpty ? ' style="cursor:default"' : ' onclick="selectCat(\'' + c.id + '\')"') + '>' +
+        '<div class="cat-icon" style="' + op + '">' + c.icon + '</div>' +
+        '<div class="cat-name" style="' + op + '">' + c.label + '</div>' +
         (c.alert&&!isEmpty ? '<span class="alert-dot">⚠️</span>' : '') +
-        '<div class="cat-icon" style="' + (isEmpty?'opacity:0.3':'') + '">' + c.icon + '</div>' +
-        '<div class="cat-name" style="' + (isEmpty?'opacity:0.3':'') + '">' + c.label + '</div>' +
-        '<div class="cat-count" style="' + (isEmpty?'opacity:0.3':'') + '">' + (isEmpty ? '準備中' : c.count + '件') + '</div>' +
+        '<div class="cat-count" style="' + op + '">' + (isEmpty ? '準備中' : c.count + '件') + '</div>' +
+        (!isEmpty ? '<span style="color:var(--brand);font-size:16px;margin-left:2px;font-weight:300">›</span>' : '') +
         '</div>';
     }).join('');
     return '<div class="cat-grid">' + cards + '</div>';
