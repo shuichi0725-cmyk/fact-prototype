@@ -620,6 +620,30 @@ const TOPIC_DATA = {
       { stance:"国際人権団体", color:"#9C27B0", summary:"「日本の死刑制度と刑事司法制度は国際基準に照らして問題がある。袴田事件はその最悪の例」と批判。制度改革を強く求める。", sources:["アムネスティ（2024年9月）"] },
     ]
   },
+  endaka_2026: {
+    sources: [
+      { org:"日本経済新聞", type:"全国紙", score:91, lang:"ja", articles:[
+        { title:"ドル円159円台 米雇用統計控えドル買い継続 日銀介入観測も", date:"2026年4月3日", url:"https://www.nikkei.com/article/DGXZQOUB030V30S6A400C2000000/", summary:"米3月雇用統計発表を前にドル買い優勢。一部で「日銀・財務省が介入検討」の観測報道も。" },
+      ]},
+      { org:"Bloomberg Japan", type:"経済通信社", score:95, lang:"ja", articles:[
+        { title:"円安159円 日銀介入の可能性と条件を分析", date:"2026年4月3日", url:"https://www.bloomberg.co.jp/news/articles/2026-04-03", summary:"市場関係者は「160円が介入ラインの目安」と見る。財務省は公式コメントせず。" },
+      ]},
+      { org:"時事ドットコム", type:"通信社", score:92, lang:"ja", articles:[
+        { title:"「日銀介入検討」報道 財務省・日銀はコメントせず", date:"2026年4月3日", url:"https://www.jiji.com/jc/article?k=2026040300602&g=eco", summary:"一部報道の「介入検討」について財務省・日銀は公式コメントを出していない状況。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年2月", event:"ホルムズ海峡危機勃発。原油高が進みリスクオフの円売りが加速。", alert:false },
+      { date:"2026年3月", event:"ドル円が155円台から急速に上昇。原油高・米金利高がダブルで円安要因に。", alert:false },
+      { date:"2026年3月31日", event:"G7財務相・中銀総裁が「市場安定へあらゆる措置」の共同声明を発表。", alert:false },
+      { date:"2026年4月3日", event:"ドル円159円台半ば。一部メディアが「日銀介入検討」を報道。財務省・日銀はコメントせず。", alert:true, msg:"「日銀が為替介入を検討」の報道は根拠が不明確。一次情報（財務省・日銀発表）の確認を推奨。" },
+    ],
+    perspectives: [
+      { stance:"財務省・日銀", color:"#4CAF50", summary:"「過度な変動には適切に対応する」との従来の立場を維持。具体的な介入水準・時期については公式に言及なし。", sources:["財務省定例会見（2026年4月）"] },
+      { stance:"市場・アナリスト", color:"#4a9eff", summary:"「160円が介入ラインの目安」という見方が多い。ただしホルムズ危機という構造的要因がある中で介入効果は限定的との声も。", sources:["Bloomberg調査（2026年4月3日）"] },
+      { stance:"野党・消費者団体", color:"#FF9800", summary:"「円安放置は家計直撃」と政府に対策を求める。ガソリン・食料品・電気代の値上がりが家計を直撃していると指摘。", sources:["各党声明（2026年4月）"] },
+    ]
+  },
   iran_josei: {
     sources: [
       { org:"Bloomberg Japan", type:"経済通信社", score:95, lang:"ja", articles:[
