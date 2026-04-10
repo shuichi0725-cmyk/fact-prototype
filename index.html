@@ -2737,6 +2737,97 @@ function renderRelatedTab(){
 }
 
 
+// ===== 記録ページ検索：部分更新ロジック =====
+var _exploreTimer = null;
+
+function onExploreInput(val){
+  state.exploreQuery = val;
+  // クリアボタン表示切り替え（DOMは再生成しない）
+  var btn = document.getElementById('explore-clear-btn');
+  if(btn) btn.style.display = val ? 'block' : 'none';
+  // 300msデバウンス後に結果エリアだけ更新
+  clearTimeout(_exploreTimer);
+  _exploreTimer = setTimeout(function(){
+    var el = document.getElementById('explore-results');
+    if(el) el.innerHTML = buildExploreResults();
+  }, 300);
+}
+
+function clearExploreSearch(){
+  state.exploreQuery = '';
+  var inp = document.getElementById('explore-search-input');
+  if(inp){ inp.value = ''; inp.focus(); }
+  var btn = document.getElementById('explore-clear-btn');
+  if(btn) btn.style.display = 'none';
+  clearTimeout(_exploreTimer);
+  var el = document.getElementById('explore-results');
+  if(el) el.innerHTML = buildExploreResults();
+}
+
+function onExploreSubmit(){
+  var q = (state.exploreQuery||'').trim();
+  if(!q) return;
+  state.searchQuery = q;
+  state.exploreQuery = '';
+  doSearch();
+}
+
+function buildExploreResults(){
+  var eq = (state.exploreQuery||'').trim();
+  var p = P();
+
+  if(!eq){
+    // カテゴリグリッド（通常表示）
+    var cards = CATEGORIES.map(function(c){
+      var isEmpty = c.count === 0;
+      return '<div class="cat-card ' + (c.alert&&!isEmpty?'has-alert':'') + '"' +
+        (isEmpty
+          ? ' style="cursor:default;position:relative;overflow:hidden"'
+          : ' style="cursor:pointer" onclick="selectCat(\'' + c.id + '\')"') + '>' +
+        (isEmpty ? '<div style="position:absolute;inset:0;background:#080e1e88;border-radius:10px;display:flex;align-items:center;justify-content:center;z-index:1"><span style="font-size:10px;color:#3a4a6a;font-family:monospace;letter-spacing:1px">COMING SOON</span></div>' : '') +
+        (c.alert&&!isEmpty ? '<span class="alert-dot">⚠️</span>' : '') +
+        '<div class="cat-icon" style="' + (isEmpty?'opacity:0.3':'') + '">' + c.icon + '</div>' +
+        '<div class="cat-name" style="' + (isEmpty?'opacity:0.3':'') + '">' + c.label + '</div>' +
+        '<div class="cat-count" style="' + (isEmpty?'opacity:0.3':'') + '">' + (isEmpty ? '準備中' : c.count + '件') + '</div>' +
+        '</div>';
+    }).join('');
+    return '<div class="cat-grid">' + cards + '</div>';
+  }
+
+  // 検索結果
+  var scored = FACT_TOPICS.map(function(t){ return { t:t, s:scoreSearch(t,eq) }; })
+                           .filter(function(x){ return x.s > 0; });
+  scored.sort(function(a,b){ return b.s - a.s; });
+  var matched = scored.map(function(x){ return x.t; });
+
+  if(matched.length === 0){
+    return '<div style="padding:32px 14px;text-align:center">' +
+      '<div style="font-size:28px;margin-bottom:10px">📭</div>' +
+      '<div style="font-size:13px;font-weight:600;color:#e0e6f0;margin-bottom:6px">「' + eq + '」は記録にありません</div>' +
+      '<div style="font-size:11px;color:var(--text-2);margin-bottom:14px">外部ニュースや全DBで検索できます</div>' +
+      '<button onclick="onExploreSubmit()" style="padding:8px 20px;background:var(--brand-dim);border:1px solid rgba(74,158,255,0.3);border-radius:99px;font-size:12px;color:var(--brand);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600">全DBで検索 →</button>' +
+      '</div>';
+  }
+
+  var matchCards = matched.map(function(t){
+    var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color var(--t-fast),background var(--t-fast)"' +
+      ' onclick="goTopic(\''+t.id+'\')"' +
+      ' ontouchstart="this.style.background=\'var(--surface-2)\'" ontouchend="this.style.background=\'var(--surface)\'">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">' +
+      '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
+      '<span style="font-family:monospace;font-size:14px;font-weight:900;color:' + rankColor + '">' + t.score + 'pt</span>' +
+      '</div>' +
+      '<div style="font-size:13px;font-weight:700;color:#e0e6f0;line-height:1.4;margin-bottom:4px">' + t.title + '</div>' +
+      '<div style="font-size:11px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.summary + '</div>' +
+      '</div>';
+  }).join('');
+
+  return '<div style="padding:8px 14px 0">' +
+    '<div style="font-size:11px;color:var(--text-2);margin-bottom:8px">' + matched.length + '件がヒット · <span style="color:var(--brand);cursor:pointer" onclick="onExploreSubmit()">全DBで検索 →</span></div>' +
+    matchCards + '</div>';
+}
+
 function renderExplore(){
   var cat = state.selectedCat;
   var sub = state.selectedSub;
@@ -2752,69 +2843,18 @@ function renderExplore(){
   if(depth===0){
     var eq = (state.exploreQuery||'').trim();
 
-    // 検索バー
+    // 検索バー（oninputでrender()を呼ばない→フォーカス・カーソル位置を維持）
     var searchBar = '<div style="padding:10px 14px 6px">' +
-      '<div style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:8px 14px;gap:8px;transition:border-color var(--t-fast)" id="explore-search-wrap">' +
+      '<div style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:8px 14px;gap:8px">' +
       '<span style="font-size:14px;color:var(--text-2)">🔍</span>' +
-      '<input id="explore-search-input" style="flex:1;background:none;border:none;color:#e0e6f0;font-size:13px;outline:none;font-family:\'Noto Sans JP\',sans-serif" placeholder="記録内を検索..." value="' + eq + '"' +
-      ' oninput="state.exploreQuery=this.value;render()" onkeydown="if(event.key===\'Enter\'&&state.exploreQuery.trim()){state.searchQuery=state.exploreQuery;state.exploreQuery=\'\';doSearch();}">' +
-      (eq ? '<button onclick="state.exploreQuery=\'\';render()" style="background:none;border:none;color:var(--text-2);font-size:18px;cursor:pointer;padding:0;line-height:1">×</button>' : '') +
+      '<input id="explore-search-input" style="flex:1;background:none;border:none;color:#e0e6f0;font-size:13px;outline:none;font-family:\'Noto Sans JP\',sans-serif" placeholder="記録内を検索..." value="' + eq + '" autocomplete="off"' +
+      ' oninput="onExploreInput(this.value)"' +
+      ' onkeydown="if(event.key===\'Enter\'&&!event.isComposing){onExploreSubmit();}">' +
+      '<button id="explore-clear-btn" onclick="clearExploreSearch()" style="background:none;border:none;color:var(--text-2);font-size:20px;cursor:pointer;padding:0 2px;line-height:1;display:' + (eq?'block':'none') + '">×</button>' +
       '</div>' +
-      (eq ? '<div style="font-size:11px;color:var(--text-2);padding:6px 4px 0">Enterで全DBを検索</div>' : '') +
       '</div>';
 
-    // 検索クエリがある場合: マッチするトピックをインライン表示
-    if(eq){
-      var scored = FACT_TOPICS.map(function(t){ return { t:t, s:scoreSearch(t,eq) }; })
-                               .filter(function(x){ return x.s > 0; });
-      scored.sort(function(a,b){ return b.s - a.s; });
-      var matched = scored.map(function(x){ return x.t; });
-
-      if(matched.length === 0){
-        var noMatch = '<div style="padding:32px 14px;text-align:center">' +
-          '<div style="font-size:28px;margin-bottom:10px">📭</div>' +
-          '<div style="font-size:13px;font-weight:600;color:#e0e6f0;margin-bottom:6px">「' + eq + '」は記録にありません</div>' +
-          '<div style="font-size:11px;color:var(--text-2);margin-bottom:14px">外部ニュースで検索しますか？</div>' +
-          '<button onclick="state.searchQuery=state.exploreQuery;state.exploreQuery=\'\';doSearch()" style="padding:8px 20px;background:var(--brand-dim);border:1px solid rgba(74,158,255,0.3);border-radius:99px;font-size:12px;color:var(--brand);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600">全DBで検索 →</button>' +
-          '</div>';
-        return breadcrumb + searchBar + noMatch;
-      }
-
-      var matchCards = matched.map(function(t){
-        var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
-        return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color var(--t-fast),background var(--t-fast)"' +
-          ' onclick="goTopic(\''+t.id+'\')"' +
-          ' onmouseenter="this.style.borderColor=\'var(--border-2)\'" onmouseleave="this.style.borderColor=\'var(--border)\'">' +
-          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">' +
-          '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
-          '<span style="font-family:monospace;font-size:14px;font-weight:900;color:' + rankColor + '">' + t.score + 'pt</span>' +
-          '</div>' +
-          '<div style="font-size:13px;font-weight:700;color:#e0e6f0;line-height:1.4;margin-bottom:4px">' + t.title + '</div>' +
-          '<div style="font-size:11px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.summary + '</div>' +
-          '</div>';
-      }).join('');
-
-      return breadcrumb + searchBar +
-        '<div style="padding:8px 14px 0">' +
-        '<div style="font-size:11px;color:var(--text-2);margin-bottom:8px">' + matched.length + '件がヒット</div>' +
-        matchCards + '</div>';
-    }
-
-    // 通常: カテゴリグリッド
-    var cards = CATEGORIES.map(function(c){
-      var isEmpty = c.count === 0;
-      return '<div class="cat-card ' + (c.alert&&!isEmpty?'has-alert':'') + '"' +
-        (isEmpty
-          ? ' style="cursor:default;position:relative;overflow:hidden"'
-          : ' style="cursor:pointer" onclick="selectCat(\'' + c.id + '\')"') + '>' +
-        (isEmpty ? '<div style="position:absolute;inset:0;background:#080e1e88;border-radius:10px;display:flex;align-items:center;justify-content:center;z-index:1"><span style="font-size:10px;color:#3a4a6a;font-family:monospace;letter-spacing:1px">COMING SOON</span></div>' : '') +
-        (c.alert&&!isEmpty ? '<span class="alert-dot">⚠️</span>' : '') +
-        '<div class="cat-icon" style="' + (isEmpty?'opacity:0.3':'') + '">' + c.icon + '</div>' +
-        '<div class="cat-name" style="' + (isEmpty?'opacity:0.3':'') + '">' + c.label + '</div>' +
-        '<div class="cat-count" style="' + (isEmpty?'opacity:0.3':'') + '">' + (isEmpty ? '準備中' : c.count + '件') + '</div>' +
-        '</div>';
-    }).join('');
-    return breadcrumb + searchBar + '<div class="cat-grid">' + cards + '</div>';
+    return breadcrumb + searchBar + '<div id="explore-results">' + buildExploreResults() + '</div>';
   }
 
   if(depth===1){
