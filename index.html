@@ -358,7 +358,23 @@ let FACT_TOPICS = [];
 
 let TOPIC_DATA = {};
 
-
+// 詳細データの遅延ロード
+var _detailLoaded = false;
+var _detailLoadPromise = null;
+function ensureDetailLoaded() {
+  if (_detailLoaded) return Promise.resolve();
+  if (_detailLoadPromise) return _detailLoadPromise;
+  _detailLoadPromise = fetch('./data/topics_detail.json')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      TOPIC_DATA = d.TOPIC_DATA;
+      _detailLoaded = true;
+    })
+    .catch(function(e){
+      console.error('topics_detail.json の読み込みに失敗:', e);
+    });
+  return _detailLoadPromise;
+}
 
 
 
@@ -1678,6 +1694,10 @@ function renderSearchTab(tab, score){
 }
 
 function renderSummaryTab(){
+  if(!_detailLoaded){
+    ensureDetailLoaded().then(function(){ render(); });
+    return '<div style="padding:60px 0;text-align:center;color:var(--text-2);font-size:13px">読み込み中...</div>';
+  }
   var p = P();
 
   // 現在のトピックを特定
@@ -1758,6 +1778,10 @@ function renderSummaryTab(){
 }
 
 function renderTimelineTab(){
+  if(!_detailLoaded){
+    ensureDetailLoaded().then(function(){ render(); });
+    return '<div style="padding:60px 0;text-align:center;color:var(--text-2);font-size:13px">読み込み中...</div>';
+  }
   var p = P();
   var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
   var currentData = TOPIC_DATA[currentTopic.id] || TOPIC_DATA['hakamada_muzai'];
@@ -1806,6 +1830,10 @@ function renderTimelineTab(){
 
 
 function renderSourcesTab(){
+  if(!_detailLoaded){
+    ensureDetailLoaded().then(function(){ render(); });
+    return '<div style="padding:60px 0;text-align:center;color:var(--text-2);font-size:13px">読み込み中...</div>';
+  }
   var p = P();
   var q = state.searchQuery;
   if(state.sourceSort === undefined) state.sourceSort = 'score';
@@ -1918,6 +1946,10 @@ function renderSourcesTab(){
 
 
 function renderPerspectivesTab(){
+  if(!_detailLoaded){
+    ensureDetailLoaded().then(function(){ render(); });
+    return '<div style="padding:60px 0;text-align:center;color:var(--text-2);font-size:13px">読み込み中...</div>';
+  }
   var p = P();
   var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
   var currentData = TOPIC_DATA[currentTopic.id] || TOPIC_DATA['hakamada_muzai'];
@@ -2787,17 +2819,16 @@ if('serviceWorker' in navigator){
   });
 }
 
-// 初期描画：topics.json をフェッチしてからレンダリング
+// 初期描画：topics_meta.json をフェッチしてからレンダリング（詳細データは遅延ロード）
 applyColorMode();
-fetch('./data/topics.json')
+fetch('./data/topics_meta.json')
   .then(function(r){ return r.json(); })
   .then(function(d){
     FACT_TOPICS = d.FACT_TOPICS;
-    TOPIC_DATA  = d.TOPIC_DATA;
     render();
   })
   .catch(function(e){
-    console.error('topics.json の読み込みに失敗しました:', e);
+    console.error('topics_meta.json の読み込みに失敗しました:', e);
     render();
   });
 </script>
