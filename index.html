@@ -12,136 +12,265 @@
 <title>FACT — Verified Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
+/* ===== デザインシステム (ui-ux-pro-max principles: News/FactCheck / Dark Editorial) ===== */
+:root {
+  --brand:      #4a9eff;
+  --brand-dim:  rgba(74,158,255,0.12);
+  --brand-glow: rgba(74,158,255,0.18);
+
+  /* サーフェス階層 */
+  --bg:         #080e1e;
+  --surface:    #0c1525;
+  --surface-2:  #0f1e35;
+  --surface-3:  #132240;
+
+  /* ボーダー */
+  --border:     #1a2a4a;
+  --border-2:   #2a4272;
+
+  /* テキスト (WCAG AA 4.5:1 以上) */
+  --text-1:     #e0e6f0;   /* primary  ≈ 12:1 */
+  --text-2:     #8899b0;   /* secondary ≈ 5.5:1 */
+  --text-3:     #5a6a80;   /* tertiary  ≈ 3.5:1 (非クリティカル用途のみ) */
+
+  /* ステータス */
+  --success:    #4caf50;
+  --warn:       #ff9800;
+  --danger:     #ef5350;
+
+  /* トランジション (article checklist: 150–300ms) */
+  --t-fast:     150ms ease;
+  --t-mid:      250ms ease;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-:root { --brand: #4a9eff; }
-body { background: #080e1e; color: #e0e6f0; font-family: 'Noto Sans JP', sans-serif; display: flex; justify-content: center; }
+body { background: var(--bg); color: var(--text-1); font-family: 'Noto Sans JP', sans-serif; display: flex; justify-content: center; }
 ::-webkit-scrollbar { display: none; }
 
-#app { width: 100%; max-width: 400px; min-height: 100vh; display: flex; flex-direction: column; position: relative; background: #080e1e; }
+/* フォーカスリング (キーボードナビ / a11y) */
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px; }
+
+#app { width: 100%; max-width: 400px; min-height: 100vh; display: flex; flex-direction: column; position: relative; background: var(--bg); }
 
 /* ヘッダー */
-#header { background: #0c1525; border-bottom: 1px solid #1a2a4a; padding: 12px 16px; display: flex; align-items: center; gap: 10; flex-shrink: 0; }
+#header {
+  background: rgba(12,21,37,0.85);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 10;
+  flex-shrink: 0;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 var(--border), 0 4px 16px rgba(0,0,0,0.3);
+}
 .logo { font-family: monospace; font-weight: 900; font-size: 18px; color: var(--brand); letter-spacing: 2px; }
-.logo-sub { font-size: 10px; color: var(--brand); letter-spacing: 1px; opacity: 0.6; margin-left: 8px; }
-.sensitivity-badge { margin-left: auto; font-size: 10px; color: #555; font-family: monospace; }
+.logo-sub { font-size: 10px; color: var(--brand); letter-spacing: 1px; opacity: 0.55; margin-left: 8px; }
+.sensitivity-badge { margin-left: auto; font-size: 10px; color: var(--text-3); font-family: monospace; }
 
 /* コンテンツ */
 #content { flex: 1; overflow-y: auto; padding-bottom: 70px; }
 
 /* 下部ナビ */
-#bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: #0c1525; border-top: 1px solid #1a2a4a; display: flex; z-index: 50; }
-.nav-btn { flex: 1; padding: 9px 2px 7px; display: flex; flex-direction: column; align-items: center; gap: 2px; border: none; background: none; cursor: pointer; border-top: 2px solid transparent; transition: border-color 0.2s; }
-.nav-btn.active { border-top-color: var(--brand); }
-.nav-btn.active .nav-label { color: var(--brand); }
+#bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 400px;
+  background: rgba(12,21,37,0.92);
+  border-top: 1px solid var(--border);
+  display: flex; z-index: 50;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+}
+.nav-btn {
+  flex: 1; padding: 9px 2px 7px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  border: none; background: none; cursor: pointer;
+  border-top: 2px solid transparent;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.nav-btn:hover { background: var(--brand-dim); }
+.nav-btn:active { background: var(--brand-glow); }
+.nav-btn.active { border-top-color: var(--brand); background: var(--brand-dim); }
+.nav-btn.active .nav-label { color: var(--brand); font-weight: 600; }
 .nav-icon { font-size: 16px; }
-.nav-btn:not(.active) .nav-icon { filter: grayscale(1) opacity(0.5); }
-.nav-label { font-size: 8.5px; color: #555; letter-spacing: 0.3px; }
+.nav-btn:not(.active) .nav-icon { filter: grayscale(1) opacity(0.45); }
+.nav-label { font-size: 8.5px; color: var(--text-2); letter-spacing: 0.3px; }
 
 /* 共通 */
 .section { padding: 14px 14px 0; }
-.section-title { font-size: 10px; color: var(--brand); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; font-family: monospace; }
-.card { background: #0c1525; border: 1px solid #1a2a4a; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
-.card.clickable { cursor: pointer; transition: border-color 0.2s; }
-.card.clickable:hover { border-color: #2a4a7a; }
+.section-title {
+  font-size: 10px; color: var(--brand); letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 10px; font-family: monospace;
+  padding-left: 8px;
+  border-left: 2px solid var(--brand);
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.card.clickable { cursor: pointer; transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast); }
+.card.clickable:hover { border-color: var(--border-2); box-shadow: 0 0 0 1px var(--brand-dim), 0 4px 16px rgba(0,0,0,0.3); background: var(--surface-2); }
+.card.clickable:active { background: var(--surface-2); transform: scale(0.992); transition: transform 0.1s, background 0.1s; }
 
 /* カテゴリグリッド */
 .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px; }
-.cat-card { background: #0c1525; border: 1px solid #1a2a4a; border-radius: 10px; padding: 14px 12px; cursor: pointer; position: relative; transition: border-color 0.2s; }
-.cat-card:hover { border-color: #2a4a7a; }
+.cat-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 12px; cursor: pointer; position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast), background var(--t-fast);
+}
+.cat-card:hover { border-color: var(--border-2); box-shadow: 0 0 0 1px var(--brand-dim), 0 6px 20px rgba(0,0,0,0.35); background: var(--surface-2); }
+.cat-card:active { transform: scale(0.96); }
 .cat-card.has-alert { border-color: #FF980044; }
 .cat-card .cat-icon { font-size: 24px; margin-bottom: 6px; }
 .cat-card .cat-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
-.cat-card .cat-count { font-size: 10px; color: #555; }
-.cat-card .alert-dot { position: absolute; top: 8px; right: 8px; font-size: 10px; color: #FF9800; }
+.cat-card .cat-count { font-size: 10px; color: var(--text-2); }
+.cat-card .alert-dot { position: absolute; top: 8px; right: 8px; font-size: 10px; color: var(--warn); }
 
 /* スコアバー */
 .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
-.score-bar-track { flex: 1; height: 6px; background: #1a2035; border-radius: 99px; overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+.score-bar-track { flex: 1; height: 6px; background: rgba(26,32,53,0.8); border-radius: 99px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
 .score-val { font-family: monospace; font-size: 13px; font-weight: 700; min-width: 28px; }
 
 /* タグ */
 .type-tag { font-size: 10px; padding: 2px 8px; border-radius: 99px; border: 1px solid; display: inline-block; }
-.tag-nhk { color: #4a9eff; background: #4a9eff22; border-color: #4a9eff44; }
-.tag-paper { color: #8BC34A; background: #8BC34A22; border-color: #8BC34A44; }
-.tag-gov { color: #FF9800; background: #FF980022; border-color: #FF980044; }
-.tag-academic { color: #9C27B0; background: #9C27B022; border-color: #9C27B044; }
+.tag-nhk      { color: #5aaeff; background: rgba(74,158,255,0.12); border-color: rgba(74,158,255,0.3); }
+.tag-paper    { color: #8BC34A; background: rgba(139,195,74,0.1);  border-color: rgba(139,195,74,0.3); }
+.tag-gov      { color: #ff9800; background: rgba(255,152,0,0.1);   border-color: rgba(255,152,0,0.3); }
+.tag-academic { color: #c97fe0; background: rgba(156,39,176,0.1);  border-color: rgba(156,39,176,0.3); }
 
 /* アラートバッジ */
-.alert-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 4px; font-size: 11px; cursor: pointer; border: 1px solid; }
+.alert-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 4px; font-size: 11px; cursor: pointer; border: 1px solid; transition: opacity var(--t-fast); }
+.alert-badge:hover { opacity: 0.8; }
 
 /* タブ */
-.tabs { display: flex; border-bottom: 1px solid #1a2a4a; overflow-x: auto; scrollbar-width: none; }
+.tabs { display: flex; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
-.tab-btn { padding: 10px 14px; font-size: 11px; white-space: nowrap; border: none; background: none; color: #555; border-bottom: 2px solid transparent; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: color 0.2s; }
-.tab-btn.active { color: #4a9eff; border-bottom-color: #4a9eff; font-weight: 700; }
+.tab-btn {
+  padding: 10px 14px; font-size: 11px; white-space: nowrap;
+  border: none; background: none; color: var(--text-2);
+  border-bottom: 2px solid transparent; cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+.tab-btn:hover { color: var(--text-1); }
+.tab-btn.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 700; }
 
 /* 検索ボックス */
 .search-box { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; }
-.search-input { flex: 1; background: #0c1525; border: 1px solid #1a2a4a; border-radius: 8px; padding: 10px 14px; color: #e0e6f0; font-size: 14px; outline: none; font-family: 'Noto Sans JP', sans-serif; transition: border-color 0.2s; }
-.search-input:focus { border-color: #4a9eff44; }
-.search-input::placeholder { color: #444; }
-.search-btn { padding: 10px 16px; background: #4a9eff; border: none; border-radius: 8px; color: #fff; font-weight: 700; cursor: pointer; font-size: 13px; white-space: nowrap; font-family: 'Noto Sans JP', sans-serif; }
+.search-input {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; color: var(--text-1); font-size: 14px;
+  outline: none; font-family: 'Noto Sans JP', sans-serif;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.search-input:focus { border-color: rgba(74,158,255,0.5); box-shadow: 0 0 0 3px var(--brand-dim); }
+.search-input::placeholder { color: var(--text-3); }
+.search-btn {
+  padding: 10px 16px; background: var(--brand); border: none; border-radius: 8px;
+  color: #fff; font-weight: 700; cursor: pointer; font-size: 13px;
+  white-space: nowrap; font-family: 'Noto Sans JP', sans-serif;
+  transition: background var(--t-fast), box-shadow var(--t-fast);
+}
+.search-btn:hover { background: #5aaaff; box-shadow: 0 2px 12px rgba(74,158,255,0.3); }
+.search-btn:active { background: #3a8ee0; }
 
 /* パンくず */
-.breadcrumb { padding: 10px 14px; font-size: 12px; color: #555; display: flex; align-items: center; gap: 4px; background: #0c1830; border-bottom: 2px solid #1a3a6a; }
-.breadcrumb .crumb-link { color: #4a9eff; cursor: pointer; font-weight: 700; padding: 3px 8px; border-radius: 6px; transition: background 0.15s; }
-.breadcrumb .crumb-link:hover { background: rgba(74,158,255,0.15); }
-.breadcrumb .crumb-current { color: #e0e6f0; font-weight: 600; padding: 3px 8px; }
-.breadcrumb .crumb-sep { color: #2a4a7a; font-size: 14px; font-weight: 300; }
-.breadcrumb .back-hint { margin-left: auto; font-size: 10px; color: #2a5a9a; display: flex; align-items: center; gap: 3px; }
+.breadcrumb {
+  padding: 10px 14px; font-size: 12px; color: var(--text-2);
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(12,24,48,0.7);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.breadcrumb .crumb-link { color: var(--brand); cursor: pointer; font-weight: 700; padding: 3px 8px; border-radius: 6px; transition: background var(--t-fast); }
+.breadcrumb .crumb-link:hover { background: var(--brand-dim); }
+.breadcrumb .crumb-current { color: var(--text-1); font-weight: 600; padding: 3px 8px; }
+.breadcrumb .crumb-sep { color: var(--border-2); font-size: 14px; font-weight: 300; }
+.breadcrumb .back-hint { margin-left: auto; font-size: 10px; color: var(--text-3); display: flex; align-items: center; gap: 3px; }
 
 /* タイムライン */
 .timeline-item { display: flex; gap: 12px; margin-bottom: 16px; }
-.timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
-.timeline-line { width: 1px; flex: 1; background: #1a2a4a; margin-top: 4px; margin-left: 4px; }
+.timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; box-shadow: 0 0 6px currentColor; }
+.timeline-line { width: 1px; flex: 1; background: var(--border); margin-top: 4px; margin-left: 4px; }
 
 /* ポップアップ */
-#popup-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: flex-end; padding-bottom: 80px; }
+#popup-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 100; align-items: flex-end; padding-bottom: 0;
+}
 #popup-overlay.show { display: flex; }
-#popup-box { background: #0f1729; border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-width: 400px; margin: 0 auto; animation: slideUp 0.25s ease; }
-@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+#popup-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: 20px 20px 0 0; padding: 20px;
+  width: 100%; max-width: 400px; margin: 0 auto;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.7);
+  max-height: 85vh; overflow-y: auto;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeUp   { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* 水平スクロール */
 .hscroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 14px; scrollbar-width: none; }
 .hscroll::-webkit-scrollbar { display: none; }
-.hscroll-card { flex: 0 0 auto; background: #0c1525; border: 1px solid #1a2a4a; border-radius: 10px; padding: 10px 14px; cursor: pointer; text-align: center; min-width: 80px; }
+.hscroll-card {
+  flex: 0 0 auto; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 14px; cursor: pointer; text-align: center; min-width: 80px;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.hscroll-card:hover { border-color: var(--border-2); background: var(--surface-2); }
 
 /* range input */
-input[type=range] { width: 100%; accent-color: #4a9eff; }
+input[type=range] { width: 100%; accent-color: var(--brand); }
 
-.source-card { background: #0c1525; border: 1px solid #1a2a4a; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; }
+/* ソース・視点カード */
+.source-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: border-color var(--t-fast);
+}
+.perspective-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: border-color var(--t-fast);
+}
 
-.perspective-card { background: #0c1525; border: 1px solid #1a2a4a; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+/* フィルターボタン */
+.filter-btn {
+  padding: 4px 10px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 99px; font-size: 11px; color: var(--text-2); cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+}
+.filter-btn:hover { border-color: var(--border-2); color: var(--text-1); background: var(--surface-2); }
+.filter-btn.active { border-color: var(--brand); color: var(--brand); background: var(--brand-dim); }
 
-.filter-btn { padding: 4px 10px; background: #0c1525; border: 1px solid #1a2a4a; border-radius: 99px; font-size: 11px; color: #888; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+/* インフォ・警告ボックス */
+.info-box { padding: 8px 12px; background: rgba(74,158,255,0.07); border: 1px solid rgba(74,158,255,0.25); border-radius: 8px; font-size: 11px; color: var(--brand); margin-bottom: 14px; line-height: 1.6; }
+.warn-box { padding: 8px 10px; background: rgba(255,152,0,0.07); border: 1px solid rgba(255,152,0,0.3); border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-top: 10px; transition: background var(--t-fast); }
+.warn-box:hover { background: rgba(255,152,0,0.12); }
 
-.info-box { padding: 8px 12px; background: #4a9eff11; border: 1px solid #4a9eff33; border-radius: 8px; font-size: 11px; color: #4a9eff; margin-bottom: 14px; line-height: 1.6; }
-.warn-box { padding: 8px 10px; background: #FF980011; border: 1px solid #FF980044; border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-top: 10px; }
-
-/* タップフィードバック */
-.card.clickable:active { background: #0f1e35; transform: scale(0.992); transition: transform 0.1s, background 0.1s; }
-.cat-card:active { transform: scale(0.97); transition: transform 0.1s; }
-
-/* ポップアップ改善 */
-#popup-overlay { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-#popup-box { border: 1px solid #1a2a4a; box-shadow: 0 -8px 40px rgba(0,0,0,0.6); max-height: 85vh; overflow-y: auto; border-radius: 20px 20px 0 0; }
-@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-/* スコアバーアニメーション */
-.score-bar-fill { transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
-
-/* ナビゲーション改善 */
-.nav-btn { transition: border-color 0.2s, color 0.2s; }
-.nav-btn:active { background: rgba(74,158,255,0.08); }
-
-/* ページ遷移アニメーション */
+/* ページ遷移 */
 @keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 #content.page-enter { animation: pageIn 0.18s ease-out; }
 
-/* ヘッダー */
-#header { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+/* prefers-reduced-motion (article checklist 必須項目) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .score-bar-fill { transition: none !important; }
+}
 </style>
 </head>
 <body>
@@ -179,7 +308,7 @@ input[type=range] { width: 100%; accent-color: #4a9eff; }
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
       <span id="popup-icon" style="font-size:20px;"></span>
       <span id="popup-type" style="font-weight:700;font-size:14px;"></span>
-      <button onclick="closePopup()" style="margin-left:auto;background:none;border:none;color:#555;font-size:22px;cursor:pointer;">×</button>
+      <button onclick="closePopup()" style="margin-left:auto;background:none;border:none;color:var(--text-2);font-size:22px;cursor:pointer;">×</button>
     </div>
     <p id="popup-msg" style="font-size:13px;color:#ccc;line-height:1.7;margin-bottom:16px;"></p>
     <button style="width:100%;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;" id="popup-btn">詳細を見る →</button>
@@ -1434,8 +1563,8 @@ function renderAd(){
     <div onclick="event.stopPropagation()" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:flex;align-items:flex-end;justify-content:center;max-width:400px;left:50%;transform:translateX(-50%)" onclick="void(0)">
       <div style="width:100%;background:#0f1729;border-radius:20px 20px 0 0;padding:24px;animation:slideUp 0.3s ease">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <span style="font-size:10px;color:#555;letter-spacing:2px">AD</span>
-          <div id="ad-countdown" style="font-size:11px;color:#555">${state.adCountdown}秒後にスキップ</div>
+          <span style="font-size:10px;color:var(--text-2);letter-spacing:2px">AD</span>
+          <div id="ad-countdown" style="font-size:11px;color:var(--text-2)">${state.adCountdown}秒後にスキップ</div>
         </div>
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
           <div style="width:60px;height:60px;background:${d.color};border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${d.emoji}</div>
@@ -1454,8 +1583,8 @@ function renderAd(){
     <div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;max-width:400px;left:50%;transform:translateX(-50%)">
       <div style="background:#0f1729;border-radius:16px;padding:24px;width:100%;max-width:340px;animation:fadeUp 0.3s ease">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <span style="font-size:10px;color:#555;letter-spacing:2px">AD</span>
-          <div id="ad-countdown" style="font-size:11px;color:#555">${state.adCountdown}秒後にスキップ</div>
+          <span style="font-size:10px;color:var(--text-2);letter-spacing:2px">AD</span>
+          <div id="ad-countdown" style="font-size:11px;color:var(--text-2)">${state.adCountdown}秒後にスキップ</div>
         </div>
         <div style="text-align:center;margin-bottom:20px">
           <div style="font-size:48px;margin-bottom:12px">${d.emoji}</div>
@@ -1491,12 +1620,13 @@ function typeClass(t){ return {公共放送:"tag-nhk",主要紙:"tag-paper",政�
 function scoreBarHTML(score, sm=false){
   const c=scoreColor(score), h=sm?4:6;
   const sym=scoreSymbol(score);
-  const pattern=state.colorMode==="mono"?"repeating-linear-gradient(45deg,"+c+","+c+" 2px,transparent 2px,transparent 6px)":"linear-gradient(90deg,"+c+"88,"+c+")";
+  const pattern=state.colorMode==="mono"?"repeating-linear-gradient(45deg,"+c+","+c+" 2px,transparent 2px,transparent 6px)":"linear-gradient(90deg,"+c+"66,"+c+")";
+  const glow=state.colorMode==="mono"?"":"box-shadow:0 0 6px "+c+"55;";
   return `<div class="score-bar-wrap">
     <div class="score-bar-track" style="height:${h}px">
-      <div class="score-bar-fill" style="width:${score}%;background:${pattern}"></div>
+      <div class="score-bar-fill" style="width:${score}%;background:${pattern};${glow}"></div>
     </div>
-    <span class="score-val" style="color:${c};font-size:${sm?11:13}px">${sym}${score}</span>
+    <span class="score-val" style="color:${c};font-size:${sm?11:13}px;text-shadow:0 0 8px ${c}66">${sym}${score}</span>
   </div>`;
 }
 
@@ -1576,7 +1706,7 @@ function renderHome(){
       border-bottom:2px solid ${state.homeTab===t.id?p.brand:'transparent'};
       transition:border-color 0.2s, color 0.2s;">
       <span style="font-size:${state.homeTab===t.id?'19':'16'}px;transition:font-size 0.15s">${t.icon}</span>
-      <span style="font-size:10px;color:${state.homeTab===t.id?p.brand:'#555'};font-weight:${state.homeTab===t.id?700:400};letter-spacing:0.3px">${t.label}</span>
+      <span style="font-size:10px;color:${state.homeTab===t.id?p.brand:'#8899b0'};font-weight:${state.homeTab===t.id?700:400};letter-spacing:0.3px">${t.label}</span>
     </button>`).join('');
 
   return `
@@ -1612,18 +1742,18 @@ function renderHomeTab(tab){
   if(tab === 'alerts') return `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div class="section-title" style="margin-bottom:0">⚠️ 今日の注意喚起</div>
-      <span style="font-size:10px;color:#555">AIが自動検出</span>
+      <span style="font-size:10px;color:var(--text-2)">AIが自動検出</span>
     </div>
     ${ALERTS.slice(0,alertCount).map(a=>{
       const c=alertColor(a.type), icon=alertIcon(a.type);
       const d=encodeURIComponent(JSON.stringify(a));
       return `<div class="card clickable" onclick="showPopup(decodeURIComponent('${d}'))">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-          <span style="font-size:11px;color:#555">${a.cat}</span>
+          <span style="font-size:11px;color:var(--text-2)">${a.cat}</span>
           <span style="font-size:10px;color:${c};background:${c}22;padding:1px 7px;border-radius:99px;border:1px solid ${c}44">${a.sev==="high"?"重要":"注意"}</span>
         </div>
         <div style="font-size:13px;font-weight:600;margin-bottom:4px">${icon} ${a.title}</div>
-        <div style="font-size:11px;color:#888;line-height:1.5">${a.msg.slice(0,60)}...</div>
+        <div style="font-size:11px;color:var(--text-2);line-height:1.5">${a.msg.slice(0,60)}...</div>
         ${archiveLinkHTML(a.topicId)}
       </div>`;
     }).join("")}`;
@@ -1643,7 +1773,7 @@ function renderHomeTab(tab){
       }).join('') + '</div></div>';
     var rankColors = ['#FFD700','#C0C0C0','#CD7F32'];
     return periodBar + rankData.map(function(t, i){
-      var chColor = t.change.startsWith('↑') ? p.high : t.change.startsWith('↓') ? p.danger : t.change==='new' ? p.warn : '#555';
+      var chColor = t.change.startsWith('↑') ? p.high : t.change.startsWith('↓') ? p.danger : t.change==='new' ? p.warn : '#8899b0';
       var kNum = t.searches >= 100000 ? (t.searches/10000).toFixed(0)+'万' : t.searches >= 1000 ? (t.searches/1000).toFixed(1)+'k' : t.searches+'';
       var barWidth = Math.round((t.searches / maxSearches) * 100);
       var rankNumColor = i < 3 ? rankColors[i] : '#2a4a7a';
@@ -1654,7 +1784,7 @@ function renderHomeTab(tab){
         '<div style="flex:1;min-width:0">' +
         '<div style="font-size:13px;font-weight:700;margin-bottom:4px;line-height:1.4">' + t.title + '</div>' +
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">' +
-        '<span style="font-size:10px;color:#555">' + t.cat + '</span>' +
+        '<span style="font-size:10px;color:var(--text-2)">' + t.cat + '</span>' +
         '<span style="font-size:10px;color:'+chColor+';font-family:monospace;font-weight:700">' + t.change + '</span>' +
         '</div>' +
         (t.why ? '<div style="font-size:11px;color:#3a5a8a;line-height:1.5;margin-bottom:8px">💡 ' + t.why + '</div>' : '') +
@@ -1675,7 +1805,7 @@ function renderHomeTab(tab){
     return '<div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
       '<div class="section-title" style="margin-bottom:0">📅 今日のピックアップ</div>' +
-      '<span style="font-size:10px;color:#555">編集部セレクト · ' + (new Date().getMonth()+1) + '/' + new Date().getDate() + '</span>' +
+      '<span style="font-size:10px;color:var(--text-2)">編集部セレクト · ' + (new Date().getMonth()+1) + '/' + new Date().getDate() + '</span>' +
       '</div>' +
       PICKUP.map(function(item){
         var lc = labelColors[item.label] || p.warn;
@@ -1684,7 +1814,7 @@ function renderHomeTab(tab){
           '<div style="padding:14px 14px 12px">' +
           '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">' +
           '<span style="font-size:10px;font-weight:700;color:'+lc+';background:'+lc+'22;padding:2px 10px;border-radius:99px;border:1px solid '+lc+'44">' + item.label + '</span>' +
-          '<span style="font-size:10px;color:#555">' + item.cat + '</span>' +
+          '<span style="font-size:10px;color:var(--text-2)">' + item.cat + '</span>' +
           (item.hasFollowup ? '<span style="font-size:10px;color:#4a9eff;background:#4a9eff11;border:1px solid #4a9eff33;padding:2px 8px;border-radius:99px;margin-left:auto">🔄 続報あり</span>' : '') +
           '</div>' +
           '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">' +
@@ -1721,7 +1851,7 @@ function renderHomeTab(tab){
     return '<div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
       '<div class="section-title" style="margin-bottom:0">🔄 続報</div>' +
-      '<span style="font-size:10px;color:#555">追いかけているニュース ' + FOLLOWUP.length + '件</span>' +
+      '<span style="font-size:10px;color:var(--text-2)">追いかけているニュース ' + FOLLOWUP.length + '件</span>' +
       '</div>' +
       FOLLOWUP.map(function(f){
         var sc = statusColors[f.statusColor] || p.warn;
@@ -1733,7 +1863,7 @@ function renderHomeTab(tab){
           '<span style="font-size:20px">' + f.icon + '</span>' +
           '<div style="flex:1;min-width:0">' +
           '<div style="font-size:13px;font-weight:700;color:#e0e6f0;margin-bottom:2px">' + f.title + '</div>' +
-          '<div style="font-size:10px;color:#555">' + f.cat + '</div>' +
+          '<div style="font-size:10px;color:var(--text-2)">' + f.cat + '</div>' +
           '</div>' +
           '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">' +
           '<span style="font-size:10px;color:'+sc+';background:'+sc+'22;padding:2px 8px;border-radius:99px;border:1px solid '+sc+'44;white-space:nowrap">' + f.status + '</span>' +
@@ -1745,7 +1875,7 @@ function renderHomeTab(tab){
           '<div style="font-size:10px;color:#3a5a7a;font-family:monospace;margin-bottom:6px;letter-spacing:0.5px">最新アップデート</div>' +
           (latestUpdate ? '<div style="display:flex;gap:8px">' +
             '<div style="width:6px;height:6px;border-radius:50%;background:'+sc+';flex-shrink:0;margin-top:4px"></div>' +
-            '<div><div style="font-size:10px;color:#555;font-family:monospace;margin-bottom:2px">' + latestUpdate.date + '</div>' +
+            '<div><div style="font-size:10px;color:var(--text-2);font-family:monospace;margin-bottom:2px">' + latestUpdate.date + '</div>' +
             '<div style="font-size:12px;color:#bbb;line-height:1.5">' + latestUpdate.text + '</div>' +
             '</div></div>' : '') +
           '</div>' +
@@ -1781,12 +1911,12 @@ function renderRankingSection(){
   });
   html += '</div>';
   rankData.forEach(function(t){
-    var chColor = t.change.indexOf('↑')>=0 ? p.high : t.change.indexOf('↓')>=0 ? p.danger : t.change==='new' ? p.warn : '#555';
+    var chColor = t.change.indexOf('↑')>=0 ? p.high : t.change.indexOf('↓')>=0 ? p.danger : t.change==='new' ? p.warn : '#8899b0';
     html += '<div class="card clickable" style="display:flex;align-items:center;gap:10px;margin-bottom:6px" onclick="t.topicId?goTopic(t.topicId):setSearchQuery(t.title)" data-title="' + t.title.replace(/"/g,'&quot;') + '">';
     html += '<div style="font-family:monospace;font-size:16px;font-weight:900;color:#1a3a6a;min-width:20px;text-align:center">' + t.rank + '</div>';
     html += '<div style="flex:1;min-width:0">';
     html += '<div style="font-size:12px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.title + '</div>';
-    html += '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:#555">' + t.cat + '</span><span style="font-size:10px;color:' + chColor + ';font-family:monospace">' + t.change + '</span></div>';
+    html += '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--text-2)">' + t.cat + '</span><span style="font-size:10px;color:' + chColor + ';font-family:monospace">' + t.change + '</span></div>';
     html += '</div></div>';
   });
   html += '</div>';
@@ -1891,8 +2021,8 @@ function renderFilterTags(){
   const activeCount = (f.cats.length) + (f.types?f.types.length:0) + (f.trust?1:0) + (f.period?1:0) + (f.alert?1:0);
   return `<div style="padding:8px 14px 4px;border-bottom:1px solid #0f1a2e">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <span style="font-size:10px;color:#555;letter-spacing:1px">絞り込み</span>
-      ${activeCount>0?`<button onclick="clearFilters()" style="padding:2px 10px;background:transparent;border:1px solid #333;border-radius:99px;font-size:10px;color:#888;cursor:pointer;font-family:'Noto Sans JP',sans-serif">× ${activeCount}件クリア</button>`:''}
+      <span style="font-size:10px;color:var(--text-2);letter-spacing:1px">絞り込み</span>
+      ${activeCount>0?`<button onclick="clearFilters()" style="padding:2px 10px;background:transparent;border:1px solid #333;border-radius:99px;font-size:10px;color:var(--text-2);cursor:pointer;font-family:'Noto Sans JP',sans-serif">× ${activeCount}件クリア</button>`:''}
     </div>
     ${TAG_GROUPS.map(g=>{
       const tags = g.values.map(v=>{
@@ -1908,7 +2038,7 @@ function renderFilterTags(){
         return `<button onclick="toggleFilter('${g.type}','${val}')" style="flex-shrink:0;padding:5px 12px;background:${bg};border:1px solid ${bc};border-radius:99px;font-size:11px;color:${tc};cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif">${active?'✓ ':''}${lbl}</button>`;
       }).join('');
       return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch">
-        <span style="font-size:10px;color:#444;flex-shrink:0;min-width:40px;padding-right:4px">${g.label}</span>
+        <span style="font-size:10px;color:var(--text-3);flex-shrink:0;min-width:40px;padding-right:4px">${g.label}</span>
         <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1">${tags}</div>
       </div>`;
     }).join('')}
@@ -1985,7 +2115,7 @@ function renderSearchResults(p){
     var alertBadge = t.alert ?
       '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px">⚠️ 注意</span>' : '';
     var tags = (t.tags||[]).map(function(tag){
-      return '<span style="font-size:10px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + tag + '</span>';
+      return '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + tag + '</span>';
     }).join('');
 
     return '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer"' +
@@ -1993,7 +2123,7 @@ function renderSearchResults(p){
       ' onclick="goTopicDetail(this)">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
       '<div style="display:flex;align-items:center;gap:6px">' +
-      '<span style="font-size:11px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
+      '<span style="font-size:11px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
       alertBadge +
       '</div>' +
       '<div style="display:flex;align-items:baseline;gap:2px">' +
@@ -2004,8 +2134,8 @@ function renderSearchResults(p){
       '<div style="font-size:12px;color:#777;line-height:1.7;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + t.summary + '</div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between">' +
       '<div style="display:flex;align-items:center;gap:10px">' +
-      '<span style="font-size:11px;color:#555">📰 ' + t.sourceCount + '件のソースを分析</span>' +
-      '<span style="font-size:11px;color:#555">📅 ' + t.date + '</span>' +
+      '<span style="font-size:11px;color:var(--text-2)">📰 ' + t.sourceCount + '件のソースを分析</span>' +
+      '<span style="font-size:11px;color:var(--text-2)">📅 ' + t.date + '</span>' +
       '</div>' +
       '<div style="font-size:12px;color:' + p.brand + ';font-weight:600">詳細を見る →</div>' +
       '</div>' +
@@ -2017,15 +2147,15 @@ function renderSearchResults(p){
 
     // 検索バー
     '<div style="padding:10px 14px;border-bottom:1px solid #1a2a4a;background:#0c1525;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:8px">' +
-    '<span style="font-size:14px;color:#555">🔍</span>' +
+    '<span style="font-size:14px;color:var(--text-2)">🔍</span>' +
     '<span style="font-size:14px;color:#e0e6f0;flex:1;font-weight:600">' + q + '</span>' +
-    '<button onclick="state.searchFocused=true;state.searched=false;render()" style="padding:5px 12px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:#555;font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">変更</button>' +
+    '<button onclick="state.searchFocused=true;state.searched=false;render()" style="padding:5px 12px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:var(--text-2);font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">変更</button>' +
     '</div>' +
 
     // 結果件数・説明
     '<div style="padding:12px 14px 8px">' +
     '<div style="font-size:13px;font-weight:700;color:#e0e6f0;margin-bottom:3px">' + results.length + '件のFACT分析が見つかりました</div>' +
-    '<div style="font-size:11px;color:#555">タップするとAIによる詳細分析・ソース一覧を確認できます</div>' +
+    '<div style="font-size:11px;color:var(--text-2)">タップするとAIによる詳細分析・ソース一覧を確認できます</div>' +
     '</div>' +
 
     // トピックカード一覧
@@ -2034,7 +2164,7 @@ function renderSearchResults(p){
     // 区切り
     '<div style="padding:8px 14px">' +
     '<div style="border-top:1px solid #1a2a4a;padding-top:14px">' +
-    '<div style="font-size:11px;color:#555;text-align:center">FACTのDBに存在しないトピックはAIが新規分析します（有料機能）</div>' +
+    '<div style="font-size:11px;color:var(--text-2);text-align:center">FACTのDBに存在しないトピックはAIが新規分析します（有料機能）</div>' +
     '</div>' +
     '</div>' +
     '</div>';
@@ -2061,7 +2191,7 @@ function renderSearchDetail(p){
     '<div style="display:flex;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none">' +
     TABS.map(function(t,i){
       var active = state.searchTab===i;
-      return '<button onclick="state.searchTab=' + i + ';render()" style="padding:8px 10px;background:transparent;border:none;border-bottom:2px solid ' + (active?p.brand:'transparent') + ';color:' + (active?p.brand:'#555') + ';font-size:11px;cursor:pointer;white-space:nowrap;font-family:\'Noto Sans JP\',sans-serif;font-weight:' + (active?'700':'400') + '">' + t + '</button>';
+      return '<button onclick="state.searchTab=' + i + ';render()" style="padding:8px 10px;background:transparent;border:none;border-bottom:2px solid ' + (active?p.brand:'transparent') + ';color:' + (active?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;white-space:nowrap;font-family:\'Noto Sans JP\',sans-serif;font-weight:' + (active?'700':'400') + '">' + t + '</button>';
     }).join('') +
     '</div>' +
     '</div>' +
@@ -2083,22 +2213,22 @@ function renderSearchFocused(p){
     ' oninput="state.searchQuery=this.value;updateSearchSuggestions()"' +
     ' oncompositionend="state.searchQuery=this.value;updateSearchSuggestions()"' +
     ' onkeydown="if(event.key===\'Enter\'&&!event.isComposing&&state.searchQuery.trim()){state.searchFocused=false;doSearch()}">' +
-    '<button id="search-clear-btn" onclick="state.searchQuery=\'\';document.getElementById(\'search-input-focused\').value=\'\';updateSearchSuggestions()" style="background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;display:none">×</button>' +
+    '<button id="search-clear-btn" onclick="state.searchQuery=\'\';document.getElementById(\'search-input-focused\').value=\'\';updateSearchSuggestions()" style="background:none;border:none;color:var(--text-2);font-size:20px;cursor:pointer;padding:0 4px;display:none">×</button>' +
     '</div>' +
     '<button onclick="state.searchFocused=false;render()" style="background:none;border:none;color:#4a9eff;font-size:13px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;white-space:nowrap">キャンセル</button>' +
     '</div>' +
     (history.length > 0 ?
       '<div style="flex:1;overflow-y:auto;padding:8px 0">' +
-      '<div style="font-size:11px;color:#555;padding:8px 16px">最近の検索</div>' +
+      '<div style="font-size:11px;color:var(--text-2);padding:8px 16px">最近の検索</div>' +
       history.map(function(h){
         return '<div style="display:flex;align-items:center;padding:12px 16px;cursor:pointer;border-bottom:1px solid #0a1020" onclick="state.searchQuery=\'' + h.replace(/'/g,"\\'") + '\';state.searchFocused=false;doSearch()">' +
-          '<span style="color:#555;margin-right:12px;font-size:14px">🕐</span>' +
+          '<span style="color:var(--text-2);margin-right:12px;font-size:14px">🕐</span>' +
           '<span style="font-size:14px;color:#aaa">' + h + '</span>' +
           '</div>';
       }).join('') +
       '</div>' :
       '<div style="flex:1;display:flex;align-items:center;justify-content:center">' +
-      '<div style="text-align:center;color:#555;font-size:13px">検索履歴はありません</div>' +
+      '<div style="text-align:center;color:var(--text-2);font-size:13px">検索履歴はありません</div>' +
       '</div>'
     ) +
     '</div>';
@@ -2122,11 +2252,11 @@ function renderSearchEmpty(p){
     '<div style="text-align:center;margin-bottom:24px">' +
     '<div style="font-size:40px;margin-bottom:12px">🔍</div>' +
     '<div style="font-size:15px;color:#aaa;margin-bottom:6px;font-weight:600">何を調べますか？</div>' +
-    '<div style="font-size:12px;color:#555">キーワードを入力してください</div>' +
+    '<div style="font-size:12px;color:var(--text-2)">キーワードを入力してください</div>' +
     '</div>' +
     // 検索例
     '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:12px;padding:16px">' +
-    '<div style="font-size:11px;color:#555;margin-bottom:10px">検索例</div>' +
+    '<div style="font-size:11px;color:var(--text-2);margin-bottom:10px">検索例</div>' +
     ['袴田事件 再審無罪', 'ホルムズ海峡 日本への影響', '日銀 利上げ 影響', 'Microsoft 日本 AI投資'].map(function(q){
       return '<div style="padding:10px 0;border-bottom:1px solid #0f1a2e;cursor:pointer;font-size:13px;color:#aaa;display:flex;align-items:center;gap:8px" onclick="state.searchQuery=\'' + q + '\';doSearch()">' +
         '<span style="color:#4a9eff">🔍</span>' + q + '</div>';
@@ -2196,7 +2326,7 @@ function renderSummaryTab(){
     '<div class="warn-box" style="margin-bottom:12px;cursor:pointer" onclick="showAlertByEl(this)" data-type="' + alertType + '" data-msg="' + alertMsg + '">' +
     '<span>' + alertIcon(alertType) + '</span>' +
     '<div><div style="font-size:11px;color:' + alertColor(alertType) + ';font-weight:700;margin-bottom:2px">注意喚起あり — タップで詳細</div>' +
-    '<div style="font-size:11px;color:#888">' + alertMsg.slice(0,45) + '...</div></div></div>' : '';
+    '<div style="font-size:11px;color:var(--text-2)">' + alertMsg.slice(0,45) + '...</div></div></div>' : '';
 
   // ソース一覧（ALL_SOURCESは袴田事件専用のためトピックによって表示を調整）
   var showSources = currentTopic.id === 'hakamada_muzai' || currentTopic.id === 'hakamada_history';
@@ -2217,7 +2347,7 @@ function renderSummaryTab(){
         '<div style="font-size:12px;font-weight:600;color:#ddd;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + title + '</div>' +
         '<div style="display:flex;align-items:center;gap:6px">' +
         '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px">' + s.type + '</span>' +
-        '<span style="font-size:10px;color:#555">' + date + '</span>' +
+        '<span style="font-size:10px;color:var(--text-2)">' + date + '</span>' +
         '</div></div>' +
         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">' +
         '<span style="font-family:monospace;font-size:13px;color:' + scoreColor(s.score) + ';font-weight:700">' + s.score + 'pt</span>' +
@@ -2229,7 +2359,7 @@ function renderSummaryTab(){
     mediaList.slice(0, currentTopic.sourceCount).forEach(function(name, i){
       sourcesHtml += '<div style="padding:8px 0;border-bottom:1px solid #0f1a2e;display:flex;align-items:center;justify-content:space-between">' +
         '<span style="font-size:13px;color:#ddd">' + name + '</span>' +
-        '<span style="font-size:11px;color:#555">確認済み</span>' +
+        '<span style="font-size:11px;color:var(--text-2)">確認済み</span>' +
         '</div>';
     });
   }
@@ -2251,12 +2381,12 @@ function renderSummaryTab(){
     '<div style="width:' + currentTopic.score + '%;height:100%;background:linear-gradient(90deg,' + c + '88,' + c + ');border-radius:99px"></div>' +
     '</div>' +
     '<div style="font-size:11px;color:' + c + ';font-weight:600;margin-bottom:6px">● ' + scoreLabel(currentTopic.score) + '</div>' +
-    '<div style="font-size:11px;color:#555;line-height:1.6">' + scoreReason + '</div>' +
+    '<div style="font-size:11px;color:var(--text-2);line-height:1.6">' + scoreReason + '</div>' +
     '</div>' +
     '<div style="margin-bottom:4px">' +
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
     '<div class="section-title" style="margin-bottom:0">ソース一覧</div>' +
-    '<span style="font-size:10px;color:#555">' + currentTopic.sourceCount + '件確認</span>' +
+    '<span style="font-size:10px;color:var(--text-2)">' + currentTopic.sourceCount + '件確認</span>' +
     '</div>' +
     sourcesHtml +
     '</div>';
@@ -2273,15 +2403,15 @@ function renderTimelineTab(){
   var span = items.length > 0 ? (items[items.length-1].date.slice(0,4) - items[0].date.slice(0,4)) : 0;
 
   var header = '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">' +
-    '<div style="font-size:12px;color:#555">' + items.length + '件' + (span>0 ? '・' + span + '年間（' + items[0].date.slice(0,4) + '〜' + items[items.length-1].date.slice(0,4) + '年）' : '') + '</div>' +
+    '<div style="font-size:12px;color:var(--text-2)">' + items.length + '件' + (span>0 ? '・' + span + '年間（' + items[0].date.slice(0,4) + '〜' + items[items.length-1].date.slice(0,4) + '年）' : '') + '</div>' +
     '<div style="display:flex;gap:6px">' +
-    '<button onclick="state.timelineOrder=\"asc\";render()" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='asc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='asc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='asc'?p.brand:'#555') + ';font-size:11px;cursor:pointer;font-family:sans-serif">古い順</button>' +
-    '<button onclick="state.timelineOrder=\"desc\";render()" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='desc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='desc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='desc'?p.brand:'#555') + ';font-size:11px;cursor:pointer;font-family:sans-serif">新しい順</button>' +
+    '<button onclick="state.timelineOrder=\"asc\";render()" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='asc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='asc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='asc'?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;font-family:sans-serif">古い順</button>' +
+    '<button onclick="state.timelineOrder=\"desc\";render()" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='desc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='desc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='desc'?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;font-family:sans-serif">新しい順</button>' +
     '</div></div>';
 
   var legend = '<div style="display:flex;gap:12px;margin-bottom:14px">' +
-    '<div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:' + p.brand + '"></div><span style="font-size:11px;color:#555">通常</span></div>' +
-    (alertItems>0 ? '<div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:' + p.warn + '"></div><span style="font-size:11px;color:#555">注意喚起あり</span></div>' : '') +
+    '<div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:' + p.brand + '"></div><span style="font-size:11px;color:var(--text-2)">通常</span></div>' +
+    (alertItems>0 ? '<div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:' + p.warn + '"></div><span style="font-size:11px;color:var(--text-2)">注意喚起あり</span></div>' : '') +
     '</div>';
 
   var rows = ordered.map(function(item, i){
@@ -2327,7 +2457,7 @@ function renderSourcesTab(){
   var btnStyle = function(active){
     return 'padding:4px 12px;border-radius:99px;border:1px solid ' +
       (active?p.brand:'#1a2a4a') + ';background:' + (active?p.brand+'22':'transparent') +
-      ';color:' + (active?p.brand:'#555') +
+      ';color:' + (active?p.brand:'#8899b0') +
       ';font-size:11px;cursor:pointer;font-family:"Noto Sans JP",sans-serif';
   };
 
@@ -2351,7 +2481,7 @@ function renderSourcesTab(){
           var safeUrl = getArticleUrl(a, s.org);
           return '<div style="padding:10px 0;border-bottom:1px solid #0f1a2e">' +
             '<div style="font-size:13px;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:4px">' + (a.title||'') + '</div>' +
-            '<div style="font-size:11px;color:#555;margin-bottom:4px">📅 ' + (a.date||'') + '</div>' +
+            '<div style="font-size:11px;color:var(--text-2);margin-bottom:4px">📅 ' + (a.date||'') + '</div>' +
             '<div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px">' + (a.summary||'') + '</div>' +
             (safeUrl ? '<a href="' + safeUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:4px 14px;border-radius:99px;cursor:pointer;text-decoration:none;display:inline-block">記事を読む ↗</a>' : '') +
             '</div>';
@@ -2364,12 +2494,12 @@ function renderSourcesTab(){
       '<span style="font-size:15px;font-weight:700;color:#e0e6f0">' + s.org + '</span>' +
       '<div style="display:flex;align-items:center;gap:6px;margin-top:4px">' +
       '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px">' + s.type + '</span>' +
-      '<span style="font-size:11px;color:#555">' + articleCount + '件の記事</span>' +
+      '<span style="font-size:11px;color:var(--text-2)">' + articleCount + '件の記事</span>' +
       '</div></div>' +
       '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
       '<span style="font-family:monospace;font-size:18px;font-weight:900;color:' + rankColor + '">' + s.score + '</span>' +
       '<span style="font-size:10px;color:' + rankColor + '">pt</span>' +
-      '<span style="font-size:14px;color:#555">' + (isExpanded?'▼':'›') + '</span>' +
+      '<span style="font-size:14px;color:var(--text-2)">' + (isExpanded?'▼':'›') + '</span>' +
       '</div></div>' +
       articleList + '</div>';
   };
@@ -2394,7 +2524,7 @@ function renderSourcesTab(){
             var url = makeGNewsUrl(m.domain, q);
             return '<div onclick="openUrl(\'' + url + '\')" style="cursor:pointer;padding:6px 12px;background:#0c1525;border:1px solid #1a2a4a;border-radius:99px;display:flex;align-items:center;gap:3px">' +
               '<span style="font-size:12px;color:#e0e6f0">' + m.name + '</span>' +
-              (m.lang==='en'?'<span style="font-size:10px;color:#888;margin-left:2px">EN</span>':'') +
+              (m.lang==='en'?'<span style="font-size:10px;color:var(--text-2);margin-left:2px">EN</span>':'') +
               '<span style="font-size:10px;color:#2a5a9a">↗</span></div>';
           }).join('') + '</div></div>';
       }).join('') + '</div>';
@@ -2405,19 +2535,19 @@ function renderSourcesTab(){
   return '<div>' +
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">' +
     '<div><div style="font-size:15px;font-weight:700;color:#e0e6f0">確認済みソース</div>' +
-    '<div style="font-size:11px;color:#555;margin-top:3px">' + sourceList.length + 'メディア · ' + totalArticles + '件の記事を収集</div>' +
+    '<div style="font-size:11px;color:var(--text-2);margin-top:3px">' + sourceList.length + 'メディア · ' + totalArticles + '件の記事を収集</div>' +
     '</div>' +
     '<div style="display:flex;gap:4px">' +
     '<button onclick="state.sourceSort=\'score\';render()" style="' + btnStyle(state.sourceSort==='score') + '">信頼度順</button>' +
     '<button onclick="state.sourceSort=\'date\';render()" style="' + btnStyle(state.sourceSort==='date') + '">新しい順</button>' +
     '</div></div>' +
-    (jaSources.length ? '<div style="font-size:11px;font-weight:700;color:#555;margin-bottom:10px">🇯🇵 国内メディア（' + jaSources.length + '）</div>' + jaSources.map(makeMediaCard).join('') : '') +
-    (enSources.length ? '<div style="border-top:1px solid #1a2a4a;margin:14px 0"></div><div style="font-size:11px;font-weight:700;color:#555;margin-bottom:10px">🌐 海外メディア（' + enSources.length + '）</div>' + enSources.map(makeMediaCard).join('') : '') +
+    (jaSources.length ? '<div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:10px">🇯🇵 国内メディア（' + jaSources.length + '）</div>' + jaSources.map(makeMediaCard).join('') : '') +
+    (enSources.length ? '<div style="border-top:1px solid #1a2a4a;margin:14px 0"></div><div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:10px">🌐 海外メディア（' + enSources.length + '）</div>' + enSources.map(makeMediaCard).join('') : '') +
     '<div style="border-top:1px solid #1a2a4a;margin:16px 0"></div>' +
     '<div onclick="state.showOtherMedia=!state.showOtherMedia;render()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0">' +
     '<div><div style="font-size:13px;font-weight:600;color:#aaa">他のメディアでも探す</div>' +
-    '<div style="font-size:11px;color:#555;margin-top:2px">Google News 経由で' + MEDIA_MASTER.length + 'メディアを検索</div>' +
-    '</div><span style="font-size:14px;color:#555">' + (state.showOtherMedia?'▲':'▼') + '</span>' +
+    '<div style="font-size:11px;color:var(--text-2);margin-top:2px">Google News 経由で' + MEDIA_MASTER.length + 'メディアを検索</div>' +
+    '</div><span style="font-size:14px;color:var(--text-2)">' + (state.showOtherMedia?'▲':'▼') + '</span>' +
     '</div>' + otherHtml + '</div>';
 }
 
@@ -2431,11 +2561,11 @@ function renderPerspectivesTab(){
   var disclaimer = '<div style="background:#1a2a4a22;border:1px solid #1a2a4a;border-radius:10px;padding:12px;margin-bottom:14px;display:flex;align-items:flex-start;gap:8px">' +
     '<span style="font-size:18px">🔍</span>' +
     '<div><div style="font-size:12px;font-weight:700;color:' + p.brand + ';margin-bottom:4px">FACTは断定しません</div>' +
-    '<div style="font-size:11px;color:#555;line-height:1.7">複数の立場の見解を並列提示します。情報の取捨選択と最終的な判断はあなたが行います。</div></div></div>';
+    '<div style="font-size:11px;color:var(--text-2);line-height:1.7">複数の立場の見解を並列提示します。情報の取捨選択と最終的な判断はあなたが行います。</div></div></div>';
 
   var cards = items.map(function(item){
     var srcBadges = (item.sources||[]).map(function(s){
-      return '<span style="font-size:10px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + s + '</span>';
+      return '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + s + '</span>';
     }).join('');
 
     return '<div style="border-left:3px solid ' + item.color + ';background:#0c1525;border-radius:0 12px 12px 0;padding:14px;margin-bottom:12px">' +
@@ -2444,14 +2574,14 @@ function renderPerspectivesTab(){
       '<div style="font-size:14px;font-weight:700;color:' + item.color + '">' + item.stance + '</div>' +
       '</div>' +
       '<div style="font-size:13px;color:#ccc;line-height:1.8;margin-bottom:10px">' + item.summary + '</div>' +
-      (srcBadges ? '<div style="font-size:11px;color:#555;margin-bottom:6px">根拠ソース</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">' + srcBadges + '</div>' : '') +
-      '<div style="font-size:11px;color:#444;border-top:1px solid #1a2a4a;padding-top:8px">FACTはこの立場を支持・否定しません。判断はあなたが行います。</div>' +
+      (srcBadges ? '<div style="font-size:11px;color:var(--text-2);margin-bottom:6px">根拠ソース</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">' + srcBadges + '</div>' : '') +
+      '<div style="font-size:11px;color:var(--text-3);border-top:1px solid #1a2a4a;padding-top:8px">FACTはこの立場を支持・否定しません。判断はあなたが行います。</div>' +
       '</div>';
   }).join('');
 
   return disclaimer + cards +
     '<div style="margin-top:12px;padding:10px;background:#0c1525;border:1px solid #1a2a4a;border-radius:10px;text-align:center">' +
-    '<div style="font-size:11px;color:#555">他の立場のソースはソースタブで確認できます</div>' +
+    '<div style="font-size:11px;color:var(--text-2)">他の立場のソースはソースタブで確認できます</div>' +
     '<button onclick="state.searchTab=2;render()" style="margin-top:6px;font-size:11px;color:' + p.brand + ';background:transparent;border:none;cursor:pointer;font-family:sans-serif">📰 ソースタブを開く →</button>' +
     '</div>';
 }
@@ -2525,9 +2655,9 @@ function renderRelatedTab(){
   var makeCard = function(a){
     return '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:12px;padding:14px;margin-bottom:10px">' +
       '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">' +
-      '<span style="font-size:10px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + a.org + '</span>' +
-      '<span style="font-size:10px;color:#555">📅 ' + a.date + '</span>' +
-      (a.lang==='en'?'<span style="font-size:10px;color:#888;background:#1a2a4a;padding:2px 6px;border-radius:99px">EN</span>':'') +
+      '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + a.org + '</span>' +
+      '<span style="font-size:10px;color:var(--text-2)">📅 ' + a.date + '</span>' +
+      (a.lang==='en'?'<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 6px;border-radius:99px">EN</span>':'') +
       '</div>' +
       '<div style="font-size:14px;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:8px">' + a.title + '</div>' +
       '<div style="font-size:12px;color:#666;line-height:1.7;margin-bottom:10px">' + a.summary + '</div>' +
@@ -2536,8 +2666,8 @@ function renderRelatedTab(){
   };
 
   return '<div>' +
-    (jaArticles.length ? '<div style="font-size:11px;font-weight:700;color:#555;margin-bottom:10px">🇯🇵 国内記事（' + jaArticles.length + '件）</div>' + jaArticles.map(makeCard).join('') : '') +
-    (enArticles.length ? '<div style="border-top:1px solid #1a2a4a;margin:14px 0"></div><div style="font-size:11px;font-weight:700;color:#555;margin-bottom:10px">🌐 海外記事（' + enArticles.length + '件）</div>' + enArticles.map(makeCard).join('') : '') +
+    (jaArticles.length ? '<div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:10px">🇯🇵 国内記事（' + jaArticles.length + '件）</div>' + jaArticles.map(makeCard).join('') : '') +
+    (enArticles.length ? '<div style="border-top:1px solid #1a2a4a;margin:14px 0"></div><div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:10px">🌐 海外記事（' + enArticles.length + '件）</div>' + enArticles.map(makeCard).join('') : '') +
     '</div>';
 }
 
@@ -2595,8 +2725,8 @@ function renderExplore(){
       return breadcrumb +
         '<div style="padding:40px 14px;text-align:center">' +
         '<div style="font-size:32px;margin-bottom:12px">📭</div>' +
-        '<div style="font-size:14px;color:#555;margin-bottom:8px">このカテゴリのFACT分析は準備中です</div>' +
-        '<div style="font-size:12px;color:#444">検索から調べることができます</div>' +
+        '<div style="font-size:14px;color:var(--text-2);margin-bottom:8px">このカテゴリのFACT分析は準備中です</div>' +
+        '<div style="font-size:12px;color:var(--text-3)">検索から調べることができます</div>' +
         '</div>';
     }
 
@@ -2605,7 +2735,7 @@ function renderExplore(){
       var alertBadge = t.alert ?
         '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px;margin-left:6px">⚠️</span>' : '';
       var tags = (t.tags||[]).map(function(tag){
-        return '<span style="font-size:10px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + tag + '</span>';
+        return '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + tag + '</span>';
       }).join('');
 
       return '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;transition:border-color 0.15s,transform 0.1s,background 0.1s"' +
@@ -2615,7 +2745,7 @@ function renderExplore(){
         ' onclick="goTopicDetail(this)">' +
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
         '<div style="display:flex;align-items:center;gap:6px">' +
-        '<span style="font-size:11px;color:#555;background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
+        '<span style="font-size:11px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
         alertBadge + '</div>' +
         '<div style="display:flex;align-items:baseline;gap:2px">' +
         '<span style="font-family:monospace;font-size:18px;font-weight:900;color:' + rankColor + '">' + t.score + '</span>' +
@@ -2624,7 +2754,7 @@ function renderExplore(){
         '<div style="font-size:16px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:8px">' + t.title + '</div>' +
         '<div style="font-size:12px;color:#777;line-height:1.7;margin-bottom:10px">' + t.summary + '</div>' +
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
-        '<span style="font-size:11px;color:#555">📰 ' + t.sourceCount + '件のソースを分析 · ' + t.date + '</span>' +
+        '<span style="font-size:11px;color:var(--text-2)">📰 ' + t.sourceCount + '件のソースを分析 · ' + t.date + '</span>' +
         '<span style="font-size:12px;color:' + p.brand + ';font-weight:600">詳細を見る →</span>' +
         '</div>' +
         '<div style="display:flex;gap:4px;flex-wrap:wrap">' + tags + '</div>' +
@@ -2656,7 +2786,7 @@ function renderAlerts(){
       const active = state.alertFilter===f;
       const cnt = f==='all' ? ALERTS.length : ALERTS.filter(a=>a.type===f).length;
       return `<button onclick="setAlertFilter('${f}')"
-        style="flex-shrink:0;padding:5px 12px;border-radius:99px;border:1px solid ${active?'#4a9eff':'#1a2a4a'};background:${active?'#4a9eff22':'transparent'};color:${active?'#4a9eff':'#555'};font-size:11px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap">
+        style="flex-shrink:0;padding:5px 12px;border-radius:99px;border:1px solid ${active?'#4a9eff':'#1a2a4a'};background:${active?'#4a9eff22':'transparent'};color:${active?'#4a9eff':'#8899b0'};font-size:11px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap">
         ${ALERT_FILTER_LABELS[f]}${cnt?` <span style="opacity:0.6">${cnt}</span>`:''}
       </button>`;
     }).join('')}
@@ -2664,7 +2794,7 @@ function renderAlerts(){
   return `<div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px">
       <div class="section-title" style="margin-bottom:0">⚠️ 注意喚起 — AI検出</div>
-      ${unreadCount>0?`<span style="font-size:10px;color:#FF9800;background:#FF980022;border:1px solid #FF980044;padding:2px 8px;border-radius:99px">${unreadCount}件 未読</span>`:'<span style="font-size:10px;color:#555">すべて既読</span>'}
+      ${unreadCount>0?`<span style="font-size:10px;color:#FF9800;background:#FF980022;border:1px solid #FF980044;padding:2px 8px;border-radius:99px">${unreadCount}件 未読</span>`:'<span style="font-size:10px;color:var(--text-2)">すべて既読</span>'}
     </div>
     ${filterBar}
     <div style="padding:0 14px">
@@ -2677,19 +2807,19 @@ function renderAlerts(){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <div style="display:flex;align-items:center;gap:6px">
             ${!isRead?`<span style="width:6px;height:6px;border-radius:50%;background:${c};display:inline-block;flex-shrink:0"></span>`:''}
-            <span style="font-size:10px;color:#555">${a.cat}</span>
+            <span style="font-size:10px;color:var(--text-2)">${a.cat}</span>
           </div>
           <span style="font-size:10px;color:${c};background:${c}22;padding:1px 7px;border-radius:99px">${icon} ${a.sev==="high"?"重要":"注意"}</span>
         </div>
         <div style="font-size:13px;font-weight:${isRead?'500':'700'};margin-bottom:6px;color:${isRead?'#888':'#e0e6f0'}">${a.title}</div>
         <div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px">${a.msg}</div>
         <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:10px;color:#444;font-family:monospace">📅 ${a.date}</span>
+          <span style="font-size:10px;color:var(--text-3);font-family:monospace">📅 ${a.date}</span>
           <span style="font-size:11px;color:#4a9eff">詳細を見る →</span>
         </div>
       </div>`;
     }).join("")}
-    ${filtered.length===0?`<div style="padding:30px 0;text-align:center;color:#444;font-size:13px">該当する注意喚起はありません</div>`:''}
+    ${filtered.length===0?`<div style="padding:30px 0;text-align:center;color:var(--text-3);font-size:13px">該当する注意喚起はありません</div>`:''}
     </div>
   </div>`;
 }
@@ -2699,7 +2829,7 @@ function renderSettings(){
   const levels=["最小","低め","標準","高め","最大"];
   const descs=["科学的に完全否定された情報のみ表示します","明確な誤情報と政府公式と大きく矛盾する情報を表示します","標準：主要メディア間の論調の乖離も含めて表示します","専門家見解との軽微な差異も表示します","すべての不確実性・未確認情報に反応します"];
   const plans=[
-    ["無料プラン","現在利用中","#555"],
+    ["無料プラン","現在利用中",'#8899b0'],
     ["ライト — ¥280/月","CM非表示・テーマ変更","#4a9eff"],
     ["スタンダード — ¥580/月","プラグイン（基本）","#8BC34A"],
     ["プレミアム — ¥980/月","プラグイン（フル）・全テーマ","#FF9800"],
@@ -2712,7 +2842,7 @@ function renderSettings(){
         <span style="font-family:monospace;font-weight:700;color:#4a9eff" id="sens-label">Lv.${state.sensitivity} — ${levels[state.sensitivity-1]}</span>
       </div>
       <input type="range" min="1" max="5" value="${state.sensitivity}" id="sens-slider" oninput="updateSensitivity(this.value)">
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:#555;margin-top:4px">
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-2);margin-top:4px">
         ${levels.map(l=>`<span>${l}</span>`).join("")}
       </div>
       <div style="margin-top:12px;padding:8px 10px;background:#4a9eff11;border-radius:6px;font-size:11px;color:#4a9eff" id="sens-desc">${descs[state.sensitivity-1]}</div>
@@ -2737,7 +2867,7 @@ function renderSettings(){
             </div>
             <div style="flex:1">
               <div style="font-size:13px;font-weight:700;color:${active?"#4a9eff":"#e0e6f0"}">${name}</div>
-              <div style="font-size:11px;color:#555;margin-top:2px">${desc}</div>
+              <div style="font-size:11px;color:var(--text-2);margin-top:2px">${desc}</div>
             </div>
             <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${active?"#4a9eff":"#1a2a4a"};background:${active?"#4a9eff":"transparent"};display:flex;align-items:center;justify-content:center;flex-shrink:0">
               ${active?`<span style="color:#fff;font-size:11px;font-weight:900">✓</span>`:''}
@@ -2748,19 +2878,19 @@ function renderSettings(){
     </div>
     <div class="section-title" style="margin-top:20px">プラン</div>
     <div style="margin-bottom:12px;padding:10px 12px;background:#1a2a4a22;border:1px solid #1a2a4a;border-radius:8px;display:flex;align-items:center;justify-content:space-between">
-      <span style="font-size:12px;color:#888">CM表示テスト（デモ用）</span>
+      <span style="font-size:12px;color:var(--text-2)">CM表示テスト（デモ用）</span>
       <button onclick="state.navCount=9;maybeShowAd()" style="padding:5px 14px;background:#4a9eff22;border:1px solid #4a9eff44;border-radius:99px;color:#4a9eff;font-size:11px;cursor:pointer;font-family:'Noto Sans JP',sans-serif">今すぐ表示</button>
     </div>
     ${plans.map(([name,desc,color])=>`
       <div class="card" style="margin-bottom:8px">
         <div style="font-size:13px;font-weight:600;color:${color};margin-bottom:3px">${name}</div>
-        <div style="font-size:11px;color:#555">${desc}</div>
+        <div style="font-size:11px;color:var(--text-2)">${desc}</div>
       </div>`).join("")}
 
     <div class="section-title" style="margin-top:20px">FACTを支援する</div>
     <div class="card" style="border-color:#4a9eff44">
       <div style="font-size:13px;color:#4a9eff;font-weight:600;margin-bottom:6px">寄付バッジ（時限性・1年）</div>
-      <div style="font-size:11px;color:#888;line-height:1.6;margin-bottom:10px">FACTの理念に共感していただける方の任意支援です。広告は一切付きません。バッジは1年後に消滅します。</div>
+      <div style="font-size:11px;color:var(--text-2);line-height:1.6;margin-bottom:10px">FACTの理念に共感していただける方の任意支援です。広告は一切付きません。バッジは1年後に消滅します。</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         ${["¥500","¥1,000","¥3,000","任意"].map(a=>`<button style="padding:6px 14px;background:#4a9eff22;border:1px solid #4a9eff44;border-radius:99px;color:#4a9eff;font-size:12px;cursor:pointer;font-family:'Noto Sans JP',sans-serif">${a}</button>`).join("")}
       </div>
@@ -2906,7 +3036,7 @@ function amazonSearchHTML(context){
     `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <span style="font-size:16px">🛒</span>
       <span style="font-size:13px;font-weight:700;color:#FF9900">Amazonで探す</span>
-      <span style="font-size:10px;color:#555;margin-left:auto">購入でFACT支援</span>
+      <span style="font-size:10px;color:var(--text-2);margin-left:auto">購入でFACT支援</span>
     </div>`}
     <div style="display:flex;gap:8px;margin-bottom:${isCompact?8:12}px">
       <input id="amz-input-${context}" class="search-input"
@@ -2918,7 +3048,7 @@ function amazonSearchHTML(context){
     </div>
     ${!isCompact?`
     <div style="padding:0 14px">
-      <div style="font-size:10px;color:#444;letter-spacing:1px;margin-bottom:8px">よく検索されるキーワード</div>
+      <div style="font-size:10px;color:var(--text-3);letter-spacing:1px;margin-bottom:8px">よく検索されるキーワード</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
         ${['防災グッズ','健康食品','ビジネス書','スマホアクセサリー','キッチン用品','掃除用品'].map(k=>`
           <button onclick="setAmazonQuery('${k}','${context}')"
@@ -2929,7 +3059,7 @@ function amazonSearchHTML(context){
       <div style="font-size:11px;color:#FF9900;margin-bottom:4px">📋 Amazonアソシエイトについて</div>
       <div style="font-size:11px;color:#666;line-height:1.6">FACTはAmazonアソシエイト・プログラムに参加しています。このリンクから商品を購入された場合、売上の一部がFACTの運営費用に充てられます。商品価格に変わりはありません。</div>
     </div>`:
-    `<div style="font-size:10px;color:#555;line-height:1.5">Amazonアソシエイト参加中 · 購入額に変わりはありません</div>`}
+    `<div style="font-size:10px;color:var(--text-2);line-height:1.5">Amazonアソシエイト参加中 · 購入額に変わりはありません</div>`}
   </div>`;
 }
 
@@ -2968,7 +3098,7 @@ function renderAmazon(){
       <span style="font-size:28px">🛒</span>
       <div>
         <div style="font-size:17px;font-weight:700;color:#FF9900;letter-spacing:0.5px">Amazon で探す</div>
-        <div style="font-size:11px;color:#555;margin-top:2px">購入でFACTの運営を支援</div>
+        <div style="font-size:11px;color:var(--text-2);margin-top:2px">購入でFACTの運営を支援</div>
       </div>
     </div>
   </div>
@@ -3003,7 +3133,7 @@ function renderAmazon(){
 
     <div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:10px;padding:12px">
       <div style="font-size:11px;color:#FF9900;margin-bottom:6px">📋 Amazonアソシエイトについて</div>
-      <div style="font-size:11px;color:#555;line-height:1.7">FACTはAmazonアソシエイト・プログラムに参加しています。このリンクから購入された場合、売上の一部がFACTの運営費用に充てられます。商品価格に変わりはありません。</div>
+      <div style="font-size:11px;color:var(--text-2);line-height:1.7">FACTはAmazonアソシエイト・プログラムに参加しています。このリンクから購入された場合、売上の一部がFACTの運営費用に充てられます。商品価格に変わりはありません。</div>
     </div>
   </div>
   <div style="height:20px"></div>`;
@@ -3089,7 +3219,7 @@ function renderSourceDetail(){
     <div style="margin-bottom:16px">
       <span class="type-tag ${typeClass(s.type)}" style="margin-bottom:8px;display:inline-block">${s.type}</span>
       <div style="font-size:15px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:6px">${title}</div>
-      <div style="font-size:11px;color:#555;font-family:monospace">${date}</div>
+      <div style="font-size:11px;color:var(--text-2);font-family:monospace">${date}</div>
     </div>
 
     <div style="margin-bottom:4px">
@@ -3131,7 +3261,7 @@ function renderSourceDetail(){
       ${s.articles.map(a=>`
         <div style="padding:10px 0;border-bottom:1px solid #0f1a2e">
           <div style="font-size:13px;font-weight:600;color:#ddd;margin-bottom:4px">${a.title||''}</div>
-          <div style="font-size:11px;color:#555;margin-bottom:6px">📅 ${a.date||''}</div>
+          <div style="font-size:11px;color:var(--text-2);margin-bottom:6px">📅 ${a.date||''}</div>
           ${a.url ? `<a href="${a.url}" target="_blank" rel="noopener" style="font-size:11px;color:${p.brand};background:${p.brand}15;border:1px solid ${p.brand}44;padding:3px 10px;border-radius:99px;cursor:pointer;text-decoration:none;display:inline-block">記事を読む ↗</a>` : ''}
         </div>`).join('')}
     </div>` : ''}
@@ -3145,7 +3275,7 @@ function renderSourceDetail(){
       </a>` : ''}
       <div style="background:#1a2a4a22;border:1px solid #1a2a4a;border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="switchNav('explore')">
         <div style="font-size:13px;font-weight:600;color:#4a9eff">🗄️ 記録を閲覧する</div>
-        <div style="font-size:10px;color:#444;margin-top:2px">カテゴリから探す</div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:2px">カテゴリから探す</div>
       </div>
     </div>
 
