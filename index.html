@@ -2227,6 +2227,8 @@ function renderSearchResults(p){
 
   var cards = results.map(function(t){
     var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
+    var _td = TOPIC_DATA[t.id];
+    var srcCount = _td ? (_td.sources === null ? ALL_SOURCES.length : (_td.sources ? _td.sources.length : t.sourceCount)) : t.sourceCount;
     var alertBadge = t.alert ?
       '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px">⚠️ 注意</span>' : '';
     var tags = (t.tags||[]).map(function(tag){
@@ -2249,7 +2251,7 @@ function renderSearchResults(p){
       '<div style="font-size:12px;color:#777;line-height:1.7;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + t.summary + '</div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between">' +
       '<div style="display:flex;align-items:center;gap:10px">' +
-      '<span style="font-size:11px;color:var(--text-2)">📰 ' + t.sourceCount + '件のソースを分析</span>' +
+      '<span style="font-size:11px;color:var(--text-2)">📰 ' + srcCount + '件のソースを分析</span>' +
       '<span style="font-size:11px;color:var(--text-2)">📅 ' + t.date + '</span>' +
       '</div>' +
       '<div style="font-size:12px;color:' + p.brand + ';font-weight:600">詳細を見る →</div>' +
@@ -2935,6 +2937,8 @@ function renderExplore(){
 
     var topicCards = topics.map(function(t){
       var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
+      var _td2 = TOPIC_DATA[t.id];
+      var srcCount = _td2 ? (_td2.sources === null ? ALL_SOURCES.length : (_td2.sources ? _td2.sources.length : t.sourceCount)) : t.sourceCount;
       var alertBadge = t.alert ?
         '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px;margin-left:6px">⚠️</span>' : '';
       var tags = (t.tags||[]).map(function(tag){
@@ -2957,7 +2961,7 @@ function renderExplore(){
         '<div style="font-size:16px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:8px">' + t.title + '</div>' +
         '<div style="font-size:12px;color:#777;line-height:1.7;margin-bottom:10px">' + t.summary + '</div>' +
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
-        '<span style="font-size:11px;color:var(--text-2)">📰 ' + t.sourceCount + '件のソースを分析 · ' + t.date + '</span>' +
+        '<span style="font-size:11px;color:var(--text-2)">📰 ' + srcCount + '件のソースを分析 · ' + t.date + '</span>' +
         '<span style="font-size:12px;color:' + p.brand + ';font-weight:600">詳細を見る →</span>' +
         '</div>' +
         '<div style="display:flex;gap:4px;flex-wrap:wrap">' + tags + '</div>' +
