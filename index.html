@@ -892,6 +892,37 @@ const TOPIC_DATA = {
       { stance:"脱原発・環境団体", color:"#9C27B0", summary:"「危機を口実に原発再稼働を急ぐな。再生可能エネルギーの緊急導入こそ解決策」と主張。", sources:["原発ゼロ市民会議（2026年4月）"] },
     ]
   },
+  kako_enzai: {
+    sources: [
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"「死刑四事件」が問う冤罪と司法 袴田事件で再び注目", date:"2026年3月20日", url:"https://www3.nhk.or.jp/news/html/20260320/k10014882001000.html", summary:"袴田事件再審無罪を受け、昭和の死刑確定四事件（島田・松山・財田川・免田）の検証報道。自白強要と証拠問題を再考。" },
+      ]},
+      { org:"朝日新聞デジタル", type:"全国紙", score:92, lang:"ja", articles:[
+        { title:"昭和の冤罪 免田事件から40年 「日本の死刑は間違いだった」", date:"2026年3月15日", url:"https://www.asahi.com/articles/AST3H3Q1YT3HUTIL006M.html", summary:"免田事件再審無罪から40年。元死刑囚の証言と当時の捜査手法の問題点を改めて検証した。" },
+        { title:"島田事件・財田川事件 冤罪認定後も国家賠償ゼロ 遺族の怒り", date:"2026年3月10日", url:"https://www.asahi.com/articles/AST3A0P4ST3AUTIL007Q.html", summary:"再審無罪が確定した昭和の冤罪事件のうち国家賠償が認められなかったケースの実態を追跡取材。" },
+      ]},
+      { org:"東京新聞", type:"全国紙", score:88, lang:"ja", articles:[
+        { title:"「再審法改正なくして冤罪はなくならない」 昭和四大冤罪の教訓", date:"2026年3月28日", url:"https://www.tokyo-np.co.jp/article/323800", summary:"昭和の死刑四事件を通じ、証拠開示・自白偏重・再審の困難さを解説。現行の再審制度改革へ繋げる論考。" },
+      ]},
+      { org:"日弁連", type:"法曹団体", score:94, lang:"ja", articles:[
+        { title:"再審法改正に向けた意見書（昭和冤罪事件の教訓から）", date:"2025年11月", url:"https://www.nichibenren.or.jp/document/opinion/year/2025/251120.html", summary:"日弁連が昭和の死刑冤罪四事件を根拠に、証拠開示義務化と検察の不服申し立て禁止を求める意見書を提出。" },
+      ]},
+      { org:"法務省", type:"政府機関", score:96, lang:"ja", articles:[
+        { title:"法制審議会再審法部会 審議状況", date:"2026年4月", url:"https://www.moj.go.jp/shingi1/housei02_003063.html", summary:"再審法改正に向けた法制審議会特別部会の審議内容。証拠開示の範囲・検察の不服申し立ての扱いが焦点。" },
+      ]},
+    ],
+    timeline: [
+      { date:"1983年〜1989年", event:"昭和の死刑冤罪四事件（免田・財田川・松山・島田）の再審無罪が相次いで確定。", alert:false },
+      { date:"2024年10月", event:"袴田事件再審無罪確定。昭和〜平成の冤罪問題が再び注目を集める。", alert:false },
+      { date:"2025年11月", event:"日弁連が再審法改正を求める意見書を提出。昭和四事件の教訓を根拠に挙げる。", alert:false },
+      { date:"2026年〜", event:"法制審部会が審議継続。昭和冤罪事件の検証が再審制度改革の議論を後押し。", alert:true, msg:"昭和の冤罪事件と現在の再審制度改革議論は密接に関連しています。" },
+    ],
+    perspectives: [
+      { stance:"弁護団・冤罪被害者遺族", color:"#4CAF50", summary:"「昭和の四事件はいずれも自白強要と証拠隠滅が原因。同じ過ちを繰り返さないために再審法改正が不可欠」と主張。", sources:["日弁連意見書（2025年11月）","各事件弁護団声明"] },
+      { stance:"検察・法務省", color:"#FF9800", summary:"「昭和の事件は時代の問題。現在の捜査手法は改善されている」との立場を維持。再審法の大幅改正には慎重姿勢。", sources:["法制審部会での法務省発言（2025年〜）"] },
+      { stance:"国際人権団体", color:"#9C27B0", summary:"「日本の死刑制度と刑事司法制度は国際基準に照らして問題がある。昭和冤罪事件はその証左」と批判。制度改革を強く求める。", sources:["アムネスティ・インターナショナル（2024年）"] },
+    ]
+  },
 };
 
 
