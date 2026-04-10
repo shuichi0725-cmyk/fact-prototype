@@ -1475,7 +1475,7 @@ function persistState(){
 
 // ===== 状態 =====
 const _persisted = loadPersistedState();
-let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, prevNav:null, searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, navCount:0, adVisible:false, adType:null, adCountdown:0, readAlerts:_persisted.readAlerts||[], alertFilter:'all' };
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, prevNav:null, searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, navCount:0, adVisible:false, adType:null, adCountdown:0, readAlerts:_persisted.readAlerts||[], alertFilter:'all' };
 
 // ===== CM モックデータ =====
 const AD_MOCKS = [
@@ -2067,20 +2067,112 @@ function renderSearch(){
 }
 
 
+// ===== 未収録トピック Not-Found ページ =====
+function renderSearchNotFound(p, q){
+  var enc = encodeURIComponent(q);
+  var externalSources = [
+    { name:'NHK NEWS WEB', url:'https://www3.nhk.or.jp/news/search/?q='+enc, color:'#4a9eff' },
+    { name:'朝日新聞',      url:'https://www.asahi.com/search/?keywords='+enc, color:'#e44' },
+    { name:'日本経済新聞',  url:'https://search.nikkei.com/nikkei/?cs=0&keyword='+enc, color:'#c33' },
+    { name:'毎日新聞',      url:'https://mainichi.jp/search/?q='+enc, color:'#f80' },
+    { name:'Google ニュース', url:'https://news.google.com/search?q='+enc+'&hl=ja&gl=JP', color:'#4a9eff' },
+  ];
+
+  // 部分一致する関連カテゴリを探す
+  var relatedCats = CATEGORIES.filter(function(c){
+    return c.label.indexOf(q) >= 0 || q.length >= 2 && c.label.split('・').some(function(w){ return q.indexOf(w) >= 0; });
+  });
+
+  // タグ部分一致で関連トピックを最大3件
+  var related = FACT_TOPICS.filter(function(t){
+    return (t.tags||[]).some(function(tag){ return tag.length >= 2 && (q.indexOf(tag) >= 0 || tag.indexOf(q.slice(0,2)) >= 0); });
+  }).slice(0,3);
+
+  var relatedCards = related.map(function(t){
+    return '<div style="padding:10px 0;border-bottom:1px solid #0f1a2e;cursor:pointer;display:flex;align-items:center;justify-content:space-between"' +
+      ' onclick="goTopic(\''+t.id+'\')">' +
+      '<div style="flex:1;min-width:0">' +
+      '<div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.title + '</div>' +
+      '<div style="font-size:10px;color:var(--text-2);margin-top:2px">' + t.cat + '</div>' +
+      '</div>' +
+      '<span style="font-size:11px;color:var(--brand);flex-shrink:0;margin-left:8px">→</span>' +
+      '</div>';
+  }).join('');
+
+  var extLinks = externalSources.map(function(s){
+    return '<a href="'+s.url+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #0f1a2e;text-decoration:none;cursor:pointer">' +
+      '<span style="font-size:13px;color:#e0e6f0;font-weight:600">'+s.name+'</span>' +
+      '<span style="font-size:11px;color:var(--brand)">検索 ↗</span>' +
+      '</a>';
+  }).join('');
+
+  var catLinks = relatedCats.map(function(c){
+    return '<button onclick="selectCat(\''+c.id+'\');switchNav(\'explore\')" style="padding:5px 12px;background:var(--surface);border:1px solid var(--border);border-radius:99px;font-size:11px;color:var(--text-1);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">' + c.icon + ' ' + c.label + '</button>';
+  }).join('');
+
+  return '<div style="padding-bottom:20px">' +
+    // 検索バー
+    '<div style="padding:10px 14px;border-bottom:1px solid #1a2a4a;background:#0c1525;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:8px">' +
+    '<span style="font-size:14px;color:var(--text-2)">🔍</span>' +
+    '<span style="font-size:14px;color:#e0e6f0;flex:1;font-weight:600">' + q + '</span>' +
+    '<button onclick="state.searchFocused=true;state.searched=false;render()" style="padding:5px 12px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:var(--text-2);font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">変更</button>' +
+    '</div>' +
+
+    '<div style="padding:24px 14px 16px;text-align:center">' +
+    '<div style="font-size:32px;margin-bottom:10px">📭</div>' +
+    '<div style="font-size:15px;font-weight:700;color:#e0e6f0;margin-bottom:6px">「' + q + '」はFACT未収録です</div>' +
+    '<div style="font-size:12px;color:var(--text-2);line-height:1.7">このトピックはまだFACTのデータベースに\n収録されていません。</div>' +
+    '</div>' +
+
+    // 外部ニュース検索
+    '<div style="padding:0 14px">' +
+    '<div style="font-size:10px;color:var(--brand);letter-spacing:2px;font-family:monospace;padding-left:8px;border-left:2px solid var(--brand);margin-bottom:10px">外部ニュースで調べる</div>' +
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0 12px">' +
+    extLinks +
+    '</div></div>' +
+
+    // 関連カテゴリ
+    (catLinks ? '<div style="padding:16px 14px 0"><div style="font-size:10px;color:var(--brand);letter-spacing:2px;font-family:monospace;padding-left:8px;border-left:2px solid var(--brand);margin-bottom:10px">関連カテゴリを探す</div><div style="display:flex;flex-wrap:wrap;gap:6px">' + catLinks + '</div></div>' : '') +
+
+    // 関連トピック
+    (relatedCards ? '<div style="padding:16px 14px 0"><div style="font-size:10px;color:var(--brand);letter-spacing:2px;font-family:monospace;padding-left:8px;border-left:2px solid var(--brand);margin-bottom:6px">FACT収録の近いトピック</div><div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0 12px">' + relatedCards + '</div></div>' : '') +
+
+    // リクエスト
+    '<div style="padding:20px 14px 0;text-align:center">' +
+    '<div style="font-size:11px;color:var(--text-2);margin-bottom:10px">このトピックのFACT分析を追加してほしい場合</div>' +
+    '<button style="padding:8px 20px;background:var(--brand-dim);border:1px solid rgba(74,158,255,0.3);border-radius:99px;font-size:12px;color:var(--brand);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600" onclick="alert(\'リクエスト機能は近日実装予定です\')">📩 分析をリクエストする</button>' +
+    '</div>' +
+    '</div>';
+}
+
+// 検索結果ページから未収録ページへ遷移
+function renderSearchNotFoundPage(){
+  state.searched = true;
+  render();
+}
+
+// ===== キーワードスコアリング（タイトル一致10pt > タグ5pt > 要約3pt > カテゴリ2pt）
+function scoreSearch(t, q){
+  var ql = q.toLowerCase();
+  var score = 0;
+  if(t.title.toLowerCase().indexOf(ql) >= 0) score += 10;
+  (t.tags||[]).forEach(function(tag){
+    if(tag.toLowerCase().indexOf(ql) >= 0 || ql.indexOf(tag.toLowerCase()) >= 0) score += 5;
+  });
+  if((t.summary||'').toLowerCase().indexOf(ql) >= 0) score += 3;
+  if((t.cat||'').toLowerCase().indexOf(ql) >= 0) score += 2;
+  return score;
+}
+
 function renderSearchResults(p){
   var q = state.searchQuery;
 
+  var scored = FACT_TOPICS.map(function(t){ return { t:t, s:scoreSearch(t,q) }; })
+                           .filter(function(x){ return x.s > 0; });
+  scored.sort(function(a,b){ return b.s - a.s; });
+  var results = scored.map(function(x){ return x.t; });
 
-  // クエリに該当するトピックを検索（本番はセマンティック検索）
-  var results = FACT_TOPICS.filter(function(t){
-    return t.title.indexOf(q) >= 0 ||
-           t.summary.indexOf(q) >= 0 ||
-           t.tags.some(function(tag){ return q.indexOf(tag) >= 0 || tag.indexOf(q) >= 0; }) ||
-           q.indexOf('袴田') >= 0 || q.indexOf('再審') >= 0;
-  });
-
-  // 結果なしの場合も袴田事件を表示（デモ用）
-  if(results.length === 0) results = FACT_TOPICS;
+  if(results.length === 0) return renderSearchNotFound(p, q);
 
   var cards = results.map(function(t){
     var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
@@ -2126,17 +2218,18 @@ function renderSearchResults(p){
 
     // 結果件数・説明
     '<div style="padding:12px 14px 8px">' +
-    '<div style="font-size:13px;font-weight:700;color:#e0e6f0;margin-bottom:3px">' + results.length + '件のFACT分析が見つかりました</div>' +
-    '<div style="font-size:11px;color:var(--text-2)">タップするとAIによる詳細分析・ソース一覧を確認できます</div>' +
+    '<div style="font-size:13px;font-weight:700;color:#e0e6f0;margin-bottom:3px">「' + q + '」— ' + results.length + '件のFACT分析</div>' +
+    '<div style="font-size:11px;color:var(--text-2)">関連度順。タップすると詳細分析・ソース一覧を確認できます</div>' +
     '</div>' +
 
     // トピックカード一覧
     '<div style="padding:4px 14px 0">' + cards + '</div>' +
 
-    // 区切り
-    '<div style="padding:8px 14px">' +
-    '<div style="border-top:1px solid #1a2a4a;padding-top:14px">' +
-    '<div style="font-size:11px;color:var(--text-2);text-align:center">FACTのDBに存在しないトピックはAIが新規分析します（有料機能）</div>' +
+    // 未収録誘導
+    '<div style="padding:16px 14px 8px">' +
+    '<div style="border-top:1px solid #1a2a4a;padding-top:14px;text-align:center">' +
+    '<div style="font-size:11px;color:var(--text-2);margin-bottom:8px">探しているトピックが見つからない場合</div>' +
+    '<button onclick="state.searchQuery=\'' + q.replace(/'/g,"\\'") + '\';renderSearchNotFoundPage()" style="padding:6px 16px;background:var(--brand-dim);border:1px solid rgba(74,158,255,0.3);border-radius:99px;font-size:11px;color:var(--brand);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">未収録トピックを調べる →</button>' +
     '</div>' +
     '</div>' +
     '</div>';
@@ -2657,6 +2750,57 @@ function renderExplore(){
     '</div>';
 
   if(depth===0){
+    var eq = (state.exploreQuery||'').trim();
+
+    // 検索バー
+    var searchBar = '<div style="padding:10px 14px 6px">' +
+      '<div style="display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:8px 14px;gap:8px;transition:border-color var(--t-fast)" id="explore-search-wrap">' +
+      '<span style="font-size:14px;color:var(--text-2)">🔍</span>' +
+      '<input id="explore-search-input" style="flex:1;background:none;border:none;color:#e0e6f0;font-size:13px;outline:none;font-family:\'Noto Sans JP\',sans-serif" placeholder="記録内を検索..." value="' + eq + '"' +
+      ' oninput="state.exploreQuery=this.value;render()" onkeydown="if(event.key===\'Enter\'&&state.exploreQuery.trim()){state.searchQuery=state.exploreQuery;state.exploreQuery=\'\';doSearch();}">' +
+      (eq ? '<button onclick="state.exploreQuery=\'\';render()" style="background:none;border:none;color:var(--text-2);font-size:18px;cursor:pointer;padding:0;line-height:1">×</button>' : '') +
+      '</div>' +
+      (eq ? '<div style="font-size:11px;color:var(--text-2);padding:6px 4px 0">Enterで全DBを検索</div>' : '') +
+      '</div>';
+
+    // 検索クエリがある場合: マッチするトピックをインライン表示
+    if(eq){
+      var scored = FACT_TOPICS.map(function(t){ return { t:t, s:scoreSearch(t,eq) }; })
+                               .filter(function(x){ return x.s > 0; });
+      scored.sort(function(a,b){ return b.s - a.s; });
+      var matched = scored.map(function(x){ return x.t; });
+
+      if(matched.length === 0){
+        var noMatch = '<div style="padding:32px 14px;text-align:center">' +
+          '<div style="font-size:28px;margin-bottom:10px">📭</div>' +
+          '<div style="font-size:13px;font-weight:600;color:#e0e6f0;margin-bottom:6px">「' + eq + '」は記録にありません</div>' +
+          '<div style="font-size:11px;color:var(--text-2);margin-bottom:14px">外部ニュースで検索しますか？</div>' +
+          '<button onclick="state.searchQuery=state.exploreQuery;state.exploreQuery=\'\';doSearch()" style="padding:8px 20px;background:var(--brand-dim);border:1px solid rgba(74,158,255,0.3);border-radius:99px;font-size:12px;color:var(--brand);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600">全DBで検索 →</button>' +
+          '</div>';
+        return breadcrumb + searchBar + noMatch;
+      }
+
+      var matchCards = matched.map(function(t){
+        var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
+        return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color var(--t-fast),background var(--t-fast)"' +
+          ' onclick="goTopic(\''+t.id+'\')"' +
+          ' onmouseenter="this.style.borderColor=\'var(--border-2)\'" onmouseleave="this.style.borderColor=\'var(--border)\'">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">' +
+          '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
+          '<span style="font-family:monospace;font-size:14px;font-weight:900;color:' + rankColor + '">' + t.score + 'pt</span>' +
+          '</div>' +
+          '<div style="font-size:13px;font-weight:700;color:#e0e6f0;line-height:1.4;margin-bottom:4px">' + t.title + '</div>' +
+          '<div style="font-size:11px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.summary + '</div>' +
+          '</div>';
+      }).join('');
+
+      return breadcrumb + searchBar +
+        '<div style="padding:8px 14px 0">' +
+        '<div style="font-size:11px;color:var(--text-2);margin-bottom:8px">' + matched.length + '件がヒット</div>' +
+        matchCards + '</div>';
+    }
+
+    // 通常: カテゴリグリッド
     var cards = CATEGORIES.map(function(c){
       var isEmpty = c.count === 0;
       return '<div class="cat-card ' + (c.alert&&!isEmpty?'has-alert':'') + '"' +
@@ -2670,7 +2814,7 @@ function renderExplore(){
         '<div class="cat-count" style="' + (isEmpty?'opacity:0.3':'') + '">' + (isEmpty ? '準備中' : c.count + '件') + '</div>' +
         '</div>';
     }).join('');
-    return breadcrumb + '<div class="cat-grid">' + cards + '</div>';
+    return breadcrumb + searchBar + '<div class="cat-grid">' + cards + '</div>';
   }
 
   if(depth===1){
