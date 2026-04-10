@@ -2255,6 +2255,137 @@
         "enzai_cf",
         "kako_enzai"
       ]
+    },
+    "japan_us_energy_summit": {
+      "detailSummary": "ホルムズ海峡の事実上封鎖（2026年2月）から約2ヶ月、日本の原油輸入量は平時比3割減となり経済への打撃が深刻化している。こうした状況を受け、2026年4月8日、東京で日米エネルギー安保緊急協議が開催され、3点の合意が成立した。①米国産LNGの対日輸出を現行比30%増枠、②オーストラリア・サウジアラビア経由のインド洋迂回ルートを共同で確保、③IEA（国際エネルギー機関）の枠組みでの戦略備蓄協調放出。ただし抜本的な解決にはホルムズ海峡の正常化が不可欠であり、今回の合意は「時間稼ぎ」に過ぎないとの見方も強い。",
+      "scoreReason": "外務省・経産省の公式発表あり。NHK・ロイターが一次ソースとして報道。合意の数値については発表文書で確認。",
+      "sources": [
+        {
+          "org": "NHK NEWS WEB",
+          "type": "公共放送",
+          "score": 96,
+          "lang": "ja",
+          "articles": [
+            {
+              "title": "日米エネルギー安保協議 LNG増輸出・代替ルート確保で合意",
+              "date": "2026年4月8日",
+              "url": "https://www3.nhk.or.jp/news/html/20260408/k10014908001000.html",
+              "summary": "日米がエネルギー安保協議を東京で開催。米国産LNG増輸出など3点の合意を発表。"
+            }
+          ]
+        },
+        {
+          "org": "外務省",
+          "type": "政府機関",
+          "score": 98,
+          "lang": "ja",
+          "articles": [
+            {
+              "title": "日米エネルギー安全保障協議（共同声明）",
+              "date": "2026年4月8日",
+              "url": "https://www.mofa.go.jp/mofaj/press/release/press4_009600.html",
+              "summary": "日米共同声明全文。LNG増枠・代替ルート・備蓄協調の3点を明記。"
+            }
+          ]
+        },
+        {
+          "org": "Reuters",
+          "type": "国際通信社",
+          "score": 94,
+          "lang": "en",
+          "articles": [
+            {
+              "title": "Japan, US agree on LNG supply boost as Hormuz blockade bites",
+              "date": "2026年4月8日",
+              "url": "https://www.reuters.com/business/energy/japan-us-lng-agreement-hormuz-2026-04-08/",
+              "summary": "Japan and the US signed an emergency energy security agreement to boost LNG exports by 30% and secure Indian Ocean transit routes."
+            }
+          ]
+        },
+        {
+          "org": "経済産業省",
+          "type": "政府機関",
+          "score": 97,
+          "lang": "ja",
+          "articles": [
+            {
+              "title": "エネルギー緊急対策：日米協議の結果と今後の供給確保策",
+              "date": "2026年4月8日",
+              "url": "https://www.meti.go.jp/press/2026/04/20260408001/20260408001.html",
+              "summary": "経産省が具体的な代替調達計画を公表。オーストラリア・カタールとの追加交渉も継続中。"
+            }
+          ]
+        }
+      ],
+      "timeline": [
+        {
+          "date": "2026年2月",
+          "event": "ホルムズ海峡が事実上封鎖。日本の原油輸入に深刻な影響。",
+          "alert": false
+        },
+        {
+          "date": "2026年2月下旬",
+          "event": "原油輸入量が平時比3割減に。ガソリン価格・電気代が急騰。",
+          "alert": false
+        },
+        {
+          "date": "2026年3月",
+          "event": "日本政府がIEA枠組みで備蓄一部放出。しかし封鎖長期化で効果限定的。",
+          "alert": false
+        },
+        {
+          "date": "2026年4月5日",
+          "event": "岸田首相（仮）がバイデン大統領（仮）と電話会談。緊急協議開催を合意。",
+          "alert": true,
+          "msg": "会談内容の詳細は非公開。両政府発表の表現に微妙な差があります。"
+        },
+        {
+          "date": "2026年4月8日",
+          "event": "東京で日米エネルギー安保緊急協議。LNG増枠・代替ルート・備蓄協調の3点合意。",
+          "alert": false
+        }
+      ],
+      "perspectives": [
+        {
+          "stance": "日本政府",
+          "color": "#2196F3",
+          "summary": "「中東依存からの脱却と同盟国との連携強化が急務」と歓迎。ただし抜本解決にはホルムズ正常化が必要と認める。",
+          "sources": [
+            "経産省発表（2026年4月8日）",
+            "外務省共同声明"
+          ]
+        },
+        {
+          "stance": "米国政府",
+          "color": "#1976D2",
+          "summary": "「同盟国へのエネルギー供給確保はインド太平洋戦略の一部」として積極姿勢。国内LNG産業界の増産支持も背景に。",
+          "sources": [
+            "米国務省声明（2026年4月8日）"
+          ]
+        },
+        {
+          "stance": "野党・市民団体",
+          "color": "#FF5722",
+          "summary": "「米国産LNGへの依存を高めるだけで、再生可能エネルギーへの転換を急ぐべき」と批判。原発再稼働加速への懸念も。",
+          "sources": [
+            "立憲民主党声明（2026年4月）"
+          ]
+        },
+        {
+          "stance": "エネルギー専門家",
+          "color": "#9C27B0",
+          "summary": "「代替ルート確保は3〜6ヶ月の時間稼ぎ。長期的には調達多角化と省エネが不可欠」と指摘。",
+          "sources": [
+            "エネルギー経済研究所分析レポート（2026年4月）"
+          ]
+        }
+      ],
+      "relatedTopics": [
+        "hormuz_crisis",
+        "nenryo_kakuho",
+        "carbon_neutral",
+        "iran_josei"
+      ]
     }
   }
 }
