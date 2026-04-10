@@ -620,6 +620,31 @@ const TOPIC_DATA = {
       { stance:"国際人権団体", color:"#9C27B0", summary:"「日本の死刑制度と刑事司法制度は国際基準に照らして問題がある。袴田事件はその最悪の例」と批判。制度改革を強く求める。", sources:["アムネスティ（2024年9月）"] },
     ]
   },
+  iran_josei: {
+    sources: [
+      { org:"Bloomberg Japan", type:"経済通信社", score:95, lang:"ja", articles:[
+        { title:"イラン新指導部 ホルムズ海峡「武器として維持」と表明", date:"2026年3月12日", url:"https://www.bloomberg.co.jp/news/articles/2026-03-12", summary:"ハーメネイ師死亡後に実権を握ったモジタバ師が強硬路線を継続。国際社会の圧力にも屈しない姿勢を示す。" },
+      ]},
+      { org:"Al Jazeera", type:"海外放送", score:87, lang:"en", articles:[
+        { title:"Iran's new leadership vows to keep Hormuz leverage amid US pressure", date:"2026年3月15日", url:"https://www.aljazeera.com/news/2026/3/15/iran-hormuz-leverage", summary:"New Iranian Supreme Leader Mojtaba Khamenei signals continued hard line stance on Strait of Hormuz closure." },
+      ]},
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"イラン 新最高指導者が強硬姿勢 外交解決に不透明感", date:"2026年3月20日", url:"https://www3.nhk.or.jp/news/html/20260320/k10014870001000.html", summary:"ハーメネイ師の後継として実権を握ったモジタバ師が強硬姿勢を維持。中東和平交渉が停滞。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2026年2月28日", event:"米・イスラエルがイランへの協調空爆を開始。最高指導者ハーメネイ師が死亡。", alert:false },
+      { date:"2026年3月初旬", event:"モジタバ・ハーメネイ師が新最高指導者として実権掌握。強硬路線継続を宣言。", alert:true, msg:"イラン国内の権力構造の詳細は外部から把握困難。情報の信頼性に注意が必要です。" },
+      { date:"2026年3月12日", event:"新指導部が「ホルムズ海峡の閉鎖レバーは引き続き利用する」と表明。", alert:false },
+      { date:"2026年4月2日", event:"英国主催の40カ国協議でイランへの外交的働きかけを継続することで合意。", alert:false },
+      { date:"2026年4月3日", event:"イランとの外交交渉は停滞中。ホルムズ海峡の完全再開時期は不明。", alert:false },
+    ],
+    perspectives: [
+      { stance:"欧州・英仏主導", color:"#4a9eff", summary:"「軍事的解決は非現実的」として制裁強化と外交的働きかけを優先。40カ国協議を主導しイランとの対話継続を模索。", sources:["Bloomberg（2026年4月2日）","英外務省声明"] },
+      { stance:"米国・トランプ政権", color:"#FF9800", summary:"「ホルムズ問題は当事国が解決すべき」と距離を置きながら、イランの発電施設への攻撃もカードに圧力を強める。", sources:["トランプ大統領SNS（2026年4月2日）"] },
+      { stance:"イラン新指導部", color:"#9C27B0", summary:"「核・ミサイル開発継続とホルムズ閉鎖は交渉カード」と位置づけ。制裁解除なしの無条件交渉には応じない姿勢。", sources:["モジタバ師声明（2026年3月12日）"] },
+    ]
+  },
   saiban_seido: {
     sources: [
       { org:"東京新聞", type:"全国紙", score:88, lang:"ja", articles:[
