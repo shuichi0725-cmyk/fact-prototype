@@ -2444,40 +2444,32 @@ function renderSummaryTab(){
     '<div><div style="font-size:11px;color:' + alertColor(alertType) + ';font-weight:700;margin-bottom:2px">注意喚起あり — タップで詳細</div>' +
     '<div style="font-size:11px;color:var(--text-2)">' + alertMsg.slice(0,45) + '...</div></div></div>' : '';
 
-  // ソース一覧（ALL_SOURCESは袴田事件専用のためトピックによって表示を調整）
-  var showSources = currentTopic.id === 'hakamada_muzai' || currentTopic.id === 'hakamada_history';
+  // ソース一覧：TOPIC_DATAのsourcesを使用（null時はALL_SOURCES）
+  var isHakamada = currentTopic.id === 'hakamada_muzai' || currentTopic.id === 'hakamada_history';
+  var summarySourceList = (currentData.sources && currentData.sources.length > 0)
+    ? currentData.sources
+    : (isHakamada ? ALL_SOURCES : null);
+  var totalSummaryArticles = summarySourceList
+    ? summarySourceList.reduce(function(n,s){ return n+(s.articles?s.articles.length:0); }, 0) : 0;
   var sourcesHtml = '';
-  if(showSources){
-    ALL_SOURCES.forEach(function(s){
-      var fa = (s.articles && s.articles[0]) ? s.articles[0] : {};
-      var title = fa.title || s.org;
-      var date = fa.date || '';
-      var articleCount = s.articles ? s.articles.length : 0;
-      var countBadge = articleCount > 1 ? '<span style="font-size:10px;color:#4a9eff;margin-left:4px">+' + (articleCount-1) + '件</span>' : '';
-      var resolvedUrl = getArticleUrl(fa, s.org);
-      var readBtn = resolvedUrl ? ('<a href="' + resolvedUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:10px;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:3px 10px;border-radius:99px;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block">読む ↗</a>') : '';
+  if(summarySourceList && summarySourceList.length > 0){
+    summarySourceList.forEach(function(s){
+      var cnt = s.articles ? s.articles.length : 0;
+      var sc = scoreColor(s.score);
       sourcesHtml +=
-        '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #0f1a2e;cursor:pointer" onclick="state.searchTab=2;state.expandedMediaId=' + s.id + ';render()">' +
-        '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:12px;font-weight:700;color:#aaa;margin-bottom:3px">' + s.org + countBadge + '</div>' +
-        '<div style="font-size:12px;font-weight:600;color:#ddd;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + title + '</div>' +
-        '<div style="display:flex;align-items:center;gap:6px">' +
-        '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px">' + s.type + '</span>' +
-        '<span style="font-size:10px;color:var(--text-2)">' + date + '</span>' +
-        '</div></div>' +
-        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">' +
-        '<span style="font-family:monospace;font-size:13px;color:' + scoreColor(s.score) + ';font-weight:700">' + s.score + 'pt</span>' +
-        readBtn + '</div></div>';
+        '<div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #0f1a2e;cursor:pointer;transition:background var(--t-fast)" onclick="state.searchTab=2;state.expandedMediaId=' + s.id + ';render()" onmouseover="this.style.background=\'rgba(255,255,255,0.03)\'" onmouseout="this.style.background=\'\'">' +
+        '<div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">' +
+        '<span style="font-size:13px;font-weight:700;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + s.org + '</span>' +
+        '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px;flex-shrink:0">' + s.type + '</span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0">' +
+        '<span style="font-size:11px;color:var(--text-2)">' + cnt + '件</span>' +
+        '<span style="font-family:monospace;font-size:13px;font-weight:700;color:' + sc + '">' + s.score + 'pt</span>' +
+        '<span style="font-size:14px;color:var(--brand)">›</span>' +
+        '</div></div>';
     });
   } else {
-    // 袴田以外のトピックは参考メディアのリスト表示
-    var mediaList = ['NHK NEWS WEB','時事ドットコム','日本経済新聞','東京新聞','Bloomberg Japan'];
-    mediaList.slice(0, currentTopic.sourceCount).forEach(function(name, i){
-      sourcesHtml += '<div style="padding:8px 0;border-bottom:1px solid #0f1a2e;display:flex;align-items:center;justify-content:space-between">' +
-        '<span style="font-size:13px;color:#ddd">' + name + '</span>' +
-        '<span style="font-size:11px;color:var(--text-2)">確認済み</span>' +
-        '</div>';
-    });
+    sourcesHtml = '<div style="padding:12px 0;font-size:12px;color:var(--text-2)">ソースデータを準備中です</div>';
   }
 
   return '<div class="card" style="margin-bottom:12px">' +
@@ -2502,9 +2494,14 @@ function renderSummaryTab(){
     '<div style="margin-bottom:4px">' +
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
     '<div class="section-title" style="margin-bottom:0">ソース一覧</div>' +
-    '<span style="font-size:10px;color:var(--text-2)">' + currentTopic.sourceCount + '件確認</span>' +
+    (summarySourceList
+      ? '<span style="font-size:10px;color:var(--text-2)">' + summarySourceList.length + 'メディア · ' + totalSummaryArticles + '件</span>'
+      : '<span style="font-size:10px;color:var(--text-2)">' + currentTopic.sourceCount + '件確認</span>') +
     '</div>' +
     sourcesHtml +
+    (summarySourceList && summarySourceList.length > 0
+      ? '<button onclick="state.searchTab=2;render()" style="width:100%;margin-top:10px;padding:8px;background:transparent;border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--brand);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600">ソースを全件見る →</button>'
+      : '') +
     '</div>';
 }
 
