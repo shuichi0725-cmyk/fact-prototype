@@ -620,6 +620,30 @@ const TOPIC_DATA = {
       { stance:"国際人権団体", color:"#9C27B0", summary:"「日本の死刑制度と刑事司法制度は国際基準に照らして問題がある。袴田事件はその最悪の例」と批判。制度改革を強く求める。", sources:["アムネスティ（2024年9月）"] },
     ]
   },
+  rapidus: {
+    sources: [
+      { org:"日本経済新聞", type:"全国紙", score:91, lang:"ja", articles:[
+        { title:"ラピダス、2nm試作ライン稼働 量産へ課題山積", date:"2026年4月2日", url:"https://www.nikkei.com/article/DGXZQOUB020V40S6A400C2000000/", summary:"北海道千歳の工場で2nm半導体の試作ラインが稼働。量産に向けた歩留まり向上と資金調達が課題。" },
+      ]},
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"半導体国産化 ラピダス 政府支援3兆円超 「成功すれば産業革命」", date:"2026年3月15日", url:"https://www3.nhk.or.jp/news/html/20260315/k10014880001000.html", summary:"政府のラピダスへの支援総額が3兆円を超える見通し。経済安保上の意義と民間資金調達の難しさが焦点。" },
+      ]},
+      { org:"Bloomberg Japan", type:"経済通信社", score:95, lang:"ja", articles:[
+        { title:"Rapidus struggles to attract private funding despite government backing", date:"2026年3月20日", url:"https://www.bloomberg.co.jp/news/articles/2026-03-20", summary:"政府支援は手厚いが民間投資家からの資金調達が難航。TSMCとの技術格差埋めるのに10年以上との試算も。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2022年8月", event:"ラピダス設立。トヨタ・ソニー等8社が出資。政府も支援を表明。", alert:false },
+      { date:"2023年9月", event:"IBMとの技術提携契約締結。2nmプロセス技術の移転を受けることで合意。", alert:false },
+      { date:"2025年", event:"北海道千歳市に工場建設開始。政府支援総額が2兆円を超える。", alert:false },
+      { date:"2026年4月", event:"試作ラインが稼働。2027年の量産開始に向け歩留まり向上が最大の技術課題。", alert:true, msg:"量産コスト・技術水準についてラピダスと独立系専門家の見解に大きな差があります。" },
+    ],
+    perspectives: [
+      { stance:"政府・経産省", color:"#4CAF50", summary:"「経済安保と産業競争力の観点から半導体国産化は国家的プロジェクト」と位置づけ。支援継続の方針を維持。", sources:["経産省資料（2026年）"] },
+      { stance:"民間投資家・市場", color:"#FF9800", summary:"「TSMCとの技術格差は10年以上。民間資金調達が困難」と冷ややかな見方。政府の過剰支援を懸念する声も。", sources:["Bloomberg（2026年3月20日）"] },
+      { stance:"半導体専門家", color:"#4a9eff", summary:"「技術的には可能だが、人材確保と歩留まり向上に時間がかかる。2027年量産はタイトなスケジュール」と慎重に評価。", sources:["半導体産業新聞（2026年）"] },
+    ]
+  },
   sns_fraud: {
     sources: [
       { org:"警察庁", type:"政府機関", score:98, lang:"ja", articles:[
