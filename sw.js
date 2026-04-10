@@ -1,8 +1,9 @@
 // FACT Service Worker
-const CACHE_NAME = 'fact-v1';
+const CACHE_NAME = 'fact-v9';
 const ASSETS = [
   '/fact-prototype/',
   '/fact-prototype/index.html',
+  '/fact-prototype/data/topics.json',
   '/fact-prototype/manifest.json',
   'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&display=swap',
 ];
@@ -42,8 +43,8 @@ self.addEventListener('fetch', function(e){
     caches.match(e.request).then(function(cached){
       if(cached) return cached;
       return fetch(e.request).then(function(response){
-        // index.htmlはキャッシュを更新
-        if(e.request.url.includes('index.html') || e.request.url.endsWith('/fact-prototype/')){
+        // index.html と topics.json はキャッシュを更新
+        if(e.request.url.includes('index.html') || e.request.url.endsWith('/fact-prototype/') || e.request.url.includes('topics.json')){
           var clone = response.clone();
           caches.open(CACHE_NAME).then(function(cache){
             cache.put(e.request, clone);
