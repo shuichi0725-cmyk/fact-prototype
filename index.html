@@ -620,6 +620,30 @@ const TOPIC_DATA = {
       { stance:"国際人権団体", color:"#9C27B0", summary:"「日本の死刑制度と刑事司法制度は国際基準に照らして問題がある。袴田事件はその最悪の例」と批判。制度改革を強く求める。", sources:["アムネスティ（2024年9月）"] },
     ]
   },
+  sns_fraud: {
+    sources: [
+      { org:"警察庁", type:"政府機関", score:98, lang:"ja", articles:[
+        { title:"令和7年のSNS型詐欺被害状況 過去最多を更新", date:"2026年3月31日", url:"https://www.npa.go.jp/bureau/criminal/souni/sns-fraud/index.html", summary:"2025年のSNS型詐欺被害額は約1,200億円で過去最多。60代以上の被害が全体の約4割を占める。" },
+      ]},
+      { org:"NHK NEWS WEB", type:"公共放送", score:96, lang:"ja", articles:[
+        { title:"SNS型投資詐欺 被害額が過去最多 著名人の偽広告も急増", date:"2026年3月31日", url:"https://www3.nhk.or.jp/news/html/20260331/k10014895001000.html", summary:"SNSを入口とした投資詐欺の被害が急増。著名人の偽広告を使った手口が横行。" },
+      ]},
+      { org:"国民生活センター", type:"政府機関", score:95, lang:"ja", articles:[
+        { title:"SNS・マッチングアプリを悪用した詐欺に注意", date:"2026年4月1日", url:"https://www.kokusen.go.jp/news/data/n-20260401_1.html", summary:"ロマンス詐欺・投資詐欺の最新手口と被害防止策をまとめた注意喚起。" },
+      ]},
+    ],
+    timeline: [
+      { date:"2024年", event:"SNS型詐欺被害が急増。著名人の偽広告を悪用した手口が多発。", alert:false },
+      { date:"2025年", event:"被害額が約1,200億円で過去最多を更新。警察庁が緊急対策チームを発足。", alert:false },
+      { date:"2026年1月", event:"大手SNS各社に偽広告の削除強化を要請。プラットフォームの対応が焦点に。", alert:false },
+      { date:"2026年4月3日", event:"警察庁が詐欺グループの摘発を強化中。海外拠点のグループが多く捜査が難航。", alert:true, msg:"「詐欺師リスト」「被害回復業者」を名乗る二次被害も急増しています。疑わしい情報には応じないでください。" },
+    ],
+    perspectives: [
+      { stance:"警察庁・政府", color:"#4CAF50", summary:"「摘発強化と啓発活動を両輪で進める」と発表。プラットフォーム事業者への規制強化も検討中。海外当局との連携も強化。", sources:["警察庁発表（2026年3月31日）"] },
+      { stance:"SNSプラットフォーム", color:"#4a9eff", summary:"「偽広告の検出・削除に取り組んでいる」と説明するが、被害者団体からは「対応が遅すぎる」と批判を受けている。", sources:["各社声明（2026年）"] },
+      { stance:"被害者・消費者団体", color:"#FF9800", summary:"「高齢者への啓発だけでなく、プラットフォームへの法的責任を問うべき」と訴える。被害回復のための制度整備も求めている。", sources:["国民生活センター（2026年4月1日）"] },
+    ]
+  },
   carbon_neutral: {
     sources: [
       { org:"環境省", type:"政府機関", score:97, lang:"ja", articles:[
