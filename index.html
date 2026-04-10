@@ -1891,36 +1891,8 @@ function renderHomeTab(tab){
 }
 
 function renderRankingSection(){
-  var p = P();
-  var tab = state.homeTab || 'alerts';
-  // trending以外では非表示
-  if(tab !== 'alerts') return '';
-  var rp = state.rankingPeriod || 'day';
-  var tabData = TAB_RANKING[tab] || TAB_RANKING.alerts;
-  var rankData = tabData[rp] || [];
-  var labels = {hour:'時', day:'日', week:'週'};
-  var periods = ['hour','day','week'];
-  var html = '<div style="margin-bottom:4px;border-bottom:1px solid #1a2a4a;padding-bottom:8px">';
-  html += '<div style="display:flex;align-items:center;gap:6px;padding:8px 0 6px">';
-  periods.forEach(function(period){
-    var active = rp === period;
-    var bc = active ? p.brand : '#1a2a4a';
-    var tc = active ? p.brand : '#666';
-    var bg = active ? p.brand+'22' : 'transparent';
-    html += '<button onclick="state.rankingPeriod=&quot;' + period + '&quot;;render()" style="padding:4px 14px;background:' + bg + ';border:1px solid ' + bc + ';border-radius:99px;font-size:11px;color:' + tc + ';cursor:pointer;font-family:sans-serif">' + labels[period] + 'ランキング</button>';
-  });
-  html += '</div>';
-  rankData.forEach(function(t){
-    var chColor = t.change.indexOf('↑')>=0 ? p.high : t.change.indexOf('↓')>=0 ? p.danger : t.change==='new' ? p.warn : '#8899b0';
-    html += '<div class="card clickable" style="display:flex;align-items:center;gap:10px;margin-bottom:6px" onclick="t.topicId?goTopic(t.topicId):setSearchQuery(t.title)" data-title="' + t.title.replace(/"/g,'&quot;') + '">';
-    html += '<div style="font-family:monospace;font-size:16px;font-weight:900;color:#1a3a6a;min-width:20px;text-align:center">' + t.rank + '</div>';
-    html += '<div style="flex:1;min-width:0">';
-    html += '<div style="font-size:12px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.title + '</div>';
-    html += '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--text-2)">' + t.cat + '</span><span style="font-size:10px;color:' + chColor + ';font-family:monospace">' + t.change + '</span></div>';
-    html += '</div></div>';
-  });
-  html += '</div>';
-  return html;
+  // 全タブで非表示（急上昇タブは renderHomeTab 内に専用セレクターあり）
+  return '';
 }
 
 // カテゴリ名→記録IDマッピング
