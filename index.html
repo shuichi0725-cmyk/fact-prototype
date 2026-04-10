@@ -223,6 +223,19 @@ body { background: var(--bg); color: var(--text-1); font-family: 'Noto Sans JP',
 @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes fadeUp   { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+/* トースト通知 */
+#toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: 99px; padding: 10px 20px;
+  font-size: 13px; font-weight: 600; color: var(--text-1);
+  white-space: nowrap; z-index: 300;
+  opacity: 0; transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 /* 水平スクロール */
 .hscroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 14px; scrollbar-width: none; }
 .hscroll::-webkit-scrollbar { display: none; }
@@ -309,6 +322,8 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
     </button>
   </div>
 </div>
+
+<div id="toast"></div>
 
 <div id="popup-overlay" onclick="closePopup()">
   <div id="popup-box" onclick="event.stopPropagation()">
@@ -1668,6 +1683,14 @@ function showPopup(dataStr){
 }
 function closePopup(){ document.getElementById("popup-overlay").classList.remove("show"); }
 
+function showToast(msg, duration){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function(){ el.classList.remove('show'); }, duration || 2500);
+}
+
 // ===== ナビ切り替え =====
 function switchNav(nav){
   const prevNav = state.nav;
@@ -2168,7 +2191,7 @@ function renderSearchNotFound(p, q){
     // リクエスト
     '<div style="padding:20px 14px 0;text-align:center">' +
     '<div style="font-size:11px;color:var(--text-2);margin-bottom:10px">このトピックのFACT分析を追加してほしい場合</div>' +
-    '<button style="padding:8px 20px;background:var(--brand-dim);border:1px solid rgba(74,158,255,0.3);border-radius:99px;font-size:12px;color:var(--brand);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600" onclick="alert(\'リクエスト機能は近日実装予定です\')">📩 分析をリクエストする</button>' +
+    '<button style="padding:8px 20px;background:var(--brand-dim);border:1px solid rgba(74,158,255,0.3);border-radius:99px;font-size:12px;color:var(--brand);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600" onclick="showToast(\'✅ リクエストを受け付けました。ありがとうございます\')">📩 分析をリクエストする</button>' +
     '</div>' +
     '</div>';
 }
