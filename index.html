@@ -361,9 +361,11 @@ let TOPIC_DATA = {};
 // 詳細データの遅延ロード
 var _detailLoaded = false;
 var _detailLoadPromise = null;
+var _detailError = false;
 function ensureDetailLoaded() {
   if (_detailLoaded) return Promise.resolve();
   if (_detailLoadPromise) return _detailLoadPromise;
+  _detailError = false;
   _detailLoadPromise = fetch('./data/topics_detail.json')
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -372,8 +374,15 @@ function ensureDetailLoaded() {
     })
     .catch(function(e){
       console.error('topics_detail.json の読み込みに失敗:', e);
+      _detailError = true;
+      _detailLoadPromise = null; // リセットして再試行を可能に
+      // re-throw しない → 呼び出し元の .then(render) が失敗時も実行される
     });
   return _detailLoadPromise;
+}
+function retryDetailLoad() {
+  _detailError = false;
+  render(); // ガードが再度 ensureDetailLoaded() を呼ぶ
 }
 
 
@@ -1681,10 +1690,21 @@ function renderSearchTab(tab, score){
   return "";
 }
 
+function renderDetailLoading(){
+  if(_detailError){
+    return '<div style="padding:60px 14px;text-align:center">' +
+      '<div style="font-size:24px;margin-bottom:10px">⚠️</div>' +
+      '<div style="color:var(--text-2);font-size:13px;margin-bottom:16px">詳細データの読み込みに失敗しました</div>' +
+      '<button onclick="retryDetailLoad()" style="padding:8px 24px;background:#4a9eff22;border:1px solid #4a9eff44;border-radius:99px;color:#4a9eff;font-size:13px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">再試行</button>' +
+      '</div>';
+  }
+  return '<div style="padding:60px 0;text-align:center;color:var(--text-2);font-size:13px">読み込み中...</div>';
+}
+
 function renderSummaryTab(){
   if(!_detailLoaded){
     ensureDetailLoaded().then(function(){ render(); });
-    return '<div style="padding:60px 0;text-align:center;color:var(--text-2);font-size:13px">読み込み中...</div>';
+    return renderDetailLoading();
   }
   var p = P();
 
@@ -1768,7 +1788,7 @@ function renderSummaryTab(){
 function renderTimelineTab(){
   if(!_detailLoaded){
     ensureDetailLoaded().then(function(){ render(); });
-    return '<div style="padding:60px 0;text-align:center;color:var(--text-2);font-size:13px">読み込み中...</div>';
+    return renderDetailLoading();
   }
   var p = P();
   var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
@@ -1820,7 +1840,7 @@ function renderTimelineTab(){
 function renderSourcesTab(){
   if(!_detailLoaded){
     ensureDetailLoaded().then(function(){ render(); });
-    return '<div style="padding:60px 0;text-align:center;color:var(--text-2);font-size:13px">読み込み中...</div>';
+    return renderDetailLoading();
   }
   var p = P();
   var q = state.searchQuery;
@@ -1936,7 +1956,7 @@ function renderSourcesTab(){
 function renderPerspectivesTab(){
   if(!_detailLoaded){
     ensureDetailLoaded().then(function(){ render(); });
-    return '<div style="padding:60px 0;text-align:center;color:var(--text-2);font-size:13px">読み込み中...</div>';
+    return renderDetailLoading();
   }
   var p = P();
   var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
