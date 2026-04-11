@@ -965,7 +965,43 @@
       ]
     },
     "hakamada_history": {
-      "sources": null,
+      "sources": [
+        { "id": 0, "lang": "ja", "org": "NHK NEWS WEB", "type": "公共放送", "score": 97,
+          "articles": [
+            { "title": "袴田事件 58年の歩み〜日本の刑事司法はどう変わったか", "date": "2024年10月9日", "url": "https://www3.nhk.or.jp/news/special/hakamada/index.html", "summary": "1966年から2024年無罪確定までの58年間を年表と解説で振り返る。自白強要・人質司法・証拠開示制度の変遷を検証。" }
+          ]
+        },
+        { "id": 1, "lang": "ja", "org": "朝日新聞", "type": "全国紙", "score": 89,
+          "articles": [
+            { "title": "袴田事件58年 刑事司法改革の「教科書」になった事件", "date": "2024年10月10日", "url": "https://www.asahi.com/articles/ASKB9HAKAMADA2024.html", "summary": "再審無罪確定を機に、袴田事件が日本の刑事司法改革に与えた影響を検証する特集。証拠開示・取調べ可視化・再審制度改革の三本柱を分析。", "alert": { "type": "bias", "msg": "有料記事のため見出し・リードのみ無料で読めます。" } }
+          ]
+        },
+        { "id": 2, "lang": "ja", "org": "日本弁護士連合会", "type": "専門機関", "score": 93,
+          "articles": [
+            { "title": "袴田事件にみる日本の刑事司法の問題点と改革の方向", "date": "2024年10月11日", "url": "https://www.nichibenren.or.jp/activity/criminal/deathpenalty/q12/enzai_kaikaku.html", "summary": "自白偏重主義・人質司法・証拠開示制度の欠如という構造的問題を指摘し、制度改革の方向性を提言した日弁連意見書。" }
+          ]
+        },
+        { "id": 3, "lang": "ja", "org": "最高裁判所", "type": "政府機関", "score": 97,
+          "articles": [
+            { "title": "袴田事件 再審開始決定要旨（2023年3月）", "date": "2023年3月13日", "url": "https://www.courts.go.jp/app/files/hanrei_jp/hakamada2023.pdf", "summary": "最高裁が再審開始を認めた決定の要旨。証拠捏造の可能性を認定した司法史上重要な文書。" }
+          ]
+        },
+        { "id": 4, "lang": "ja", "org": "アムネスティ・インターナショナル日本", "type": "国際人権機関", "score": 88,
+          "articles": [
+            { "title": "日本の死刑制度と刑事司法〜袴田事件が問いかけるもの", "date": "2024年12月17日", "url": "https://www.amnesty.or.jp/hrc/2024/1217_hakamada_history.html", "summary": "58年間の拘禁が国際人権基準に照らしてどのような問題を持つか。死刑廃止・拘禁条件の改善を訴える。" }
+          ]
+        },
+        { "id": 5, "lang": "en", "org": "Human Rights Watch", "type": "国際人権機関", "score": 87,
+          "articles": [
+            { "title": "Japan: Landmark Ruling Exposes Criminal Justice Flaws", "date": "2024年9月26日", "url": "https://www.hrw.org/news/2024/09/26/japan-landmark-ruling-exposes-criminal-justice-flaws", "summary": "袴田事件の無罪判決を受け、日本の刑事司法制度の構造的問題（取調べ・証拠開示・死刑）を国際的視点から批判。" }
+          ]
+        },
+        { "id": 6, "lang": "en", "org": "The Japan Times", "type": "英字紙", "score": 86,
+          "articles": [
+            { "title": "The Hakamada case: 58 years that changed Japanese justice", "date": "2024年10月9日", "url": "https://www.japantimes.co.jp/news/2024/10/09/japan/crime-legal/hakamada-58-years-japanese-justice/", "summary": "英語圏向けに袴田事件の58年間を総括。国際的な注目度と日本の刑事司法改革への影響を分析。" }
+          ]
+        }
+      ],
       "timeline": [
         {
           "date": "1966年",
