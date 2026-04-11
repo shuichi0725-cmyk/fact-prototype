@@ -339,20 +339,22 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 
 <script>
 // ===== データ =====
-const CATEGORIES = [
-  { id:"judicial",  label:"司法・裁判",    icon:"⚖️", count:2, alert:false },
-  { id:"intl",      label:"地政学・安保",  icon:"🌏", count:2, alert:true  },
-  { id:"economy",   label:"経済・産業",    icon:"📈", count:2, alert:true  },
-  { id:"politics",  label:"政治・行政",    icon:"🏛",  count:2, alert:false },
-  { id:"medical",   label:"医療・健康",    icon:"🏥", count:2, alert:false },
-  { id:"science",   label:"科学・環境",    icon:"🔬", count:2, alert:false },
-  { id:"society",   label:"社会・事件",    icon:"📋", count:2, alert:false },
-  { id:"tech",      label:"テクノロジー",  icon:"💻", count:2, alert:false },
-  { id:"edu",       label:"教育・子ども",  icon:"📚", count:2, alert:false },
-  { id:"food",      label:"食品・消費者",  icon:"🛡",  count:2, alert:true  },
-  { id:"disaster",  label:"災害・インフラ",icon:"🗾", count:2, alert:false },
-  { id:"history",   label:"歴史・検証",    icon:"📜", count:2, alert:true  },
+// カテゴリ定義（id/label/icon のみ）。count/alert は起動fetch後に FACT_TOPICS から計算して付与される
+const CATEGORY_DEFS = [
+  { id:"judicial",  label:"司法・裁判",    icon:"⚖️" },
+  { id:"intl",      label:"地政学・安保",  icon:"🌏" },
+  { id:"economy",   label:"経済・産業",    icon:"📈" },
+  { id:"politics",  label:"政治・行政",    icon:"🏛"  },
+  { id:"medical",   label:"医療・健康",    icon:"🏥" },
+  { id:"science",   label:"科学・環境",    icon:"🔬" },
+  { id:"society",   label:"社会・事件",    icon:"📋" },
+  { id:"tech",      label:"テクノロジー",  icon:"💻" },
+  { id:"edu",       label:"教育・子ども",  icon:"📚" },
+  { id:"food",      label:"食品・消費者",  icon:"🛡"  },
+  { id:"disaster",  label:"災害・インフラ",icon:"🗾" },
+  { id:"history",   label:"歴史・検証",    icon:"📜" },
 ];
+let CATEGORIES = [];
 
 let FACT_TOPICS = [];
 
@@ -2500,10 +2502,12 @@ Promise.all([
     var meta = results[0];
     var home = results[1];
     FACT_TOPICS = meta.FACT_TOPICS;
-    // CATEGORIES の count・alert をFACT_TOPICSから動的に算出（H1+H2）
-    CATEGORIES.forEach(function(c){
-      c.count = FACT_TOPICS.filter(function(t){ return t.cat === c.label; }).length;
-      c.alert = FACT_TOPICS.some(function(t){ return t.cat === c.label && !!t.alert; });
+    // CATEGORY_DEFS に count・alert を付与して CATEGORIES を確定
+    CATEGORIES = CATEGORY_DEFS.map(function(def){
+      return Object.assign({}, def, {
+        count: FACT_TOPICS.filter(function(t){ return t.cat === def.label; }).length,
+        alert: FACT_TOPICS.some(function(t){ return t.cat === def.label && !!t.alert; })
+      });
     });
     // alert フィールドを持つトピックから ALERTS を動的生成
     ALERTS = FACT_TOPICS
