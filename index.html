@@ -2867,6 +2867,11 @@ fetch('./data/topics_meta.json')
   .then(function(r){ return r.json(); })
   .then(function(d){
     FACT_TOPICS = d.FACT_TOPICS;
+    // CATEGORIES の count・alert をFACT_TOPICSから動的に算出（H1+H2）
+    CATEGORIES.forEach(function(c){
+      c.count = FACT_TOPICS.filter(function(t){ return t.cat === c.label; }).length;
+      c.alert = FACT_TOPICS.some(function(t){ return t.cat === c.label && !!t.alert; });
+    });
     // alert フィールドを持つトピックから ALERTS を動的生成
     ALERTS = FACT_TOPICS
       .filter(function(t){ return t.alert; })
