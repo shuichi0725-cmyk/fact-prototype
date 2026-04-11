@@ -1,7 +1,66 @@
 {
   "TOPIC_DATA": {
     "hakamada_muzai": {
-      "sources": null,
+      "sources": [
+        { "id": 0, "lang": "ja", "org": "NHK NEWS WEB", "type": "公共放送", "score": 97,
+          "articles": [
+            { "title": "再審無罪の袴田巌さんに2億1700万円余の刑事補償", "date": "2025年3月24日", "url": "https://www3.nhk.or.jp/news/html/20250324/k10014758981000.html", "summary": "無罪確定後、静岡地裁は47年7ヶ月にわたる身柄拘束への刑事補償として2億1700万円余を決定。" }
+          ]
+        },
+        { "id": 1, "lang": "ja", "org": "時事ドットコム", "type": "通信社", "score": 94,
+          "articles": [
+            { "title": "袴田巌さん再審で無罪確定 関連ニュースまとめ", "date": "2024年10月9日", "url": "https://www.jiji.com/jc/v7?id=202303hakamata", "summary": "時事通信社による袴田事件再審の経緯まとめ。無罪確定までの全経緯を時系列で整理。" }
+          ]
+        },
+        { "id": 2, "lang": "ja", "org": "東京新聞", "type": "全国紙", "score": 88,
+          "articles": [
+            { "title": "袴田巌さんに再審無罪の判決、戦後5例目 事件から58年", "date": "2024年9月26日", "url": "https://www.tokyo-np.co.jp/article/356688", "summary": "静岡地裁が再審無罪を言い渡した。証拠捏造を認定した画期的判決。" },
+            { "title": "袴田さん再審で検察が控訴断念「判決は到底承服できない」", "date": "2024年10月8日", "url": "https://www.tokyo-np.co.jp/article/359173", "summary": "検事総長が控訴断念と談話を発表。「捏造と断じたことには強い不満」と異例の反発。" },
+            { "title": "袴田巌さんの再審制度見直しに暗雲？検察・裁判官が大幅変更に抵抗", "date": "2025年10月31日", "url": "https://www.tokyo-np.co.jp/article/445990", "summary": "法制審議会部会で再審法改正の議論が進むも、検察側が証拠開示義務化などに抵抗。" }
+          ]
+        },
+        { "id": 3, "lang": "ja", "org": "日本経済新聞", "type": "全国紙", "score": 91,
+          "articles": [
+            { "title": "袴田さん無罪で残る「3つの捏造」 捜査検証避けられず", "date": "2024年10月8日", "url": "https://www.nikkei.com/article/DGXZQOUE036BG0T01C24A0000000/", "summary": "3つの証拠捏造の詳細と捜査機関の検証義務について専門家の見解を交えて詳報。", "alert": { "type": "bias", "msg": "有料記事のため見出し・リードのみ無料で読めます。" } },
+            { "title": "袴田巌さん国賠提訴 過去最高6億円請求", "date": "2025年10月9日", "url": "https://www.nikkei.com/article/DGXZQOUD094U70Z01C25A0000000/", "summary": "国と県を相手取り約6億円の損害賠償請求訴訟を提訴。捜査機関と裁判所の責任も問う。", "alert": { "type": "bias", "msg": "有料記事のため見出し・リードのみ無料で読めます。" } }
+          ]
+        },
+        { "id": 4, "lang": "ja", "org": "東京弁護士会", "type": "専門機関", "score": 90,
+          "articles": [
+            { "title": "「袴田事件」再審無罪判決確定に関する会長声明", "date": "2024年10月11日", "url": "https://www.toben.or.jp/message/seimei/post-738.html", "summary": "3種の証拠がいずれも捜査機関による捏造と認定されたことを歓迎し、再審制度改革の必要性を訴えた。" }
+          ]
+        },
+        { "id": 5, "lang": "ja", "org": "日本弁護士連合会", "type": "専門機関", "score": 93,
+          "articles": [
+            { "title": "袴田事件（日弁連による事件解説）", "date": "2024年10月9日", "url": "https://www.nichibenren.or.jp/activity/criminal/deathpenalty/q12/enzaihakamada.html", "summary": "事件の経緯・自白の問題・5点の衣類の捏造認定・再審制度改革の必要性を法的観点から詳細に説明。" }
+          ]
+        },
+        { "id": 6, "lang": "ja", "org": "イノセンス・プロジェクト・ジャパン", "type": "NPO", "score": 82,
+          "articles": [
+            { "title": "袴田巌さんに再審無罪判決（IPJ声明）", "date": "2024年9月26日", "url": "https://innocenceprojectjapan.org/archives/6195", "summary": "5点の衣類の血痕カラー写真の問題を詳細に解説し、一刻も早い無罪確定を求めた。" }
+          ]
+        },
+        { "id": 7, "lang": "ja", "org": "アムネスティ・インターナショナル日本", "type": "国際人権機関", "score": 88,
+          "articles": [
+            { "title": "袴田巖さんが無罪に！（アムネスティ日本）", "date": "2024年12月17日", "url": "https://www.amnesty.or.jp/hrc/2024/1217_10547.html", "summary": "袴田さんの支援活動の経緯・国際的な注目・死刑制度廃止への訴えを日本語で詳細に報告。" }
+          ]
+        },
+        { "id": 8, "lang": "en", "org": "Al Jazeera", "type": "海外放送", "score": 87,
+          "articles": [
+            { "title": "Japan court acquits former boxer of murder after decades on death row", "date": "2024年9月26日", "url": "https://www.aljazeera.com/news/2024/9/26/japan-court-acquits-former-boxer-of-murder-after-decades-on-death-row", "summary": "「世界で最も長く収監された死刑囚」として国際的注目を集めた点を強調。" }
+          ]
+        },
+        { "id": 9, "lang": "en", "org": "Amnesty International", "type": "国際人権機関", "score": 89,
+          "articles": [
+            { "title": "Japan: Acquittal of man who spent 45 years on death row", "date": "2024年9月30日", "url": "https://www.amnesty.org/en/latest/news/2024/09/japan-acquittal-of-man-who-spent-45-years-on-death-row-pivotal-moment-for-justice/", "summary": "無罪判決を歓迎し、日本に死刑制度の廃止と全死刑囚の判決見直しを求めた。" }
+          ]
+        },
+        { "id": 10, "lang": "en", "org": "CBS News", "type": "海外放送", "score": 85,
+          "articles": [
+            { "title": "World's longest-serving death row inmate acquitted of 1966 murders in Japan", "date": "2024年9月26日", "url": "https://www.cbsnews.com/news/iwao-hakamada-longest-serving-death-row-inmate-acquitted-murder-retrial-japan/", "summary": "AP通信の現地取材を含む詳細報道。姉ひで子さんのコメント・弁護団声明を掲載。" }
+          ]
+        }
+      ],
       "timeline": [
         {
           "date": "1966年6月30日",

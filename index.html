@@ -389,67 +389,6 @@ function retryDetailLoad() {
 
 
 
-// 記録 全ソースプール（検索対象）
-const ALL_SOURCES = [
-  { id:0, lang:"ja", org:"NHK NEWS WEB", type:"公共放送", score:97,
-    articles:[
-      { title:"再審無罪の袴田巌さんに2億1700万円余の刑事補償", date:"2025年3月24日", url:"https://news.web.nhk/newsweb/na/na-k10014758981000", summary:"無罪確定後、静岡地裁は47年7ヶ月にわたる身柄拘束への刑事補償として2億1700万円余を決定。" },
-    ]
-  },
-  { id:1, lang:"ja", org:"時事ドットコム", type:"通信社", score:94,
-    articles:[
-      { title:"袴田巌さん再審で無罪確定 関連ニュースまとめ", date:"2024年10月9日", url:"https://www.jiji.com/jc/v7?id=202303hakamata", summary:"時事通信社による袴田事件再審の経緯まとめ。無罪確定までの全経緯を時系列で整理。" },
-    ]
-  },
-  { id:2, lang:"ja", org:"東京新聞", type:"全国紙", score:88,
-    articles:[
-      { title:"袴田巌さんに再審無罪の判決、戦後5例目 事件から58年", date:"2024年9月26日", url:"https://www.tokyo-np.co.jp/article/356688", summary:"静岡地裁が再審無罪を言い渡した。証拠捏造を認定した画期的判決。" },
-      { title:"袴田さん再審で検察が控訴断念「判決は到底承服できない」", date:"2024年10月8日", url:"https://www.tokyo-np.co.jp/article/359173", summary:"検事総長が控訴断念と談話を発表。「捏造と断じたことには強い不満」と異例の反発。" },
-      { title:"袴田巌さんの再審制度見直しに暗雲？検察・裁判官が大幅変更に抵抗", date:"2025年10月31日", url:"https://www.tokyo-np.co.jp/article/445990", summary:"法制審議会部会で再審法改正の議論が進むも、検察側が証拠開示義務化などに抵抗。" },
-    ]
-  },
-  { id:3, lang:"ja", org:"日本経済新聞", type:"全国紙", score:91,
-    articles:[
-      { title:"袴田さん無罪で残る「3つの捏造」 捜査検証避けられず", date:"2024年10月8日", url:"https://www.nikkei.com/article/DGXZQOUE036BG0T01C24A0000000/", summary:"3つの証拠捏造の詳細と捜査機関の検証義務について専門家の見解を交えて詳報。", alert:{type:"bias", msg:"有料記事のため見出し・リードのみ無料で読めます。"} },
-      { title:"袴田巌さん国賠提訴 過去最高6億円請求", date:"2025年10月9日", url:"https://www.nikkei.com/article/DGXZQOUD094U70Z01C25A0000000/", summary:"国と県を相手取り約6億円の損害賠償請求訴訟を提訴。捜査機関と裁判所の責任も問う。", alert:{type:"bias", msg:"有料記事のため見出し・リードのみ無料で読めます。"} },
-    ]
-  },
-  { id:4, lang:"ja", org:"東京弁護士会", type:"専門機関", score:90,
-    articles:[
-      { title:"「袴田事件」再審無罪判決確定に関する会長声明", date:"2024年10月11日", url:"https://www.toben.or.jp/message/seimei/post-738.html", summary:"3種の証拠がいずれも捜査機関による捏造と認定されたことを歓迎し、再審制度改革の必要性を訴えた。" },
-    ]
-  },
-  { id:5, lang:"ja", org:"日本弁護士連合会", type:"専門機関", score:93,
-    articles:[
-      { title:"袴田事件（日弁連による事件解説）", date:"2024年10月9日", url:"https://www.nichibenren.or.jp/activity/criminal/deathpenalty/q12/enzaihakamada.html", summary:"事件の経緯・自白の問題・5点の衣類の捏造認定・再審制度改革の必要性を法的観点から詳細に説明。" },
-    ]
-  },
-  { id:6, lang:"ja", org:"イノセンス・プロジェクト・ジャパン", type:"NPO", score:82,
-    articles:[
-      { title:"袴田巌さんに再審無罪判決（IPJ声明）", date:"2024年9月26日", url:"https://innocenceprojectjapan.org/archives/6195", summary:"5点の衣類の血痕カラー写真の問題を詳細に解説し、一刻も早い無罪確定を求めた。" },
-    ]
-  },
-  { id:7, lang:"ja", org:"アムネスティ・インターナショナル日本", type:"国際人権機関", score:88,
-    articles:[
-      { title:"袴田巖さんが無罪に！（アムネスティ日本）", date:"2024年12月17日", url:"https://www.amnesty.or.jp/hrc/2024/1217_10547.html", summary:"袴田さんの支援活動の経緯・国際的な注目・死刑制度廃止への訴えを日本語で詳細に報告。" },
-    ]
-  },
-  { id:8, lang:"en", org:"Al Jazeera", type:"海外放送", score:87,
-    articles:[
-      { title:"Japan court acquits former boxer of murder after decades on death row", date:"2024年9月26日", url:"https://www.aljazeera.com/news/2024/9/26/japan-court-acquits-former-boxer-of-murder-after-decades-on-death-row", summary:"「世界で最も長く収監された死刑囚」として国際的注目を集めた点を強調。" },
-    ]
-  },
-  { id:9, lang:"en", org:"Amnesty International", type:"国際人権機関", score:89,
-    articles:[
-      { title:"Japan: Acquittal of man who spent 45 years on death row", date:"2024年9月30日", url:"https://www.amnesty.org/en/latest/news/2024/09/japan-acquittal-of-man-who-spent-45-years-on-death-row-pivotal-moment-for-justice/", summary:"無罪判決を歓迎し、日本に死刑制度の廃止と全死刑囚の判決見直しを求めた。" },
-    ]
-  },
-  { id:10, lang:"en", org:"CBS News", type:"海外放送", score:85,
-    articles:[
-      { title:"World's longest-serving death row inmate acquitted of 1966 murders in Japan", date:"2024年9月26日", url:"https://www.cbsnews.com/news/iwao-hakamada-longest-serving-death-row-inmate-acquitted-murder-retrial-japan/", summary:"AP通信の現地取材を含む詳細報道。姉ひで子さんのコメント・弁護団声明を掲載。" },
-    ]
-  },
-];
 // ===== メディアマスターデータ =====
 const MEDIA_MASTER = [
   // S: 政府・公共放送
@@ -551,207 +490,15 @@ function getArticleUrl(article, orgName){
 
 
 
-const SOURCES = ALL_SOURCES.slice(0,5);
-
 // ALERTS は topics_meta.json ロード後に FACT_TOPICS.alert フィールドから動的生成
 let ALERTS = [];
 
 
-const TRENDING = [
-  { rank:1, title:"能登地震 復興2年の現状", cat:"災害・インフラ", searches:12847, label:"多く調べられています" },
-  { rank:2, title:"日銀 追加利上げの影響は", cat:"経済・産業", searches:9234, label:"多く調べられています" },
-  { rank:3, title:"少子化対策 新制度の詳細", cat:"政治・行政", searches:8102, label:"多く調べられています" },
-  { rank:4, title:"鳥インフルエンザ 国内感染状況", cat:"医療・健康", searches:7455, label:"多く調べられています" },
-];
-const TAB_RANKING = {
-  alerts: {
-    hour: [
-      { rank:1, title:"ワクチン後遺症SNS拡散", cat:"医療・健康", change:"new" },
-      { rank:2, title:"選挙 誤投票情報", cat:"政治・行政", change:"↑1" },
-      { rank:3, title:"日銀報道バイアス検出", cat:"経済・産業", change:"↑2" },
-    ],
-    day: [
-      { rank:1, title:"選挙 誤投票情報", cat:"政治・行政", change:"→" },
-      { rank:2, title:"ワクチン後遺症SNS拡散", cat:"医療・健康", change:"↓1" },
-      { rank:3, title:"紛争地域 被害数乖離", cat:"国際・外交", change:"↑1" },
-    ],
-    week: [
-      { rank:1, title:"健康食品 誇大広告拡散", cat:"食品・消費者", change:"new" },
-      { rank:2, title:"気候変動 否定情報拡散", cat:"科学・環境", change:"↑3" },
-      { rank:3, title:"選挙 誤投票情報", cat:"政治・行政", change:"↓1" },
-    ],
-  },
-  trending: {
-    hour: [
-      { rank:1, title:"日銀 緊急声明の全文", cat:"経済・産業", change:"↑3" },
-      { rank:2, title:"東京震度3 震源地と詳細", cat:"災害・インフラ", change:"new" },
-      { rank:3, title:"国会 緊急動議の内容", cat:"政治・行政", change:"↑5" },
-    ],
-    day: [
-      { rank:1, title:"能登地震 復興2年の現状", cat:"災害・インフラ", change:"↑1" },
-      { rank:2, title:"日銀 追加利上げの影響は", cat:"経済・産業", change:"↓1" },
-      { rank:3, title:"少子化対策 新制度の詳細", cat:"政治・行政", change:"→" },
-    ],
-    week: [
-      { rank:1, title:"2026年春の政策変更まとめ", cat:"政治・行政", change:"→" },
-      { rank:2, title:"能登地震 復興の現状と課題", cat:"災害・インフラ", change:"↑2" },
-      { rank:3, title:"日銀利上げ 家計への影響", cat:"経済・産業", change:"↓1" },
-    ],
-  },
-  pickup: {
-    hour: [
-      { rank:1, title:"地下鉄サリン事件31年 報道の変化", cat:"歴史・検証", change:"new" },
-      { rank:2, title:"AI規制法案 委員会審議速報", cat:"テクノロジー", change:"↑2" },
-      { rank:3, title:"袴田事件 今日の司法議論", cat:"司法・裁判", change:"→" },
-    ],
-    day: [
-      { rank:1, title:"1995年3月20日 地下鉄サリン事件から31年", cat:"歴史・検証", change:"→" },
-      { rank:2, title:"AI規制法案 今国会での審議状況", cat:"テクノロジー", change:"↑1" },
-      { rank:3, title:"袴田事件 再審無罪確定後の議論", cat:"司法・裁判", change:"↑2" },
-    ],
-    week: [
-      { rank:1, title:"AI規制 国際比較と日本の立場", cat:"テクノロジー", change:"new" },
-      { rank:2, title:"冤罪事件 過去10年の検証", cat:"司法・裁判", change:"↑1" },
-      { rank:3, title:"地下鉄サリン事件 風化する記憶", cat:"歴史・検証", change:"↓1" },
-    ],
-  },
-  followup: {
-    hour: [
-      { rank:1, title:"能登地震 仮設住宅退去期限", cat:"災害・インフラ", change:"new" },
-      { rank:2, title:"日銀 総裁発言の詳細", cat:"経済・産業", change:"↑1" },
-      { rank:3, title:"袴田事件 法務省動向", cat:"司法・裁判", change:"→" },
-    ],
-    day: [
-      { rank:1, title:"能登地震 復興の最新状況", cat:"災害・インフラ", change:"→" },
-      { rank:2, title:"袴田事件 再審制度改革の議論", cat:"司法・裁判", change:"↑2" },
-      { rank:3, title:"日銀 追加利上げ観測の続報", cat:"経済・産業", change:"↑1" },
-    ],
-    week: [
-      { rank:1, title:"少子化対策 効果検証の続報", cat:"政治・行政", change:"↑1" },
-      { rank:2, title:"能登地震 住宅再建の現状", cat:"災害・インフラ", change:"↓1" },
-      { rank:3, title:"日銀利上げ 家計影響の続報", cat:"経済・産業", change:"→" },
-    ],
-  },
-};
-const RANKING = {
-  hour: [
-    { rank:1, title:"ホルムズ海峡 タンカー3隻通過の報道", cat:"地政学・安全保障", searches:18400, change:"new", topicId:"hormuz_crisis", why:"英国主催協議の結果が速報で流れ急騰" },
-    { rank:2, title:"日経平均 475円高", cat:"経済・金融", searches:12100, change:"↑2", topicId:"food_price_hike", why:"米雇用統計発表を前にリスクオン" },
-    { rank:3, title:"Microsoft 1兆円 日本投資発表", cat:"経済・産業", searches:9800, change:"↓1", topicId:"microsoft_japan", why:"昨日の発表を受けて調査が続く" },
-    { rank:4, title:"円安 159円台後半", cat:"経済・金融", searches:7200, change:"↑1", topicId:"food_price_hike", why:"米雇用統計控えドル買い優勢" },
-    { rank:5, title:"袴田巌 国家賠償 第1回口頭弁論", cat:"司法・裁判", searches:5600, change:"→", topicId:"hakamada_muzai", why:"昨日の弁論内容を後追い確認する動き" },
-  ],
-  day: [
-    { rank:1, title:"ホルムズ海峡 40カ国が再開協議", cat:"地政学・安全保障", searches:124500, change:"new", topicId:"hormuz_crisis", why:"英国主催の国際協議が報道され一気に急上昇" },
-    { rank:2, title:"Microsoft 日本1兆円投資", cat:"経済・産業", searches:98200, change:"↑3", topicId:"microsoft_japan", why:"発表翌日も関連検索が継続中" },
-    { rank:3, title:"日経平均 475円高 半導体株高", cat:"経済・金融", searches:87300, change:"↑1", topicId:"food_price_hike", why:"大幅反発を受けて相場確認の検索急増" },
-    { rank:4, title:"円安 159円台 米雇用統計待ち", cat:"経済・金融", searches:76100, change:"↑2", topicId:"food_price_hike", why:"為替の行方と物価への影響を気にする声多数" },
-    { rank:5, title:"袴田巌 国賠訴訟 口頭弁論", cat:"司法・裁判", searches:54200, change:"↑1", topicId:"hakamada_muzai", why:"第1回口頭弁論の内容を確認する検索が集中" },
-  ],
-  week: [
-    { rank:1, title:"ホルムズ海峡危機 日本への影響", cat:"地政学・安全保障", searches:892000, change:"→", topicId:"hormuz_crisis", why:"週を通じて最多。原油高・停電リスクへの関心継続" },
-    { rank:2, title:"日本 原油輸入量3割減 過去最少", cat:"エネルギー", searches:654000, change:"↑2", topicId:"hormuz_crisis", why:"統計発表を受けてエネルギー問題への関心急増" },
-    { rank:3, title:"再審制度改革 法制審議論", cat:"司法・裁判", searches:432000, change:"↑1", topicId:"enzai_cf", why:"法制審部会が非公開会合を継続し注目が集まる" },
-    { rank:4, title:"AI データセンター 日本誘致競争", cat:"科学・技術", searches:321000, change:"new", topicId:"ai_datacenter_japan", why:"Microsoft発表をきっかけにAI投資への関心が急増" },
-    { rank:5, title:"米雇用統計 4月3日発表", cat:"経済・金融", searches:298000, change:"↑1", topicId:"food_price_hike", why:"円相場・日経平均への影響を事前に確認する動き" },
-  ],
-};
+// RANKING, PICKUP, FOLLOWUP は home_data.json ロード後に設定
+let RANKING = { hour: [], day: [], week: [] };
+let PICKUP = [];
+let FOLLOWUP = [];
 
-
-const PICKUP = [
-  { id:0, icon:"⛽", label:"緊急", cat:"地政学・安全保障", topicId:"hormuz_crisis",
-    title:"ホルムズ海峡危機 日本への影響まとめ",
-    summary:"原油輸入の約9割がホルムズ海峡経由の日本。3月の原油輸入量が2月比3割減と過去最少水準に。ガソリン・電気代高騰・円安のダブルパンチで家計への影響が深刻化。",
-    note:"本日、40カ国協議で一部航路再開の可能性が浮上。状況は刻々と変化しています。",
-    updated:"2026年4月3日", hasFollowup:true, score:91,
-    alert:{type:"fact", msg:"政府の備蓄放出・緊急対応について各社の報道に差があります。"} },
-  { id:1, icon:"⚖️", label:"注目", cat:"司法・裁判", topicId:"enzai_cf",
-    title:"再審制度改革 法制審部会の行方",
-    summary:"袴田事件を契機に再審法改正の議論が2025年10月から法制審議会部会で本格化。証拠開示の義務化・検察の不服申し立て禁止をめぐり検察側が抵抗。",
-    note:"法制審部会は非公開会合を継続中。与野党で改正への温度差が顕著になっている。",
-    updated:"2026年4月3日", hasFollowup:true, score:85, alert:null },
-  { id:2, icon:"🤖", label:"注目", cat:"科学・技術", topicId:"ai_datacenter_japan",
-    title:"AIデータセンター 日本誘致競争の構図",
-    summary:"MicrosoftのAI拠点投資1兆円発表に続き、GoogleやAmazonも日本でのデータセンター投資を計画。データ主権・経済安保の観点から政府も積極誘致。電力需要急増が課題。",
-    note:"電力需給と安全保障の観点から今後の政策動向に注目。電力株にも影響が出始めている。",
-    updated:"2026年4月3日", hasFollowup:false, score:78, alert:null },
-];
-
-
-const FOLLOWUP = [
-  { id:0, icon:"⚖️", cat:"司法・裁判", title:"袴田事件 国家賠償訴訟", status:"進行中", statusColor:"warn", lastUpdate:"2026年3月31日",
-    topicId:"hakamada_muzai",
-    summary:"2025年10月に国と県を相手取り約6億円の損害賠償請求訴訟を提訴。国側は争う姿勢。",
-    updates:[
-      { date:"2026/03/31", text:"第1回口頭弁論。国側は争う姿勢を示し、次回期日は未定。" },
-      { date:"2025/10/09", text:"弁護団が静岡地裁に国家賠償請求訴訟を提訴。請求額は過去最高の約6億円。" },
-      { date:"2025/03/24", text:"静岡地裁が刑事補償として2億1700万円余の支払いを決定。" },
-    ]
-  },
-  { id:1, icon:"🏛️", cat:"司法・裁判", title:"再審制度改革 法制審議会", status:"審議中", statusColor:"mid", lastUpdate:"2026年4月3日",
-    topicId:"enzai_cf",
-    summary:"袴田事件を契機に再審法改正の議論が法制審議会部会で進行中。証拠開示・検察の不服申し立て禁止が焦点。",
-    updates:[
-      { date:"2026/04/03", text:"法制審議会部会が非公開会合を継続。検察側が証拠開示義務化に反対し議論が難航。" },
-      { date:"2025/10/31", text:"東京新聞が「検察・裁判官が大幅変更に抵抗」と報道。" },
-      { date:"2025/04/01", text:"冤罪被害者らが再審制度改正実現に向けたクラウドファンディングを開始。" },
-    ]
-  },
-  { id:2, icon:"🛢️", cat:"地政学・安全保障", title:"ホルムズ海峡危機と日本経済", status:"継続中", statusColor:"high", lastUpdate:"2026年4月3日",
-    topicId:"hormuz_crisis",
-    summary:"2026年2月28日のイラン攻撃以降、ホルムズ海峡が事実上封鎖。日本の原油輸入に深刻な影響。",
-    updates:[
-      { date:"2026/04/03", text:"オマーン寄り航路で超大型タンカー等3隻が通過の可能性。ただし全面解除ではない。" },
-      { date:"2026/04/02", text:"英国主催で日欧など40カ国余りが再開に向けた対応を協議。" },
-      { date:"2026/04/01", text:"日本の3月原油輸入量が2月比3割減。比較可能な2013年以降で最少水準に。" },
-    ]
-  },
-  { id:3, icon:"💱", cat:"経済・金融", title:"円安・原油高 家計への影響", status:"悪化傾向", statusColor:"danger", lastUpdate:"2026年4月3日",
-    topicId:"food_price_hike",
-    summary:"ホルムズ危機による原油高と円安が同時進行。ガソリン・電気代・食料品価格への波及が続く。",
-    updates:[
-      { date:"2026/04/03", text:"ドル円159円台半ば。日経平均は半導体株高で475円高。米3月雇用統計の結果に注目。" },
-      { date:"2026/03/31", text:"G7財務相・中銀総裁が「市場安定へあらゆる措置」の共同声明を発表。" },
-      { date:"2026/03/28", text:"OECDがG20の今年のインフレ率予測を4.0%に大幅上方修正。" },
-    ]
-  },
-];
-
-
-const PERSPECTIVES = [
-  { stance:"司法（再審判決）", color:"#4CAF50",
-    summary:"静岡地裁は2024年9月、「5点の衣類・自白調書・ズボンの共布」の3つの証拠はいずれも捜査機関によって捏造されたと認定。「捜査機関以外に事実上想定できない」と断じ、袴田さんを無罪とした。",
-    sources:["静岡地裁判決文（2024年9月26日）","東京高裁再審開始決定（2023年3月）"]
-  },
-  { stance:"弁護団・支援者", color:"#4a9eff",
-    summary:"弁護団は「みそ漬け実験」等の科学的証拠により証拠捏造を立証。「3つの捏造認定」は当然の結果と評価。一方で、袴田さんが法廷に立てないほど拘禁症状が残っていることを「刑事司法の最大の恥」と訴えた。",
-    sources:["弁護団最終弁論（2024年5月）","IPJ声明（2024年9月）"]
-  },
-  { stance:"検察", color:"#FF9800",
-    summary:"控訴断念の談話で「判決には到底承服できず、捏造と断じたことには強い不満がある」と表明。一方で袴田さんが「長期間法的地位が不安定な状況に置かれたことに申し訳なく思う」とも述べた。",
-    sources:["畝本検事総長談話（2024年10月8日）","検察の論告（2024年5月）"]
-  },
-  { stance:"専門家・人権団体", color:"#9C27B0",
-    summary:"アムネスティ・ヒューマン・ライツ・ウォッチなどは「日本の刑事司法制度の根本的な改革が必要」と指摘。「人質司法」「自白強要」「証拠開示制度の欠如」を問題の本質として訴えた。",
-    sources:["アムネスティ国際声明（2024年9月）","Human Rights Watch（2025年1月）"]
-  },
-];
-
-const TIMELINE = [
-  { date:"1966年6月30日", event:"静岡県清水市で一家4人が殺害される。みそ製造会社専務宅が放火・全焼。", alert:false },
-  { date:"1966年8月18日", event:"袴田巌さん（当時30歳）が強盗殺人容疑で逮捕。その後1日平均12時間に及ぶ取調べが続く。", alert:true, msg:"取調べの非人道性について当時から問題視する声があったが、見過ごされた経緯があります。" },
-  { date:"1967年8月", event:"みそ製造工場のみそタンク内から「5点の衣類」が発見される。後に証拠捏造と認定。", alert:true, msg:"この発見の状況について、検察と弁護側で根本的な事実認識の違いがあります。" },
-  { date:"1968年9月11日", event:"静岡地裁が袴田さんに死刑判決。裁判官3名中1名が反対意見を持っていたことが後に判明。", alert:false },
-  { date:"1980年11月19日", event:"最高裁が上告を棄却し死刑確定。以降袴田さんは死刑囚として拘置所に収監。", alert:false },
-  { date:"2014年3月27日", event:"静岡地裁（村山裁判長）が再審開始と拘置執行停止を決定。袴田さんが47年7ヶ月ぶりに釈放。", alert:false },
-  { date:"2018年6月11日", event:"東京高裁が再審開始決定を取り消し。弁護側が特別抗告。", alert:true, msg:"この高裁決定は後に最高裁に否定されましたが、さらに約5年の時間を要しました。" },
-  { date:"2023年3月13日", event:"東京高裁が再審開始を認め、検察の即時抗告を棄却。検察は特別抗告を断念し再審開始が確定。", alert:false },
-  { date:"2024年9月26日", event:"静岡地裁が再審無罪判決。「5点の衣類・自白調書・共布」の3つの証拠を捜査機関による捏造と認定。", alert:false },
-  { date:"2024年10月9日", event:"検察が控訴を断念し無罪が確定。逮捕から58年、死刑確定から44年。", alert:false },
-  { date:"2025年3月24日", event:"静岡地裁が刑事補償として2億1700万円余の支払いを決定。", alert:false },
-  { date:"2025年10月9日", event:"袴田さんが国と県を相手取り、約6億円の国家賠償請求訴訟を提訴。", alert:false },
-  { date:"2026年3月31日", event:"国賠訴訟第1回口頭弁論。国側は「検事総長談話は犯人と述べたものではない」と争う姿勢。", alert:true, msg:"検察側の主張について複数の法律専門家が「到底承服できない論理」と批判しています。" },
-];
 
 
 // ===== localStorage 永続化 =====
@@ -1281,31 +1028,6 @@ function clearFilters(){
   render();
 }
 
-function getFilteredSources(){
-  const q = state.searchQuery.toLowerCase();
-  const f = state.filters;
-  return ALL_SOURCES.filter(s=>{
-    // キーワード検索（タイトル・発行元・カテゴリ・要約）
-    if(q && !s.title.toLowerCase().includes(q) &&
-       !s.org.toLowerCase().includes(q) &&
-       !s.cat.toLowerCase().includes(q) &&
-       !(s.summary||'').toLowerCase().includes(q)) return false;
-    // カテゴリフィルター
-    if(f.cats.length>0 && !f.cats.includes(s.cat)) return false;
-    // ソース種別
-    if(f.types && f.types.length>0 && !f.types.includes(s.type)) return false;
-    // 信頼度
-    if(f.trust==='high' && s.score<90) return false;
-    if(f.trust==='mid' && (s.score<50||s.score>=90)) return false;
-    if(f.trust==='low' && s.score>=50) return false;
-    // 期間
-    if(f.period && s.period!==f.period) return false;
-    // 注意喚起
-    if(f.alert==='yes' && !s.alert) return false;
-    if(f.alert==='no' && s.alert) return false;
-    return true;
-  }).sort((a,b)=>b.score-a.score);
-}
 
 function hasActiveFilter(){
   const f=state.filters;
@@ -1509,7 +1231,7 @@ function renderSearchResults(p){
   var cards = results.map(function(t){
     var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
     var _td = TOPIC_DATA[t.id];
-    var srcCount = _td ? (_td.sources === null ? ALL_SOURCES.length : (_td.sources ? _td.sources.length : t.sourceCount)) : t.sourceCount;
+    var srcCount = _td && _td.sources ? _td.sources.length : t.sourceCount;
     var alertBadge = t.alert ?
       '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px">⚠️ 注意</span>' : '';
     var tags = (t.tags||[]).map(function(tag){
@@ -1710,11 +1432,10 @@ function renderSummaryTab(){
     '<div><div style="font-size:11px;color:' + alertColor(alertType) + ';font-weight:700;margin-bottom:2px">注意喚起あり — タップで詳細</div>' +
     '<div style="font-size:11px;color:var(--text-2)">' + alertMsg.slice(0,45) + '...</div></div></div>' : '';
 
-  // ソース一覧：TOPIC_DATAのsourcesを使用（null時はALL_SOURCES）
-  var isHakamada = currentTopic.id === 'hakamada_muzai' || currentTopic.id === 'hakamada_history';
+  // ソース一覧：TOPIC_DATAのsourcesを使用
   var summarySourceList = (currentData.sources && currentData.sources.length > 0)
     ? currentData.sources
-    : (isHakamada ? ALL_SOURCES : null);
+    : null;
   var totalSummaryArticles = summarySourceList
     ? summarySourceList.reduce(function(n,s){ return n+(s.articles?s.articles.length:0); }, 0) : 0;
   var sourcesHtml = '';
@@ -1838,8 +1559,7 @@ function renderSourcesTab(){
   var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
   var currentData = TOPIC_DATA[currentTopic.id] || {};
 
-  // ソースデータ：null = ALL_SOURCES（袴田事件）を使用
-  var sourceList = (currentData.sources !== null && currentData.sources) ? currentData.sources : ALL_SOURCES;
+  var sourceList = (currentData.sources && currentData.sources.length > 0) ? currentData.sources : [];
 
   var btnStyle = function(active){
     return 'padding:4px 12px;border-radius:99px;border:1px solid ' +
@@ -2009,90 +1729,9 @@ function renderRelatedTab(){
       '</div>';
   }
 
-  // フォールバック：旧来の外部記事リスト（relatedMap）
-  var relatedMap = {
-    hakamada_muzai: [
-      { title:'袴田巌さん冤罪で始まった「再審制度見直し」に暗雲？', org:'東京新聞', date:'2025年10月31日', lang:'ja', summary:'法制審議会部会で再審制度改革の議論が進むも、検察・裁判官側が大幅変更に抵抗。', url:'https://www.tokyo-np.co.jp/article/445990' },
-      { title:'袴田巌さん国賠提訴 過去最高6億円請求', org:'日本経済新聞', date:'2025年10月9日', lang:'ja', summary:'袴田さんが国と県を相手取り約6億円の損害賠償請求訴訟を提訴。', url:'https://www.nikkei.com/article/DGXZQOUD094U70Z01C25A0000000/' },
-      { title:'冤罪被害者ら、再審制度改正へクラウドファンディング', org:'時事通信', date:'2026年4月1日', lang:'ja', summary:'冤罪被害者らが再審制度改正実現に向けたCFを開始。袴田弁護団も支持。', url:'https://www.jiji.com/jc/archives?g=soc_archive_0' },
-      { title:'Japan acquits former boxer Iwao Hakamada after 45 years on death row', org:'Amnesty International', date:'2024年9月30日', lang:'en', summary:'Amnesty welcomes the acquittal and calls for abolition of the death penalty in Japan.', url:'https://www.amnesty.org/en/latest/news/2024/09/japan-acquittal-of-man-who-spent-45-years-on-death-row-pivotal-moment-for-justice/' },
-      { title:"World's longest-serving death row inmate acquitted", org:'CBS News', date:'2024年9月26日', lang:'en', summary:"Iwao Hakamada acquitted of 1966 murders after spending 45 years on death row.", url:'https://www.cbsnews.com/news/iwao-hakamada-longest-serving-death-row-inmate-acquitted-murder-retrial-japan/' },
-    ],
-    hormuz_crisis: [
-      { title:'ホルムズ海峡「通航料」の実態、秘密のコードと元決済で航行許可', org:'Bloomberg Japan', date:'2026年4月1日', lang:'ja', summary:'ペルシャ湾で足止めされた原油タンカーへの「通航料」提案の実態を報道。', url:'https://www.bloomberg.com/jp/news/articles/2026-04-01/TCTZI1T96OSL00' },
-      { title:'16世紀の大航海時代に「ホルムズ軍事占領」、なぜ歴史が繰り返されるのか', org:'ダイヤモンドオンライン', date:'2026年4月2日', lang:'ja', summary:'ホルムズ海峡の地政学的重要性を歴史的観点から分析。', url:'https://diamond.jp/articles/-/387164' },
-      { title:'日本の原油輸入量が急減 3月は3割減', org:'日本経済新聞', date:'2026年4月3日', lang:'ja', summary:'ホルムズ海峡封鎖の直撃を受け2月比3割減。比較可能な2013年以降で最少。', url:'https://www.nikkei.com/article/DGXZQOUB024AU0S6A400C2000000/' },
-      { title:'UK convenes 40-nation talks to reopen Strait of Hormuz', org:'Arab News Japan', date:'2026年4月2日', lang:'en', summary:'Britain hosts virtual summit with 40+ nations discussing measures to reopen the strait.', url:'https://www.arabnews.jp/article/middle-east/article_173358/' },
-    ],
-    microsoft_japan: [
-      { title:'Microsoftの株価下落と投資家の懸念', org:'日本経済新聞', date:'2026年4月3日', lang:'ja', summary:'1〜3月のMicrosoft株価は金融危機以来の下落。AI投資の費用対効果に疑問。', url:'https://www.nikkei.com/article/DGXZQOUB020V30S6A400C2000000/' },
-      { title:'AIデータセンター 日本誘致競争の構図', org:'NHK', date:'2026年4月3日', lang:'ja', summary:'Microsoft投資に続きGoogleやAmazonも日本でのデータセンター投資を計画。', url:'https://www3.nhk.or.jp/news/html/20260403/k10014900001000.html' },
-    ],
-    yosan_2026: [
-      { title:'2026年4月の政治・政策カレンダー', org:'KSI政策ニュース', date:'2026年4月', lang:'ja', summary:'4月11日自然成立予定の本予算と4月から始まる新制度の一覧。', url:'https://www.policynews.jp/schedule/2026/4.html' },
-      { title:'予算成立遅れは野党の怠慢？SNSで批判飛び交う', org:'東京新聞', date:'2026年4月2日', lang:'ja', summary:'土日審議拒否に対するSNS上の批判と「大衆迎合的な議論」への懸念。', url:'https://www.tokyo-np.co.jp/n/politics' },
-    ],
-    sudden_death_diagnosis: [
-      { title:'死因究明拠点整備モデル事業実施団体の公募について', org:'厚生労働省', date:'2026年3月4日', lang:'ja', summary:'厚労省が死因究明制度の拡充に向けた取り組みを推進。', url:'https://www.mhlw.go.jp/stf/houdou/houdou_list_202603.html' },
-    ],
-    march_high_temp: [
-      { title:'3月は全国的に高温 北日本と沖縄・奄美は少雨', org:'時事ドットコム', date:'2026年4月1日', lang:'ja', summary:'気象庁発表。全国的に高温、北日本と沖縄・奄美地方では降水量が少雨傾向。', url:'https://www.jiji.com/jc/archives?g=soc_archive_0' },
-      { title:'発電向け燃料確保に懸念 夏に向け需給見通し示す取り組み開始', org:'NHK', date:'2026年4月3日', lang:'ja', summary:'高温と燃料不足が重なる夏の電力需給に懸念。政府が対応開始。', url:'https://news.web.nhk/newsweb/na/na-k10014900001000' },
-    ],
-    enzai_cf: [
-      { title:'袴田巌さん冤罪で始まった「再審制度見直し」に暗雲？', org:'東京新聞', date:'2025年10月31日', lang:'ja', summary:'法制審議会部会で再審制度改革の議論が進むも、検察・裁判官側が大幅変更に抵抗。', url:'https://www.tokyo-np.co.jp/article/445990' },
-      { title:'袴田事件 再審制度改正への道', org:'日弁連', date:'2024年10月9日', lang:'ja', summary:'日弁連による再審制度の問題点と改正に向けた提言。', url:'https://www.nichibenren.or.jp/activity/criminal/deathpenalty/q12/enzaihakamada.html' },
-    ],
-    ai_datacenter_japan: [
-      { title:'Microsoft 日本に1兆円AI投資', org:'NHK', date:'2026年4月3日', lang:'ja', summary:'ソフトバンク・さくらインターネットと連携しAIインフラを構築。', url:'https://news.web.nhk/newsweb/na/na-k10014900001000' },
-      { title:'発電向け燃料確保に懸念 夏に向け需給見通し', org:'NHK', date:'2026年4月3日', lang:'ja', summary:'データセンター電力需要増加とホルムズ危機による燃料確保問題が重なる。', url:'https://news.web.nhk/newsweb/na/na-k10014900001000' },
-    ],
-    kyoiku_2026: [
-      { title:'共同親権導入 DV被害者からの懸念', org:'東京新聞', date:'2026年4月1日', lang:'ja', summary:'改正民法による共同親権導入について支持と反対の声が分かれている。', url:'https://www.tokyo-np.co.jp/n/politics' },
-      { title:'私立高校授業料実質無償化 4月から開始', org:'NHK', date:'2026年4月1日', lang:'ja', summary:'2026年4月から複数の教育・子育て関連の新制度が一斉に開始。', url:'https://news.web.nhk/newsweb/na/na-k10014900001000' },
-    ],
-    food_price_hike: [
-      { title:'迫る食料危機の足音 世界の肥料価格5割高', org:'日本経済新聞', date:'2026年4月3日', lang:'ja', summary:'ホルムズ海峡ショックが農業コストに波及。食料安全保障への影響が深刻化。', url:'https://news.google.com/search?q=site:nikkei.com&hl=ja&gl=JP' },
-      { title:'イラン、ホルムズ海峡を「武器化」 長引く原油高', org:'時事ドットコム', date:'2026年3月28日', lang:'ja', summary:'原油供給の混乱が食料品価格に波及。インフレ圧力も高まっている。', url:'https://www.jiji.com/jc/article?k=2026032700791&g=int' },
-    ],
-    tochigi_jishin: [
-      { title:'栃木で震度5弱 東北新幹線に遅れ', org:'時事ドットコム', date:'2026年4月1日', lang:'ja', summary:'栃木県で最大震度5弱の地震が発生。負傷者の報告なし。', url:'https://www.jiji.com/jc/archives?g=soc_archive_0' },
-      { title:'発電向け燃料確保に懸念', org:'NHK', date:'2026年4月3日', lang:'ja', summary:'ホルムズ危機による燃料不足の状況での災害対応能力が問われる。', url:'https://news.web.nhk/newsweb/na/na-k10014900001000' },
-    ],
-    hakamada_history: [
-      { title:'袴田事件 再審無罪確定', org:'東京新聞', date:'2024年10月9日', lang:'ja', summary:'1966年発生から58年。証拠捏造を認定した歴史的判決が確定。', url:'https://www.tokyo-np.co.jp/article/356688' },
-      { title:'再審制度改革 法制審部会の行方', org:'東京新聞', date:'2025年10月31日', lang:'ja', summary:'袴田事件を契機に再審法改正の議論が本格化。検察側が抵抗。', url:'https://www.tokyo-np.co.jp/article/445990' },
-      { title:"Japan: Acquittal of man who spent 45 years on death row", org:'Amnesty International', date:'2024年9月30日', lang:'en', summary:"Pivotal moment for justice. Japan must abolish the death penalty.", url:'https://www.amnesty.org/en/latest/news/2024/09/japan-acquittal-of-man-who-spent-45-years-on-death-row-pivotal-moment-for-justice/' },
-    ],
-  };
-
-  // relatedMap にも存在しない場合は空状態を表示
-  if(!relatedMap[currentTopic.id]){
-    return '<div style="padding:40px 0;text-align:center">' +
-      '<div style="font-size:32px;margin-bottom:12px">🔗</div>' +
-      '<div style="color:var(--text-2);font-size:13px">関連トピックは準備中です</div>' +
-      '</div>';
-  }
-  var articles = relatedMap[currentTopic.id];
-  var jaArticles = articles.filter(function(a){ return a.lang==='ja'; });
-  var enArticles = articles.filter(function(a){ return a.lang==='en'; });
-
-  var makeCard = function(a){
-    return '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:12px;padding:14px;margin-bottom:10px">' +
-      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">' +
-      '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + a.org + '</span>' +
-      '<span style="font-size:10px;color:var(--text-2)">📅 ' + a.date + '</span>' +
-      (a.lang==='en'?'<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 6px;border-radius:99px">EN</span>':'') +
-      '</div>' +
-      '<div style="font-size:14px;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:8px">' + a.title + '</div>' +
-      '<div style="font-size:12px;color:#666;line-height:1.7;margin-bottom:10px">' + a.summary + '</div>' +
-      '<a href="' + getArticleUrl(a, a.org) + '" target="_blank" rel="noopener" style="font-size:11px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:5px 14px;border-radius:99px;cursor:pointer;text-decoration:none;display:inline-block">記事を読む ↗</a>' +
-      '</div>';
-  };
-
-  return '<div>' +
-    (jaArticles.length ? '<div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:10px">🇯🇵 国内記事（' + jaArticles.length + '件）</div>' + jaArticles.map(makeCard).join('') : '') +
-    (enArticles.length ? '<div style="border-top:1px solid #1a2a4a;margin:14px 0"></div><div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:10px">🌐 海外記事（' + enArticles.length + '件）</div>' + enArticles.map(makeCard).join('') : '') +
+  return '<div style="padding:40px 0;text-align:center">' +
+    '<div style="font-size:32px;margin-bottom:12px">🔗</div>' +
+    '<div style="color:var(--text-2);font-size:13px">関連トピックは準備中です</div>' +
     '</div>';
 }
 
@@ -2251,7 +1890,7 @@ function renderExplore(){
     var topicCards = topics.map(function(t){
       var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
       var _td2 = TOPIC_DATA[t.id];
-      var srcCount = _td2 ? (_td2.sources === null ? ALL_SOURCES.length : (_td2.sources ? _td2.sources.length : t.sourceCount)) : t.sourceCount;
+      var srcCount = _td2 && _td2.sources ? _td2.sources.length : t.sourceCount;
       var alertBadge = t.alert ?
         '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px;margin-left:6px">⚠️</span>' : '';
       var tags = (t.tags||[]).map(function(tag){
@@ -2682,9 +2321,10 @@ function navSearch(){
 }
 
 function openSourceDetail(sourceId){
-  // ALL_SOURCESから取得（SOURCESはスライスなので全件対応）
-  var found = ALL_SOURCES.find(function(s){ return s.id === sourceId; });
-  state.sourceDetail = found || ALL_SOURCES[sourceId] || null;
+  var td = TOPIC_DATA[state.currentTopicId || 'hakamada_muzai'] || {};
+  var sources = td.sources || [];
+  var found = sources.find(function(s){ return s.id === sourceId; }) || sources[sourceId] || null;
+  state.sourceDetail = found;
   if(!state.sourceDetail) return;
   pushNav();
   state.nav = 'sourceDetail';
@@ -2703,7 +2343,7 @@ function renderSourceDetail(){
   const p = P();
   const c = scoreColor(s.score);
 
-  // ALL_SOURCES にはarticlesが入っているので最初の記事から情報を取得
+  // articlesの最初の記事から情報を取得
   const firstArticle = (s.articles && s.articles[0]) || {};
   const title = firstArticle.title || s.org;
   const date = firstArticle.date || '';
@@ -2850,12 +2490,16 @@ if('serviceWorker' in navigator){
   });
 }
 
-// 初期描画：topics_meta.json をフェッチしてからレンダリング（詳細データは遅延ロード）
+// 初期描画：topics_meta.json + home_data.json を並行フェッチしてからレンダリング（詳細データは遅延ロード）
 applyColorMode();
-fetch('./data/topics_meta.json')
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    FACT_TOPICS = d.FACT_TOPICS;
+Promise.all([
+  fetch('./data/topics_meta.json').then(function(r){ return r.json(); }),
+  fetch('./data/home_data.json').then(function(r){ return r.json(); })
+])
+  .then(function(results){
+    var meta = results[0];
+    var home = results[1];
+    FACT_TOPICS = meta.FACT_TOPICS;
     // CATEGORIES の count・alert をFACT_TOPICSから動的に算出（H1+H2）
     CATEGORIES.forEach(function(c){
       c.count = FACT_TOPICS.filter(function(t){ return t.cat === c.label; }).length;
@@ -2875,10 +2519,14 @@ fetch('./data/topics_meta.json')
           date:    t.date
         };
       });
+    // home_data.json からホーム画面データを設定
+    RANKING  = home.RANKING  || RANKING;
+    PICKUP   = home.PICKUP   || PICKUP;
+    FOLLOWUP = home.FOLLOWUP || FOLLOWUP;
     render();
   })
   .catch(function(e){
-    console.error('topics_meta.json の読み込みに失敗しました:', e);
+    console.error('初期データの読み込みに失敗しました:', e);
     render();
   });
 </script>

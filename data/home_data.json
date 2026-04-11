@@ -1,0 +1,84 @@
+{
+  "RANKING": {
+    "hour": [
+      { "rank": 1, "title": "ホルムズ海峡 タンカー3隻通過の報道", "cat": "地政学・安全保障", "searches": 18400, "change": "new", "topicId": "hormuz_crisis", "why": "英国主催協議の結果が速報で流れ急騰" },
+      { "rank": 2, "title": "日経平均 475円高", "cat": "経済・金融", "searches": 12100, "change": "↑2", "topicId": "food_price_hike", "why": "米雇用統計発表を前にリスクオン" },
+      { "rank": 3, "title": "Microsoft 1兆円 日本投資発表", "cat": "経済・産業", "searches": 9800, "change": "↓1", "topicId": "microsoft_japan", "why": "昨日の発表を受けて調査が続く" },
+      { "rank": 4, "title": "円安 159円台後半", "cat": "経済・金融", "searches": 7200, "change": "↑1", "topicId": "food_price_hike", "why": "米雇用統計控えドル買い優勢" },
+      { "rank": 5, "title": "袴田巌 国家賠償 第1回口頭弁論", "cat": "司法・裁判", "searches": 5600, "change": "→", "topicId": "hakamada_muzai", "why": "昨日の弁論内容を後追い確認する動き" }
+    ],
+    "day": [
+      { "rank": 1, "title": "ホルムズ海峡 40カ国が再開協議", "cat": "地政学・安全保障", "searches": 124500, "change": "new", "topicId": "hormuz_crisis", "why": "英国主催の国際協議が報道され一気に急上昇" },
+      { "rank": 2, "title": "Microsoft 日本1兆円投資", "cat": "経済・産業", "searches": 98200, "change": "↑3", "topicId": "microsoft_japan", "why": "発表翌日も関連検索が継続中" },
+      { "rank": 3, "title": "日経平均 475円高 半導体株高", "cat": "経済・金融", "searches": 87300, "change": "↑1", "topicId": "food_price_hike", "why": "大幅反発を受けて相場確認の検索急増" },
+      { "rank": 4, "title": "円安 159円台 米雇用統計待ち", "cat": "経済・金融", "searches": 76100, "change": "↑2", "topicId": "food_price_hike", "why": "為替の行方と物価への影響を気にする声多数" },
+      { "rank": 5, "title": "袴田巌 国賠訴訟 口頭弁論", "cat": "司法・裁判", "searches": 54200, "change": "↑1", "topicId": "hakamada_muzai", "why": "第1回口頭弁論の内容を確認する検索が集中" }
+    ],
+    "week": [
+      { "rank": 1, "title": "ホルムズ海峡危機 日本への影響", "cat": "地政学・安全保障", "searches": 892000, "change": "→", "topicId": "hormuz_crisis", "why": "週を通じて最多。原油高・停電リスクへの関心継続" },
+      { "rank": 2, "title": "日本 原油輸入量3割減 過去最少", "cat": "エネルギー", "searches": 654000, "change": "↑2", "topicId": "hormuz_crisis", "why": "統計発表を受けてエネルギー問題への関心急増" },
+      { "rank": 3, "title": "再審制度改革 法制審議論", "cat": "司法・裁判", "searches": 432000, "change": "↑1", "topicId": "enzai_cf", "why": "法制審部会が非公開会合を継続し注目が集まる" },
+      { "rank": 4, "title": "AI データセンター 日本誘致競争", "cat": "科学・技術", "searches": 321000, "change": "new", "topicId": "ai_datacenter_japan", "why": "Microsoft発表をきっかけにAI投資への関心が急増" },
+      { "rank": 5, "title": "米雇用統計 4月3日発表", "cat": "経済・金融", "searches": 298000, "change": "↑1", "topicId": "food_price_hike", "why": "円相場・日経平均への影響を事前に確認する動き" }
+    ]
+  },
+  "PICKUP": [
+    { "id": 0, "icon": "⛽", "label": "緊急", "cat": "地政学・安全保障", "topicId": "hormuz_crisis",
+      "title": "ホルムズ海峡危機 日本への影響まとめ",
+      "summary": "原油輸入の約9割がホルムズ海峡経由の日本。3月の原油輸入量が2月比3割減と過去最少水準に。ガソリン・電気代高騰・円安のダブルパンチで家計への影響が深刻化。",
+      "note": "本日、40カ国協議で一部航路再開の可能性が浮上。状況は刻々と変化しています。",
+      "updated": "2026年4月3日", "hasFollowup": true, "score": 91,
+      "alert": { "type": "fact", "msg": "政府の備蓄放出・緊急対応について各社の報道に差があります。" }
+    },
+    { "id": 1, "icon": "⚖️", "label": "注目", "cat": "司法・裁判", "topicId": "enzai_cf",
+      "title": "再審制度改革 法制審部会の行方",
+      "summary": "袴田事件を契機に再審法改正の議論が2025年10月から法制審議会部会で本格化。証拠開示の義務化・検察の不服申し立て禁止をめぐり検察側が抵抗。",
+      "note": "法制審部会は非公開会合を継続中。与野党で改正への温度差が顕著になっている。",
+      "updated": "2026年4月3日", "hasFollowup": true, "score": 85, "alert": null
+    },
+    { "id": 2, "icon": "🤖", "label": "注目", "cat": "科学・技術", "topicId": "ai_datacenter_japan",
+      "title": "AIデータセンター 日本誘致競争の構図",
+      "summary": "MicrosoftのAI拠点投資1兆円発表に続き、GoogleやAmazonも日本でのデータセンター投資を計画。データ主権・経済安保の観点から政府も積極誘致。電力需要急増が課題。",
+      "note": "電力需給と安全保障の観点から今後の政策動向に注目。電力株にも影響が出始めている。",
+      "updated": "2026年4月3日", "hasFollowup": false, "score": 78, "alert": null
+    }
+  ],
+  "FOLLOWUP": [
+    { "id": 0, "icon": "⚖️", "cat": "司法・裁判", "title": "袴田事件 国家賠償訴訟", "status": "進行中", "statusColor": "warn", "lastUpdate": "2026年3月31日",
+      "topicId": "hakamada_muzai",
+      "summary": "2025年10月に国と県を相手取り約6億円の損害賠償請求訴訟を提訴。国側は争う姿勢。",
+      "updates": [
+        { "date": "2026/03/31", "text": "第1回口頭弁論。国側は争う姿勢を示し、次回期日は未定。" },
+        { "date": "2025/10/09", "text": "弁護団が静岡地裁に国家賠償請求訴訟を提訴。請求額は過去最高の約6億円。" },
+        { "date": "2025/03/24", "text": "静岡地裁が刑事補償として2億1700万円余の支払いを決定。" }
+      ]
+    },
+    { "id": 1, "icon": "🏛️", "cat": "司法・裁判", "title": "再審制度改革 法制審議会", "status": "審議中", "statusColor": "mid", "lastUpdate": "2026年4月3日",
+      "topicId": "enzai_cf",
+      "summary": "袴田事件を契機に再審法改正の議論が法制審議会部会で進行中。証拠開示・検察の不服申し立て禁止が焦点。",
+      "updates": [
+        { "date": "2026/04/03", "text": "法制審議会部会が非公開会合を継続。検察側が証拠開示義務化に反対し議論が難航。" },
+        { "date": "2025/10/31", "text": "東京新聞が「検察・裁判官が大幅変更に抵抗」と報道。" },
+        { "date": "2025/04/01", "text": "冤罪被害者らが再審制度改正実現に向けたクラウドファンディングを開始。" }
+      ]
+    },
+    { "id": 2, "icon": "🛢️", "cat": "地政学・安全保障", "title": "ホルムズ海峡危機と日本経済", "status": "継続中", "statusColor": "high", "lastUpdate": "2026年4月3日",
+      "topicId": "hormuz_crisis",
+      "summary": "2026年2月28日のイラン攻撃以降、ホルムズ海峡が事実上封鎖。日本の原油輸入に深刻な影響。",
+      "updates": [
+        { "date": "2026/04/03", "text": "オマーン寄り航路で超大型タンカー等3隻が通過の可能性。ただし全面解除ではない。" },
+        { "date": "2026/04/02", "text": "英国主催で日欧など40カ国余りが再開に向けた対応を協議。" },
+        { "date": "2026/04/01", "text": "日本の3月原油輸入量が2月比3割減。比較可能な2013年以降で最少水準に。" }
+      ]
+    },
+    { "id": 3, "icon": "💱", "cat": "経済・金融", "title": "円安・原油高 家計への影響", "status": "悪化傾向", "statusColor": "danger", "lastUpdate": "2026年4月3日",
+      "topicId": "food_price_hike",
+      "summary": "ホルムズ危機による原油高と円安が同時進行。ガソリン・電気代・食料品価格への波及が続く。",
+      "updates": [
+        { "date": "2026/04/03", "text": "ドル円159円台半ば。日経平均は半導体株高で475円高。米3月雇用統計の結果に注目。" },
+        { "date": "2026/03/31", "text": "G7財務相・中銀総裁が「市場安定へあらゆる措置」の共同声明を発表。" },
+        { "date": "2026/03/28", "text": "OECDがG20の今年のインフレ率予測を4.0%に大幅上方修正。" }
+      ]
+    }
+  ]
+}
