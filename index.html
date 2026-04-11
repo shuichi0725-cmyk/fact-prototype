@@ -558,20 +558,8 @@ function getArticleUrl(article, orgName){
 
 const SOURCES = ALL_SOURCES.slice(0,5);
 
-const ALERTS = [
-  { type:"sns", sev:"high", cat:"地政学・安全保障", topicId:"hormuz_crisis",
-    title:"「ホルムズ海峡封鎖解除」の誤情報拡散",
-    msg:"「海峡が完全開通した」という未確認情報がSNSで拡散。4月3日時点でオマーン側ルートで3隻通過の可能性があるのみで封鎖は継続中。政府・主要メディアの一次情報を確認してください。", date:"2026年4月3日" },
-  { type:"bias", sev:"high", cat:"経済・産業", topicId:"microsoft_japan",
-    title:"Microsoft日本1兆円投資 報道の温度差",
-    msg:"国内メディアはポジティブ報道が中心だが、海外メディアは「市場がAI戦略を不安視」と報道。1〜3月のMicrosoft株価は金融危機以来の下落と指摘。両方の視点の確認を推奨。", date:"2026年4月3日" },
-  { type:"fact", sev:"medium", cat:"経済・金融", topicId:"food_price_hike",
-    title:"円安159円台「日銀介入検討」報道の信憑性",
-    msg:"一部メディアが「日銀が為替介入を検討」と報道しているが、日銀・財務省は公式にコメントしていない。報道の根拠が不明確な状況。一次ソースの確認を推奨。", date:"2026年4月3日" },
-  { type:"old", sev:"medium", cat:"司法・裁判", topicId:"enzai_cf",
-    title:"冤罪被害者CF開始報道の出所確認",
-    msg:"「冤罪被害者らが再審制度改正へクラウドファンディング開始」の報道は4月1日付（時事通信）。エープリルフールとの混同が一部で見られるが実際のニュース。", date:"2026年4月1日" },
-];
+// ALERTS は topics_meta.json ロード後に FACT_TOPICS.alert フィールドから動的生成
+let ALERTS = [];
 
 
 const TRENDING = [
@@ -1194,7 +1182,7 @@ function renderHomeTab(tab){
   
 
   if(tab === 'followup'){
-    var today = '2026年4月3日';
+    var d = new Date(); var today = d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';
     var statusColors = { high: p.high, warn: p.warn, mid: p.mid, danger: p.danger };
     return '<div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
@@ -2825,6 +2813,20 @@ fetch('./data/topics_meta.json')
   .then(function(r){ return r.json(); })
   .then(function(d){
     FACT_TOPICS = d.FACT_TOPICS;
+    // alert フィールドを持つトピックから ALERTS を動的生成
+    ALERTS = FACT_TOPICS
+      .filter(function(t){ return t.alert; })
+      .map(function(t){
+        return {
+          type:    t.alert.type,
+          sev:     t.alert.sev || 'high',
+          cat:     t.cat,
+          topicId: t.id,
+          title:   t.title,
+          msg:     t.alert.msg,
+          date:    t.date
+        };
+      });
     render();
   })
   .catch(function(e){
