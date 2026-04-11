@@ -387,20 +387,6 @@ function retryDetailLoad() {
 
 
 
-const SUBS = {
-  judicial: [{ label:"袴田事件 再審無罪", count:1 }, { label:"再審制度改革", count:1 }],
-  intl:     [{ label:"ホルムズ海峡危機", count:1 }, { label:"イラン情勢", count:1 }],
-  economy:  [{ label:"Microsoft日本投資", count:1 }, { label:"円安・為替", count:1 }],
-  politics: [{ label:"2026年度予算", count:1 }, { label:"国家情報局新設", count:1 }],
-  medical:  [{ label:"突然死診断新手法", count:1 }, { label:"医薬品・新薬", count:1 }],
-  science:  [{ label:"3月高温・少雨", count:1 }, { label:"気候変動", count:1 }],
-  society:  [{ label:"冤罪被害者CF", count:1 }, { label:"事件・事故", count:1 }],
-  tech:     [{ label:"AIデータセンター誘致", count:1 }, { label:"半導体", count:1 }],
-  edu:      [{ label:"高校無償化・給食費無償化", count:1 }, { label:"共同親権", count:1 }],
-  food:     [{ label:"原油高・食料品値上げ", count:1 }, { label:"食の安全", count:1 }],
-  disaster: [{ label:"栃木震度5弱", count:1 }, { label:"発電燃料確保", count:1 }],
-  history:  [{ label:"袴田事件と刑事司法58年", count:1 }, { label:"過去の冤罪事件", count:1 }],
-};
 
 
 // 記録 全ソースプール（検索対象）
@@ -2231,16 +2217,18 @@ function renderExplore(){
   }
 
   if(depth===1){
-    var subs = (cat && SUBS[cat.id]) || [];
-    var subcards = subs.map(function(s, i){
-      var isEmpty = s.count === 0;
-      return '<div class="cat-card"' +
-        (isEmpty
-          ? ' style="cursor:default;position:relative;overflow:hidden"'
-          : ' style="cursor:pointer" onclick="selectSub(' + i + ',\'' + s.label + '\')"') + '>' +
-        (isEmpty ? '<div style="position:absolute;inset:0;background:#080e1e88;border-radius:10px;display:flex;align-items:center;justify-content:center;z-index:1"><span style="font-size:10px;color:#3a4a6a;font-family:monospace;letter-spacing:1px">SOON</span></div>' : '') +
-        '<div class="cat-name" style="' + (isEmpty?'opacity:0.3':'') + '">' + s.label + '</div>' +
-        '<div class="cat-count" style="' + (isEmpty?'opacity:0.3':'') + '">' + (isEmpty ? '準備中' : s.count + '件') + '</div>' +
+    var catLabel1 = cat ? cat.label : '';
+    var subcatMap = {};
+    FACT_TOPICS.forEach(function(t){
+      if(t.cat === catLabel1 && t.subcat){
+        subcatMap[t.subcat] = (subcatMap[t.subcat] || 0) + 1;
+      }
+    });
+    var subcatList = Object.keys(subcatMap).map(function(label){ return { label: label, count: subcatMap[label] }; });
+    var subcards = subcatList.map(function(s, i){
+      return '<div class="cat-card" style="cursor:pointer" onclick="selectSub(' + i + ',\'' + s.label + '\')">' +
+        '<div class="cat-name">' + s.label + '</div>' +
+        '<div class="cat-count">' + s.count + '件</div>' +
         '</div>';
     }).join('');
     return breadcrumb + '<div class="cat-grid">' + subcards + '</div>';
@@ -2248,7 +2236,8 @@ function renderExplore(){
 
   if(depth===2){
     var catLabel = cat ? cat.label : '';
-    var topics = FACT_TOPICS.filter(function(t){ return t.cat === catLabel; });
+    var subLabel = sub ? sub.label : '';
+    var topics = FACT_TOPICS.filter(function(t){ return t.cat === catLabel && (!subLabel || t.subcat === subLabel); });
 
     if(topics.length === 0){
       return breadcrumb +
