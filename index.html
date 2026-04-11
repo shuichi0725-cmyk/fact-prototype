@@ -1993,10 +1993,37 @@ function renderPerspectivesTab(){
 
 
 function renderRelatedTab(){
+  if(!_detailLoaded){
+    ensureDetailLoaded().then(function(){ render(); });
+    return renderDetailLoading();
+  }
   var p = P();
   var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
+  var currentData = TOPIC_DATA[currentTopic.id] || {};
 
-  // トピック別の関連記事
+  // relatedTopics IDが存在する場合はFACTトピックカードを表示
+  if(currentData.relatedTopics && currentData.relatedTopics.length > 0){
+    var relatedCards = currentData.relatedTopics.map(function(rid){
+      var rt = FACT_TOPICS.find(function(t){ return t.id === rid; });
+      if(!rt) return '';
+      var rc = scoreColor(rt.score);
+      return '<div class="card clickable" style="margin-bottom:10px" onclick="goTopic(\''+rt.id+'\')">' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+        '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + rt.cat + '</span>' +
+        '<span style="font-size:10px;font-family:monospace;color:'+rc+';font-weight:700">' + rt.score + 'pt</span>' +
+        '</div>' +
+        '<div style="font-size:14px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:6px">' + rt.title + '</div>' +
+        '<div style="font-size:12px;color:#888;line-height:1.6">' + rt.summary + '</div>' +
+        '<div style="margin-top:8px;font-size:11px;color:'+p.brand+'">詳しく調べる →</div>' +
+        '</div>';
+    }).filter(Boolean).join('');
+    return '<div>' +
+      '<div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:10px">関連トピック（' + currentData.relatedTopics.length + '件）</div>' +
+      (relatedCards || '<div style="padding:30px 0;text-align:center;color:var(--text-3);font-size:13px">関連トピックが見つかりません</div>') +
+      '</div>';
+  }
+
+  // フォールバック：旧来の外部記事リスト（relatedMap）
   var relatedMap = {
     hakamada_muzai: [
       { title:'袴田巌さん冤罪で始まった「再審制度見直し」に暗雲？', org:'東京新聞', date:'2025年10月31日', lang:'ja', summary:'法制審議会部会で再審制度改革の議論が進むも、検察・裁判官側が大幅変更に抵抗。', url:'https://www.tokyo-np.co.jp/article/445990' },
@@ -2053,7 +2080,14 @@ function renderRelatedTab(){
     ],
   };
 
-  var articles = relatedMap[currentTopic.id] || relatedMap['hakamada_muzai'];
+  // relatedMap にも存在しない場合は空状態を表示
+  if(!relatedMap[currentTopic.id]){
+    return '<div style="padding:40px 0;text-align:center">' +
+      '<div style="font-size:32px;margin-bottom:12px">🔗</div>' +
+      '<div style="color:var(--text-2);font-size:13px">関連トピックは準備中です</div>' +
+      '</div>';
+  }
+  var articles = relatedMap[currentTopic.id];
   var jaArticles = articles.filter(function(a){ return a.lang==='ja'; });
   var enArticles = articles.filter(function(a){ return a.lang==='en'; });
 
