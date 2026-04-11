@@ -527,7 +527,7 @@ function persistState(){
 
 // ===== 状態 =====
 const _persisted = loadPersistedState();
-let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all' };
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null };
 
 
 // カラーパレット定義
@@ -1380,7 +1380,6 @@ function renderTimelineTab(){
   var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
   var currentData = TOPIC_DATA[currentTopic.id] || TOPIC_DATA['hakamada_muzai'];
   var items = (currentData && currentData.timeline) || [];
-  if(state.timelineOrder === undefined) state.timelineOrder = 'asc';
   var ordered = state.timelineOrder === 'desc' ? items.slice().reverse() : items;
   var alertItems = items.filter(function(x){ return x.alert; }).length;
   var span = items.length > 0 ? (items[items.length-1].date.slice(0,4) - items[0].date.slice(0,4)) : 0;
@@ -1430,9 +1429,6 @@ function renderSourcesTab(){
   }
   var p = P();
   var q = state.searchQuery;
-  if(state.sourceSort === undefined) state.sourceSort = 'score';
-  if(state.showOtherMedia === undefined) state.showOtherMedia = false;
-  if(state.expandedMediaId === undefined) state.expandedMediaId = null;
 
   // 現在のトピックを特定
   var currentTopic = FACT_TOPICS.find(function(t){ return t.id === (state.currentTopicId||'hakamada_muzai'); }) || FACT_TOPICS[0];
