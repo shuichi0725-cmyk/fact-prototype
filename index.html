@@ -1111,8 +1111,7 @@ function renderSearchResults(p){
     var rankColor = t.score>=90 ? p.high : t.score>=75 ? p.brand : p.mid;
     var _td = TOPIC_DATA[t.id];
     var srcCount = _td && _td.sources ? _td.sources.length : t.sourceCount;
-    var alertBadge = t.alert ?
-      '<span style="font-size:10px;color:' + p.warn + ';background:' + p.warn + '11;border:1px solid ' + p.warn + '33;padding:1px 6px;border-radius:99px">⚠️ 注意</span>' : '';
+    var alertBadge = t.alert ? (function(){ var at=t.alert.type||t.alert; var ac=alertColor(at); var ai=alertIcon(at); return '<span style="font-size:10px;color:'+ac+';background:'+ac+'11;border:1px solid '+ac+'33;padding:1px 6px;border-radius:99px">'+ai+' 注意</span>'; })() : '';
     var tags = (t.tags||[]).map(function(tag){
       return '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + tag + '</span>';
     }).join('');
@@ -1321,15 +1320,18 @@ function renderSummaryTab(){
   if(summarySourceList && summarySourceList.length > 0){
     summarySourceList.forEach(function(s){
       var cnt = s.articles ? s.articles.length : 0;
-      var sc = scoreColor(s.score);
+      var smm = MEDIA_MASTER.find(function(m){ return m.name===s.org || s.org.indexOf(m.name)>=0 || m.name.indexOf(s.org)>=0; });
+      var sr = smm ? smm.rank : (s.score>=90?'S':s.score>=80?'A':'B');
+      var sc = { S: p.high, A: p.brand, B: p.mid }[sr] || p.mid;
       sourcesHtml +=
         '<div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #0f1a2e;cursor:pointer;transition:background var(--t-fast)" onclick="state.searchTab=2;state.expandedMediaId=' + s.id + ';render()" onmouseover="this.style.background=\'rgba(255,255,255,0.03)\'" onmouseout="this.style.background=\'\'">' +
         '<div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">' +
         '<span style="font-size:13px;font-weight:700;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + s.org + '</span>' +
         '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px;flex-shrink:0">' + s.type + '</span>' +
         '</div>' +
-        '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
         '<span style="font-size:11px;color:var(--text-2)">' + cnt + '件</span>' +
+        '<span style="font-family:monospace;font-size:10px;font-weight:900;color:' + sc + ';background:' + sc + '22;border:1px solid ' + sc + '55;border-radius:3px;padding:0px 4px">' + sr + '</span>' +
         '<span style="font-family:monospace;font-size:13px;font-weight:700;color:' + sc + '">' + s.score + 'pt</span>' +
         '<span style="font-size:14px;color:var(--brand)">›</span>' +
         '</div></div>';
@@ -1349,7 +1351,10 @@ function renderSummaryTab(){
     '<div class="card" style="margin-bottom:12px">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
     '<div class="section-title" style="margin-bottom:0">信頼度スコア</div>' +
+    '<div style="display:flex;align-items:baseline;gap:8px">' +
+    (function(){ var r=currentTopic.score>=90?'S':currentTopic.score>=80?'A':currentTopic.score>=70?'B':'C'; return '<span style="font-family:monospace;font-size:13px;font-weight:900;color:'+c+';background:'+c+'22;border:1px solid '+c+'55;border-radius:4px;padding:1px 7px;letter-spacing:1px">'+r+'</span>'; })() +
     '<span style="font-family:monospace;font-size:24px;color:' + c + ';font-weight:900">' + currentTopic.score + '</span>' +
+    '</div>' +
     '</div>' +
     '<div style="height:8px;background:#1a2035;border-radius:99px;overflow:hidden;margin-bottom:6px">' +
     '<div style="width:' + currentTopic.score + '%;height:100%;background:linear-gradient(90deg,' + c + '88,' + c + ');border-radius:99px"></div>' +
@@ -1452,7 +1457,10 @@ function renderSourcesTab(){
   }
 
   var makeMediaCard = function(s){
-    var rankColor = s.score>=90 ? p.high : s.score>=75 ? p.brand : p.mid;
+    var mediaMeta = MEDIA_MASTER.find(function(m){ return m.name===s.org || s.org.indexOf(m.name)>=0 || m.name.indexOf(s.org)>=0; });
+    var mediaRank = mediaMeta ? mediaMeta.rank : (s.score>=90?'S':s.score>=80?'A':'B');
+    var mediaRankColors = { S: p.high, A: p.brand, B: p.mid };
+    var rankColor = mediaRankColors[mediaRank] || p.mid;
     var isExpanded = state.expandedMediaId == s.id; // 文字列・数値の型差を吸収
     var articleCount = s.articles ? s.articles.length : 0;
 
@@ -1479,6 +1487,7 @@ function renderSourcesTab(){
       '<span style="font-size:11px;color:var(--text-2)">' + articleCount + '件の記事</span>' +
       '</div></div>' +
       '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
+      '<span style="font-family:monospace;font-size:13px;font-weight:900;color:' + rankColor + ';background:' + rankColor + '22;border:1px solid ' + rankColor + '55;border-radius:4px;padding:1px 6px;letter-spacing:0.5px">' + mediaRank + '</span>' +
       '<span style="font-family:monospace;font-size:18px;font-weight:900;color:' + rankColor + '">' + s.score + '</span>' +
       '<span style="font-size:10px;color:' + rankColor + '">pt</span>' +
       '<span style="font-size:14px;color:var(--text-2)">' + (isExpanded?'▼':'›') + '</span>' +
@@ -1803,7 +1812,7 @@ function renderExplore(){
 
 
 // ===== 注意喚起 =====
-const ALERT_FILTER_LABELS = { all:'すべて', sns:'SNS拡散', bias:'バイアス', fact:'事実確認', old:'情報古い' };
+const ALERT_FILTER_LABELS = { all:'すべて', sns:'SNS拡散', bias:'バイアス', fact:'事実確認', old:'情報古い', conflict:'矛盾情報' };
 function markAlertRead(topicId){
   if(!state.readAlerts.includes(topicId)){
     state.readAlerts.push(topicId);
@@ -1813,7 +1822,7 @@ function markAlertRead(topicId){
 function setAlertFilter(f){ state.alertFilter=f; render(); }
 function renderAlerts(){
   const unreadCount = ALERTS.filter(a=>!state.readAlerts.includes(a.topicId)).length;
-  const filters = ['all','sns','bias','fact','old'];
+  const filters = ['all','sns','bias','fact','old','conflict'];
   const filtered = state.alertFilter==='all' ? ALERTS : ALERTS.filter(a=>a.type===state.alertFilter);
   const filterBar = `<div style="display:flex;gap:6px;overflow-x:auto;padding:0 14px 12px;scrollbar-width:none">
     ${filters.map(f=>{
