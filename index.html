@@ -667,7 +667,7 @@ function renderHome(){
     { id:"followup", icon:"🔄", label:"続報" },
   ];
   const tabBar = HOME_TABS.map(t=>`
-    <button onclick="setHomeTab('${t.id}')" style="
+    <button data-tab="${t.id}" onclick="setHomeTab('${t.id}')" style="
       flex:1;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;
       border:none;background:none;cursor:pointer;
       border-bottom:2px solid ${state.homeTab===t.id?p.brand:'transparent'};
@@ -690,7 +690,7 @@ function renderHome(){
 
   <div style="padding:14px">
     ${renderRankingSection()}
-    ${renderHomeTab(state.homeTab)}
+    <div id="home-tab-body">${renderHomeTab(state.homeTab)}</div>
   </div>
 
   <div style="height:20px"></div>`;
@@ -698,8 +698,25 @@ function renderHome(){
 
 function setHomeTab(tab){
   state.homeTab = tab;
-  // followupタブはそのままrenderHomeTabで処理
-  render();
+  var p=P();
+  // タブバーのアクティブ状態だけ更新（リフロー最小化）
+  document.querySelectorAll('[data-tab]').forEach(function(btn){
+    var active=btn.dataset.tab===tab;
+    btn.style.borderBottomColor=active?p.brand:'transparent';
+    var icon=btn.querySelector('span:first-child'), lbl=btn.querySelector('span:last-child');
+    if(icon) icon.style.fontSize=active?'19px':'16px';
+    if(lbl){ lbl.style.color=active?p.brand:'#8899b0'; lbl.style.fontWeight=active?'700':'400'; }
+  });
+  // タブコンテンツだけフェード更新
+  var body=document.getElementById('home-tab-body');
+  if(body){
+    body.style.transition='none'; body.style.opacity='0';
+    requestAnimationFrame(function(){
+      body.innerHTML=renderHomeTab(tab);
+      body.style.transition='opacity 0.15s ease';
+      body.style.opacity='1';
+    });
+  } else { render(); }
 }
 
 function renderHomeTab(tab){
@@ -741,7 +758,7 @@ function renderHomeTab(tab){
     var rankColors = ['#FFD700','#C0C0C0','#CD7F32'];
     return periodBar + rankData.map(function(t, i){
       var chColor = t.change.startsWith('↑') ? p.high : t.change.startsWith('↓') ? p.danger : t.change==='new' ? p.warn : '#8899b0';
-      var kNum = t.searches >= 100000 ? (t.searches/10000).toFixed(0)+'万' : t.searches >= 1000 ? (t.searches/1000).toFixed(1)+'k' : t.searches+'';
+      var kNum = t.searches >= 10000 ? (t.searches/10000).toFixed(1).replace(/\.0$/,'')+'万' : t.searches >= 1000 ? (t.searches/1000).toFixed(1).replace(/\.0$/,'')+'k' : t.searches+'';
       var barWidth = Math.round((t.searches / maxSearches) * 100);
       var rankNumColor = i < 3 ? rankColors[i] : '#2a4a7a';
       var onclickFn = t.topicId ? 'goTopic(\'' + t.topicId + '\')' : 'setSearchQuery(this.dataset.title)';
@@ -1122,6 +1139,8 @@ function renderSearchResults(p){
     var _td = TOPIC_DATA[t.id];
     var srcCount = _td && _td.sources ? _td.sources.length : t.sourceCount;
     var alertBadge = t.alert ? (function(){ var at=t.alert.type||t.alert; var ac=alertColor(at); var ai=alertIcon(at); return '<span style="font-size:10px;color:'+ac+';background:'+ac+'11;border:1px solid '+ac+'33;padding:1px 6px;border-radius:99px">'+ai+' 注意</span>'; })() : '';
+    var isVisited = state.history.indexOf(t.title) >= 0;
+    var visitedBadge = isVisited ? '<span style="font-size:10px;color:#4a6a7a;background:#1a2a3a;border:1px solid #2a3a4a;padding:1px 6px;border-radius:99px">✓ 既読</span>' : '';
     var tags = (t.tags||[]).map(function(tag){
       return '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + tag + '</span>';
     }).join('');
@@ -1133,6 +1152,7 @@ function renderSearchResults(p){
       '<div style="display:flex;align-items:center;gap:6px">' +
       '<span style="font-size:11px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
       alertBadge +
+      visitedBadge +
       '</div>' +
       '<div style="display:flex;align-items:baseline;gap:2px">' +
       '<span style="font-family:monospace;font-size:18px;font-weight:900;color:' + rankColor + '">' + t.score + '</span>' +
@@ -1197,15 +1217,15 @@ function renderSearchDetail(p){
     '<span style="font-size:13px;color:#e0e6f0;flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + q + '</span>' +
     '</div>' +
     // タブバー
-    '<div style="display:flex;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none">' +
+    '<div id="search-tab-bar" style="display:flex;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none">' +
     TABS.map(function(t,i){
       var active = state.searchTab===i;
-      return '<button onclick="state.searchTab=' + i + ';render()" style="padding:8px 10px;background:transparent;border:none;border-bottom:2px solid ' + (active?p.brand:'transparent') + ';color:' + (active?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;white-space:nowrap;font-family:\'Noto Sans JP\',sans-serif;font-weight:' + (active?'700':'400') + '">' + t + '</button>';
+      return '<button data-stab="' + i + '" onclick="setTab(' + i + ')" style="padding:8px 10px;background:transparent;border:none;border-bottom:2px solid ' + (active?p.brand:'transparent') + ';color:' + (active?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;white-space:nowrap;font-family:\'Noto Sans JP\',sans-serif;font-weight:' + (active?'700':'400') + '">' + t + '</button>';
     }).join('') +
     '</div>' +
     '</div>' +
     // タブコンテンツ
-    '<div style="padding:14px">' +
+    '<div id="tab-body" style="padding:14px">' +
     renderSearchTab(state.searchTab, score) +
     '</div>' +
     '</div>';
@@ -2003,7 +2023,27 @@ function doSearch(){
   switchNav("search");
 }
 
-function setTab(i){ state.searchTab=i; render(); }
+function setTab(i){
+  state.searchTab=i;
+  var p=P();
+  // タブボタンのアクティブ状態更新
+  document.querySelectorAll('[data-stab]').forEach(function(btn){
+    var active=parseInt(btn.dataset.stab)===i;
+    btn.style.borderBottomColor=active?p.brand:'transparent';
+    btn.style.color=active?p.brand:'#8899b0';
+    btn.style.fontWeight=active?'700':'400';
+  });
+  // タブコンテンツだけフェード更新
+  var body=document.getElementById('tab-body');
+  if(body){
+    body.style.transition='none'; body.style.opacity='0';
+    requestAnimationFrame(function(){
+      body.innerHTML=renderSearchTab(i,0);
+      body.style.transition='opacity 0.15s ease';
+      body.style.opacity='1';
+    });
+  } else { render(); }
+}
 function setSearchQuery(q){
   state.searchQuery=q;
   state.history=[q,...state.history.filter(h=>h!==q)].slice(0,10);
@@ -2424,6 +2464,27 @@ if('serviceWorker' in navigator){
 
 // ESCキーでポップアップを閉じる
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closePopup(); });
+
+// スワイプジェスチャーでタブ切り替え（一度だけ登録）
+(function initSwipe(){
+  var c=document.getElementById('content');
+  var sx=0,sy=0;
+  c.addEventListener('touchstart',function(e){ sx=e.touches[0].clientX; sy=e.touches[0].clientY; },{passive:true});
+  c.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)*0.8) return;
+    var dir=dx>0?-1:1; // 左スワイプ=+1(次タブ), 右スワイプ=-1(前タブ)
+    if(state.nav==='search'&&state.searchPhase==='detail'){
+      var n=Math.min(4,Math.max(0,state.searchTab+dir));
+      if(n!==state.searchTab){ state.searchTab=n; setTab(n); }
+    } else if(state.nav==='home'){
+      var HOME_SW=['alerts','trending','pickup','followup'];
+      var idx=HOME_SW.indexOf(state.homeTab);
+      var ni=Math.min(HOME_SW.length-1,Math.max(0,idx+dir));
+      if(ni!==idx) setHomeTab(HOME_SW[ni]);
+    }
+  },{passive:true});
+})();
 
 // 初期描画：topics_meta.json + home_data.json を並行フェッチしてからレンダリング（詳細データは遅延ロード）
 applyColorMode();
