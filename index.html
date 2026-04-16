@@ -690,7 +690,7 @@ function renderHome(){
 
   <div style="padding:14px">
     ${renderRankingSection()}
-    <div id="home-tab-body">${renderHomeTab(state.homeTab)}</div>
+    <div id="home-tab-body" style="touch-action:pan-y" ontouchstart="swipeStart(event)" ontouchend="swipeEnd(event,'home')">${renderHomeTab(state.homeTab)}</div>
   </div>
 
   <div style="height:20px"></div>`;
@@ -1225,7 +1225,7 @@ function renderSearchDetail(p){
     '</div>' +
     '</div>' +
     // タブコンテンツ
-    '<div id="tab-body" style="padding:14px">' +
+    '<div id="tab-body" style="padding:14px;touch-action:pan-y" ontouchstart="swipeStart(event)" ontouchend="swipeEnd(event,\'search\')">' +
     renderSearchTab(state.searchTab, score) +
     '</div>' +
     '</div>';
@@ -2465,32 +2465,27 @@ if('serviceWorker' in navigator){
 // ESCキーでポップアップを閉じる
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closePopup(); });
 
-// スワイプジェスチャーでタブ切り替え（一度だけ登録）
-(function initSwipe(){
-  var c=document.getElementById('content');
-  if(!c) return;
-  var sx=0, sy=0;
-  c.addEventListener('touchstart',function(e){
-    sx=e.touches[0].clientX;
-    sy=e.touches[0].clientY;
-  },{passive:true});
-  c.addEventListener('touchend',function(e){
-    var dx=e.changedTouches[0].clientX-sx;
-    var dy=e.changedTouches[0].clientY-sy;
-    // 横移動50px以上、かつ縦より横が大きい場合のみ反応
-    if(Math.abs(dx)<50||Math.abs(dy)>Math.abs(dx)) return;
-    var dir=dx>0?-1:1;
-    if(state.nav==='search'&&state.searchPhase==='detail'){
-      var n=Math.min(4,Math.max(0,state.searchTab+dir));
-      if(n!==state.searchTab) setTab(n);
-    } else if(state.nav==='home'){
-      var HOME_SW=['alerts','trending','pickup','followup'];
-      var idx=HOME_SW.indexOf(state.homeTab);
-      var ni=Math.min(HOME_SW.length-1,Math.max(0,idx+dir));
-      if(ni!==idx) setHomeTab(HOME_SW[ni]);
-    }
-  },{passive:true});
-})();
+// スワイプ検出（#tab-body / #home-tab-body のインラインハンドラから呼ばれる）
+var _swipeX=0, _swipeY=0;
+function swipeStart(e){
+  var t=e.touches&&e.touches[0]; if(!t) return;
+  _swipeX=t.clientX; _swipeY=t.clientY;
+}
+function swipeEnd(e,ctx){
+  var t=e.changedTouches&&e.changedTouches[0]; if(!t) return;
+  var dx=t.clientX-_swipeX, dy=t.clientY-_swipeY;
+  if(Math.abs(dx)<50||Math.abs(dy)>Math.abs(dx)) return;
+  e.stopPropagation();
+  var dir=dx>0?-1:1;
+  if(ctx==='search'){
+    var n=Math.min(4,Math.max(0,state.searchTab+dir));
+    if(n!==state.searchTab) setTab(n);
+  } else {
+    var HS=['alerts','trending','pickup','followup'];
+    var ni=Math.min(HS.length-1,Math.max(0,HS.indexOf(state.homeTab)+dir));
+    if(HS[ni]!==state.homeTab) setHomeTab(HS[ni]);
+  }
+}
 
 // 初期描画：topics_meta.json + home_data.json を並行フェッチしてからレンダリング（詳細データは遅延ロード）
 applyColorMode();
