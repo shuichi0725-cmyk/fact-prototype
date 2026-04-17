@@ -468,25 +468,26 @@ function getOrgSearchUrl(domain, title, orgName){
 }
 
 // 架空・無効URLを検出して自社検索URLにフォールバック
-function getArticleUrl(article, orgName){
-  var url = article.url || '';
-  var isFake = !url
+function isFakeUrl(url){
+  return !url
     || /\/(2026|2027|2028|2029)/.test(url)
     || /202603|202604/.test(url)
     || url.indexOf('news.web.nhk') !== -1
-    || /nhk\.or\.jp\/news\/html\//.test(url)   // NHKアーカイブURLは時間経過で消えるため検索にフォールバック
+    || /nhk\.or\.jp\/news\/html\//.test(url)
     || url === '#';
-  if(isFake){
-    // 名前の部分一致でメディアを探す（"Bloomberg Japan" → "Bloomberg" など）
+}
+function getArticleUrl(article, orgName){
+  var url = article.url || '';
+  if(isFakeUrl(url)){
     var media = MEDIA_MASTER.find(function(m){
       return m.name === orgName
         || orgName.indexOf(m.name) >= 0
         || m.name.indexOf(orgName) >= 0;
     });
     var domain = media ? media.domain : '';
-    return getOrgSearchUrl(domain, article.title);
+    return { url: getOrgSearchUrl(domain, article.title, orgName), isFallback: true };
   }
-  return url;
+  return { url: url, isFallback: false };
 }
 
 
@@ -1519,12 +1520,15 @@ function renderSourcesTab(){
     if(s.articles && s.articles.length > 0){
       var innerHtml = '<div style="margin-top:12px;border-top:1px solid #1a2a4a;padding-top:12px">' +
         s.articles.map(function(a){
-          var safeUrl = getArticleUrl(a, s.org);
+          var articleResult = getArticleUrl(a, s.org);
+          var safeUrl = articleResult.url;
+          var btnLabel = articleResult.isFallback ? 'ソースで探す ↗' : '記事を読む ↗';
+          var btnColor = articleResult.isFallback ? p.mid : p.brand;
           return '<div style="padding:10px 0;border-bottom:1px solid #0f1a2e">' +
             '<div style="font-size:13px;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:4px">' + (a.title||'') + '</div>' +
             '<div style="font-size:11px;color:var(--text-2);margin-bottom:4px">📅 ' + (a.date||'') + '</div>' +
             '<div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px">' + (a.summary||'') + '</div>' +
-            (safeUrl ? '<a href="' + safeUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:4px 14px;border-radius:99px;cursor:pointer;text-decoration:none;display:inline-block">記事を読む ↗</a>' : '') +
+            (safeUrl ? '<a href="' + safeUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;font-weight:600;color:' + btnColor + ';background:' + btnColor + '15;border:1px solid ' + btnColor + '44;padding:4px 14px;border-radius:99px;cursor:pointer;text-decoration:none;display:inline-block">' + btnLabel + '</a>' : '') +
             '</div>';
         }).join('') + '</div>';
       articleListHtml = '<div id="al-' + s.id + '" style="overflow:hidden;transition:max-height 0.3s ease,opacity 0.25s ease;max-height:' + (isExpanded?'2000px':'0') + ';opacity:' + (isExpanded?'1':'0') + '">' + innerHtml + '</div>';
