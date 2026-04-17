@@ -298,32 +298,32 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 </head>
 <body>
 <div id="app">
-  <div id="header">
+  <header id="header" role="banner">
     <span class="logo">FACT</span>
     <span class="logo-sub">VERIFIED INTELLIGENCE</span>
     <span class="sensitivity-badge" id="sens-badge">感度 Lv.3<span id="color-mode-badge" style="color:#666"></span></span>
-  </div>
-  <div id="content"><div style="padding:60px 0;text-align:center;color:#3a5a7a;font-size:13px">読み込み中...</div></div>
-  <div id="bottom-nav">
-    <button class="nav-btn active" data-nav="home" onclick="switchNav('home')">
-      <span class="nav-icon">🏠</span><span class="nav-label">ホーム</span>
+  </header>
+  <main id="content" role="main" aria-live="polite" aria-atomic="false"><div style="padding:60px 0;text-align:center;color:#3a5a7a;font-size:13px">読み込み中...</div></main>
+  <nav id="bottom-nav" role="navigation" aria-label="メインナビゲーション">
+    <button class="nav-btn active" data-nav="home" aria-label="ホーム" aria-current="page" onclick="switchNav('home')">
+      <span class="nav-icon" aria-hidden="true">🏠</span><span class="nav-label">ホーム</span>
     </button>
-    <button class="nav-btn" data-nav="search" onclick="navSearch()">
-      <span class="nav-icon">🔍</span><span class="nav-label">検索</span>
+    <button class="nav-btn" data-nav="search" aria-label="検索" aria-current="false" onclick="navSearch()">
+      <span class="nav-icon" aria-hidden="true">🔍</span><span class="nav-label">検索</span>
     </button>
-    <button class="nav-btn" data-nav="explore" onclick="navExplore()">
-      <span class="nav-icon">🗄️</span><span class="nav-label">記録</span>
+    <button class="nav-btn" data-nav="explore" aria-label="記録" aria-current="false" onclick="navExplore()">
+      <span class="nav-icon" aria-hidden="true">🗄️</span><span class="nav-label">記録</span>
     </button>
-    <button class="nav-btn" data-nav="alerts" onclick="switchNav('alerts')">
-      <span class="nav-icon">⚠️</span><span class="nav-label">注意</span>
+    <button class="nav-btn" data-nav="alerts" aria-label="注意喚起" aria-current="false" onclick="switchNav('alerts')">
+      <span class="nav-icon" aria-hidden="true">⚠️</span><span class="nav-label">注意</span>
     </button>
-    <button class="nav-btn" data-nav="amazon" onclick="switchNav('amazon')">
-      <span class="nav-icon">🛒</span><span class="nav-label">Amazon</span>
+    <button class="nav-btn" data-nav="amazon" aria-label="Amazon" aria-current="false" onclick="switchNav('amazon')">
+      <span class="nav-icon" aria-hidden="true">🛒</span><span class="nav-label">Amazon</span>
     </button>
-    <button class="nav-btn" data-nav="settings" onclick="switchNav('settings')">
-      <span class="nav-icon">⚙️</span><span class="nav-label">設定</span>
+    <button class="nav-btn" data-nav="settings" aria-label="設定" aria-current="false" onclick="switchNav('settings')">
+      <span class="nav-icon" aria-hidden="true">⚙️</span><span class="nav-label">設定</span>
     </button>
-  </div>
+  </nav>
 </div>
 
 <div id="toast"></div>
@@ -607,11 +607,17 @@ function showToast(msg, duration){
 }
 
 // ===== ナビ切り替え =====
+function updateNavAria(nav){
+  document.querySelectorAll(".nav-btn").forEach(function(b){
+    var active = b.dataset.nav === nav;
+    b.classList.toggle("active", active);
+    b.setAttribute("aria-current", active ? "page" : "false");
+  });
+}
 function switchNav(nav){
-  const prevNav = state.nav;
   state.nav=nav;
   if(nav==="explore" && state.exploreDepth===0){ state.selectedCat=null; }
-  document.querySelectorAll(".nav-btn").forEach(b=>{ b.classList.toggle("active", b.dataset.nav===nav); });
+  updateNavAria(nav);
   render();
 }
 
@@ -633,9 +639,7 @@ function popNav(){
   var restoreY = prev.scrollY || 0;
   Object.assign(state, prev);
   state._restoreScrollY = restoreY; // Object.assign後にセット（上書き防止）
-  document.querySelectorAll('.nav-btn').forEach(function(b){
-    b.classList.toggle('active', b.dataset.nav === state.nav);
-  });
+  updateNavAria(state.nav);
   render();
 }
 
@@ -657,6 +661,10 @@ function render(){
   c.classList.add('page-enter');
   if(restoreY!==undefined) requestAnimationFrame(function(){ c.scrollTop=restoreY; });
   document.getElementById("sens-badge").textContent=`感度 Lv.${state.sensitivity}`;
+  // アラートボタンのaria-labelに未読件数を反映
+  var unread = ALERTS.filter(function(a){ return !state.readAlerts.includes(a.topicId); }).length;
+  var alertBtn = document.querySelector('.nav-btn[data-nav="alerts"]');
+  if(alertBtn) alertBtn.setAttribute('aria-label', unread > 0 ? '注意喚起（未読' + unread + '件）' : '注意喚起');
   bindEvents();
 }
 
@@ -2046,7 +2054,6 @@ function doSearch(){
   state.searched=true;
   state.searchTab=0;
   state.searchPhase='results';
-  state.currentTopicId=null;
   state.currentTopicId=null;
   switchNav("search");
 }
