@@ -2103,8 +2103,7 @@ function goTopic(topicId){
   state.searched = true;
   state.searchTab = 0;
   state.searchPhase = 'detail';
-  switchNav('search');
-  render();
+  switchNav('search'); // 内部で render() を呼ぶので重複呼び出し不要
 }
 function setExploreDepth(d){ state.exploreDepth=d; if(d===0){state.selectedCat=null;state.selectedSub=null;} render(); }
 function selectCat(id){ state.selectedCat=CATEGORIES.find(c=>c.id===id); state.exploreDepth=1; state.selectedSub=null; render(); }
@@ -2337,7 +2336,7 @@ function openSourceDetail(sourceId){
   if(!state.sourceDetail) return;
   pushNav();
   state.nav = 'sourceDetail';
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  updateNavAria('sourceDetail'); // aria-current + .active class を一括更新
   render();
 }
 
