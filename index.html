@@ -544,6 +544,8 @@ const PALETTES = {
 function P(){ return PALETTES[state.colorMode||"normal"]; }
 function scoreSymbol(s){ return state.colorMode==="mono"?(s>=90?"◆":s>=70?"▲":s>=50?"■":"✕"):""; }
 function brandColor(){ return P().brand; }
+var _ESC={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return _ESC[c];}); }
 
 // ===== ユーティリティ =====
 function scoreColor(s){ const p=P(); return s>=90?p.high:s>=70?p.mid:s>=50?p.warn:p.danger; }
@@ -753,7 +755,7 @@ function renderHomeTab(tab){
       '<div style="display:flex;gap:4px">' +
       periods2.map(function(pd){
         var active = rp === pd;
-        return '<button onclick="state.rankingPeriod=\''+pd+'\';render()" style="padding:3px 10px;background:'+(active?p.brand+'22':'transparent')+';border:1px solid '+(active?p.brand:'#1a2a4a')+';border-radius:99px;font-size:10px;color:'+(active?p.brand:'#666')+';cursor:pointer;font-family:sans-serif">'+labels2[pd]+'</button>';
+        return '<button onclick="state.rankingPeriod=\''+pd+'\';refreshHomeTab()" style="padding:3px 10px;background:'+(active?p.brand+'22':'transparent')+';border:1px solid '+(active?p.brand:'#1a2a4a')+';border-radius:99px;font-size:10px;color:'+(active?p.brand:'#666')+';cursor:pointer;font-family:sans-serif">'+labels2[pd]+'</button>';
       }).join('') + '</div></div>';
     var rankColors = ['#FFD700','#C0C0C0','#CD7F32'];
     return periodBar + rankData.map(function(t, i){
@@ -762,16 +764,16 @@ function renderHomeTab(tab){
       var barWidth = Math.round((t.searches / maxSearches) * 100);
       var rankNumColor = i < 3 ? rankColors[i] : '#2a4a7a';
       var onclickFn = t.topicId ? 'goTopic(\'' + t.topicId + '\')' : 'setSearchQuery(this.dataset.title)';
-      return '<div class="card clickable" style="margin-bottom:8px;padding:12px 14px" onclick="' + onclickFn + '" data-title="' + t.title.replace(/"/g,'&quot;') + '">' +
+      return '<div class="card clickable" style="margin-bottom:8px;padding:12px 14px" onclick="' + onclickFn + '" data-title="' + escapeHtml(t.title) + '">' +
         '<div style="display:flex;align-items:flex-start;gap:10px">' +
         '<div style="font-family:monospace;font-size:20px;font-weight:900;color:'+rankNumColor+';min-width:24px;text-align:center;line-height:1.3">' + t.rank + '</div>' +
         '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:13px;font-weight:700;margin-bottom:4px;line-height:1.4">' + t.title + '</div>' +
+        '<div style="font-size:13px;font-weight:700;margin-bottom:4px;line-height:1.4">' + escapeHtml(t.title) + '</div>' +
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">' +
-        '<span style="font-size:10px;color:var(--text-2)">' + t.cat + '</span>' +
-        '<span style="font-size:10px;color:'+chColor+';font-family:monospace;font-weight:700">' + t.change + '</span>' +
+        '<span style="font-size:10px;color:var(--text-2)">' + escapeHtml(t.cat) + '</span>' +
+        '<span style="font-size:10px;color:'+chColor+';font-family:monospace;font-weight:700">' + escapeHtml(t.change) + '</span>' +
         '</div>' +
-        (t.why ? '<div style="font-size:11px;color:#3a5a8a;line-height:1.5;margin-bottom:8px">💡 ' + t.why + '</div>' : '') +
+        (t.why ? '<div style="font-size:11px;color:#3a5a8a;line-height:1.5;margin-bottom:8px">💡 ' + escapeHtml(t.why) + '</div>' : '') +
         '<div style="display:flex;align-items:center;gap:8px">' +
         '<div style="flex:1;height:3px;background:#1a2035;border-radius:99px;overflow:hidden">' +
         '<div style="width:'+barWidth+'%;height:100%;background:linear-gradient(90deg,'+p.brand+'88,'+p.brand+');border-radius:99px"></div>' +
@@ -1214,7 +1216,7 @@ function renderSearchDetail(p){
     '<div style="padding:10px 14px;border-bottom:1px solid #1a2a4a;background:#0c1525;position:sticky;top:0;z-index:10">' +
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
     '<button onclick="popNav()" style="padding:5px 10px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:#4a9eff;font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 戻る</button>' +
-    '<span style="font-size:13px;color:#e0e6f0;flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + q + '</span>' +
+    '<span style="font-size:13px;color:#e0e6f0;flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(q) + '</span>' +
     '</div>' +
     // タブバー
     '<div id="search-tab-bar" style="display:flex;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none">' +
@@ -1373,8 +1375,8 @@ function renderSummaryTab(){
       sourcesHtml +=
         '<div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #0f1a2e;cursor:pointer;transition:background var(--t-fast)" onclick="state.searchTab=2;state.expandedMediaId=' + s.id + ';render()" onmouseover="this.style.background=\'rgba(255,255,255,0.03)\'" onmouseout="this.style.background=\'\'">' +
         '<div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">' +
-        '<span style="font-size:13px;font-weight:700;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + s.org + '</span>' +
-        '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px;flex-shrink:0">' + s.type + '</span>' +
+        '<span style="font-size:13px;font-weight:700;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(s.org) + '</span>' +
+        '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px;flex-shrink:0">' + escapeHtml(s.type) + '</span>' +
         '</div>' +
         '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
         '<span style="font-size:11px;color:var(--text-2)">' + cnt + '件</span>' +
@@ -1439,8 +1441,8 @@ function renderTimelineTab(){
   var header = '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">' +
     '<div style="font-size:12px;color:var(--text-2)">' + items.length + '件' + (span>0 ? '・' + span + '年間（' + items[0].date.slice(0,4) + '〜' + items[items.length-1].date.slice(0,4) + '年）' : '') + '</div>' +
     '<div style="display:flex;gap:6px">' +
-    '<button onclick="state.timelineOrder=\"asc\";render()" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='asc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='asc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='asc'?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;font-family:sans-serif">古い順</button>' +
-    '<button onclick="state.timelineOrder=\"desc\";render()" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='desc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='desc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='desc'?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;font-family:sans-serif">新しい順</button>' +
+    '<button onclick="state.timelineOrder=\"asc\";refreshTab(1)" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='asc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='asc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='asc'?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;font-family:sans-serif">古い順</button>' +
+    '<button onclick="state.timelineOrder=\"desc\";refreshTab(1)" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='desc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='desc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='desc'?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;font-family:sans-serif">新しい順</button>' +
     '</div></div>';
 
   var legend = '<div style="display:flex;gap:12px;margin-bottom:14px">' +
@@ -1537,7 +1539,7 @@ function renderSourcesTab(){
     return '<div id="mc-' + s.id + '" style="background:#0c1525;border:1px solid ' + (isExpanded?p.brand+'66':'#1a2a4a') + ';border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color 0.2s" onclick="toggleSourceCard(\'' + s.id + '\')">' +
       '<div style="display:flex;align-items:center;justify-content:space-between">' +
       '<div>' +
-      '<span style="font-size:15px;font-weight:700;color:#e0e6f0">' + s.org + '</span>' +
+      '<span style="font-size:15px;font-weight:700;color:#e0e6f0">' + escapeHtml(s.org) + '</span>' +
       '<div style="display:flex;align-items:center;gap:6px;margin-top:4px">' +
       '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px">' + s.type + '</span>' +
       '<span style="font-size:11px;color:var(--text-2)">' + articleCount + '件の記事</span>' +
@@ -1586,13 +1588,13 @@ function renderSourcesTab(){
     '<div style="font-size:11px;color:var(--text-2);margin-top:3px">' + sourceList.length + 'メディア · ' + totalArticles + '件の記事を収集</div>' +
     '</div>' +
     '<div style="display:flex;gap:4px">' +
-    '<button onclick="state.sourceSort=\'score\';render()" style="' + btnStyle(state.sourceSort==='score') + '">信頼度順</button>' +
-    '<button onclick="state.sourceSort=\'date\';render()" style="' + btnStyle(state.sourceSort==='date') + '">新しい順</button>' +
+    '<button onclick="state.sourceSort=\'score\';refreshTab(2)" style="' + btnStyle(state.sourceSort==='score') + '">信頼度順</button>' +
+    '<button onclick="state.sourceSort=\'date\';refreshTab(2)" style="' + btnStyle(state.sourceSort==='date') + '">新しい順</button>' +
     '</div></div>' +
     (jaSources.length ? '<div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:10px">🇯🇵 国内メディア（' + jaSources.length + '）</div>' + jaSources.map(makeMediaCard).join('') : '') +
     (enSources.length ? '<div style="border-top:1px solid #1a2a4a;margin:14px 0"></div><div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:10px">🌐 海外メディア（' + enSources.length + '）</div>' + enSources.map(makeMediaCard).join('') : '') +
     '<div style="border-top:1px solid #1a2a4a;margin:16px 0"></div>' +
-    '<div onclick="state.showOtherMedia=!state.showOtherMedia;render()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0">' +
+    '<div onclick="state.showOtherMedia=!state.showOtherMedia;refreshTab(2)" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0">' +
     '<div><div style="font-size:13px;font-weight:600;color:#aaa">他のメディアでも探す</div>' +
     '<div style="font-size:11px;color:var(--text-2);margin-top:2px">各メディア・機関のサイトで' + MEDIA_MASTER.length + '件を検索</div>' +
     '</div><span style="font-size:14px;color:var(--text-2)">' + (state.showOtherMedia?'▲':'▼') + '</span>' +
@@ -1623,9 +1625,9 @@ function renderPerspectivesTab(){
     return '<div style="border-left:3px solid ' + item.color + ';background:#0c1525;border-radius:0 12px 12px 0;padding:14px;margin-bottom:12px">' +
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
       '<div style="width:28px;height:28px;border-radius:50%;background:' + item.color + '33;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">💬</div>' +
-      '<div style="font-size:14px;font-weight:700;color:' + item.color + '">' + item.stance + '</div>' +
+      '<div style="font-size:14px;font-weight:700;color:' + item.color + '">' + escapeHtml(item.stance) + '</div>' +
       '</div>' +
-      '<div style="font-size:13px;color:#ccc;line-height:1.8;margin-bottom:10px">' + item.summary + '</div>' +
+      '<div style="font-size:13px;color:#ccc;line-height:1.8;margin-bottom:10px">' + escapeHtml(item.summary) + '</div>' +
       (srcBadges ? '<div style="font-size:11px;color:var(--text-2);margin-bottom:6px">根拠ソース</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">' + srcBadges + '</div>' : '') +
       '<div style="font-size:11px;color:var(--text-3);border-top:1px solid #1a2a4a;padding-top:8px">FACTはこの立場を支持・否定しません。判断はあなたが行います。</div>' +
       '</div>';
@@ -1656,10 +1658,10 @@ function renderRelatedTab(){
       var rc = scoreColor(rt.score);
       return '<div class="card clickable" style="margin-bottom:10px" onclick="goTopic(\''+rt.id+'\')">' +
         '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
-        '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + rt.cat + '</span>' +
+        '<span style="font-size:10px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + escapeHtml(rt.cat) + '</span>' +
         '<span style="font-size:10px;font-family:monospace;color:'+rc+';font-weight:700">' + rt.score + 'pt</span>' +
         '</div>' +
-        '<div style="font-size:14px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:6px">' + rt.title + '</div>' +
+        '<div style="font-size:14px;font-weight:700;color:#e0e6f0;line-height:1.5;margin-bottom:6px">' + escapeHtml(rt.title) + '</div>' +
         '<div style="font-size:12px;color:#888;line-height:1.6">' + rt.summary + '</div>' +
         '<div style="margin-top:8px;font-size:11px;color:'+p.brand+'">詳しく調べる →</div>' +
         '</div>';
@@ -1877,11 +1879,9 @@ function markAlertRead(topicId){
   }
 }
 function setAlertFilter(f){ state.alertFilter=f; render(); }
-function renderAlerts(){
-  const unreadCount = ALERTS.filter(a=>!state.readAlerts.includes(a.topicId)).length;
+function _buildAlertFilterBar(){
   const filters = ['all','sns','bias','fact','old','conflict'];
-  const filtered = state.alertFilter==='all' ? ALERTS : ALERTS.filter(a=>a.type===state.alertFilter);
-  const filterBar = `<div style="display:flex;gap:6px;overflow-x:auto;padding:0 14px 12px;scrollbar-width:none">
+  return `<div id="alert-filter-bar" style="display:flex;gap:6px;overflow-x:auto;padding:0 14px 12px;scrollbar-width:none">
     ${filters.map(f=>{
       const active = state.alertFilter===f;
       const cnt = f==='all' ? ALERTS.length : ALERTS.filter(a=>a.type===f).length;
@@ -1891,36 +1891,54 @@ function renderAlerts(){
       </button>`;
     }).join('')}
   </div>`;
-  return `<div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px">
-      <div class="section-title" style="margin-bottom:0">⚠️ 注意喚起 — AI検出</div>
-      ${unreadCount>0?`<span style="font-size:10px;color:#FF9800;background:#FF980022;border:1px solid #FF980044;padding:2px 8px;border-radius:99px">${unreadCount}件 未読</span>`:'<span style="font-size:10px;color:var(--text-2)">すべて既読</span>'}
-    </div>
-    ${filterBar}
-    <div style="padding:0 14px">
+}
+function _buildAlertList(){
+  const filtered = state.alertFilter==='all' ? ALERTS : ALERTS.filter(a=>a.type===state.alertFilter);
+  return `<div id="alert-list-items" style="padding:0 14px">
     ${filtered.map(a=>{
       const c=alertColor(a.type), icon=alertIcon(a.type);
       const isRead=state.readAlerts.includes(a.topicId);
       const d=encodeURIComponent(JSON.stringify(a));
       return `<div class="card clickable" style="border-left:3px solid ${c};opacity:${isRead?'0.65':'1'}"
-        onclick="markAlertRead('${a.topicId}');showPopup(decodeURIComponent('${d}'))">
+        onclick="markAlertRead('${escapeHtml(a.topicId)}');showPopup(decodeURIComponent('${d}'))">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <div style="display:flex;align-items:center;gap:6px">
             ${!isRead?`<span style="width:6px;height:6px;border-radius:50%;background:${c};display:inline-block;flex-shrink:0"></span>`:''}
-            <span style="font-size:10px;color:var(--text-2)">${a.cat}</span>
+            <span style="font-size:10px;color:var(--text-2)">${escapeHtml(a.cat)}</span>
           </div>
           <span style="font-size:10px;color:${c};background:${c}22;padding:1px 7px;border-radius:99px">${icon} ${a.sev==="high"?"重要":"注意"}</span>
         </div>
-        <div style="font-size:13px;font-weight:${isRead?'500':'700'};margin-bottom:6px;color:${isRead?'#888':'#e0e6f0'}">${a.title}</div>
-        <div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px">${a.msg}</div>
+        <div style="font-size:13px;font-weight:${isRead?'500':'700'};margin-bottom:6px;color:${isRead?'#888':'#e0e6f0'}">${escapeHtml(a.title)}</div>
+        <div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px">${escapeHtml(a.msg)}</div>
         <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:10px;color:var(--text-3);font-family:monospace">📅 ${a.date}</span>
+          <span style="font-size:10px;color:var(--text-3);font-family:monospace">📅 ${escapeHtml(a.date)}</span>
           <span style="font-size:11px;color:#4a9eff">詳細を見る →</span>
         </div>
       </div>`;
     }).join("")}
     ${filtered.length===0?`<div style="padding:30px 0;text-align:center;color:var(--text-3);font-size:13px">該当する注意喚起はありません</div>`:''}
+  </div>`;
+}
+function setAlertFilter(f){
+  state.alertFilter = f;
+  var bar = document.getElementById('alert-filter-bar');
+  var list = document.getElementById('alert-list-items');
+  if(bar && list){
+    bar.outerHTML = _buildAlertFilterBar();
+    var newList = document.getElementById('alert-filter-bar');
+    newList.insertAdjacentHTML('afterend', _buildAlertList());
+    list.remove();
+  } else { render(); }
+}
+function renderAlerts(){
+  const unreadCount = ALERTS.filter(a=>!state.readAlerts.includes(a.topicId)).length;
+  return `<div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px">
+      <div class="section-title" style="margin-bottom:0">⚠️ 注意喚起 — AI検出</div>
+      ${unreadCount>0?`<span style="font-size:10px;color:#FF9800;background:#FF980022;border:1px solid #FF980044;padding:2px 8px;border-radius:99px">${unreadCount}件 未読</span>`:'<span style="font-size:10px;color:var(--text-2)">すべて既読</span>'}
     </div>
+    ${_buildAlertFilterBar()}
+    ${_buildAlertList()}
   </div>`;
 }
 
@@ -2032,6 +2050,9 @@ function doSearch(){
   state.currentTopicId=null;
   switchNav("search");
 }
+
+function refreshTab(n){ var tb=document.getElementById('tab-body'); if(tb) tb.innerHTML=renderSearchTab(n,0); else render(); }
+function refreshHomeTab(){ var hb=document.getElementById('home-tab-body'); if(hb) hb.innerHTML=renderHomeTab(state.homeTab); else render(); }
 
 function setTab(i, dir){
   state.searchTab=i;
@@ -2346,7 +2367,7 @@ function renderSourceDetail(){
   return `
   <div style="background:#0c1525;border-bottom:1px solid #1a2a4a;padding:12px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;">
     <button onclick="closeSourceDetail()" style="background:none;border:none;color:#4a9eff;font-size:20px;cursor:pointer;padding:0;line-height:1">‹</button>
-    <span style="font-size:13px;font-weight:700;color:#e0e6f0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.org}</span>
+    <span style="font-size:13px;font-weight:700;color:#e0e6f0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(s.org)}</span>
     <span style="font-family:monospace;font-size:14px;color:${c};font-weight:900">${s.score}pt</span>
   </div>
 
@@ -2396,8 +2417,8 @@ function renderSourceDetail(){
       <div class="section-title">記事一覧（${s.articles.length}件）</div>
       ${s.articles.map(a=>`
         <div style="padding:10px 0;border-bottom:1px solid #0f1a2e">
-          <div style="font-size:13px;font-weight:600;color:#ddd;margin-bottom:4px">${a.title||''}</div>
-          <div style="font-size:11px;color:var(--text-2);margin-bottom:6px">📅 ${a.date||''}</div>
+          <div style="font-size:13px;font-weight:600;color:#ddd;margin-bottom:4px">${escapeHtml(a.title||'')}</div>
+          <div style="font-size:11px;color:var(--text-2);margin-bottom:6px">📅 ${escapeHtml(a.date||'')}</div>
           ${a.url ? `<a href="${a.url}" target="_blank" rel="noopener" style="font-size:11px;color:${p.brand};background:${p.brand}15;border:1px solid ${p.brand}44;padding:3px 10px;border-radius:99px;cursor:pointer;text-decoration:none;display:inline-block">記事を読む ↗</a>` : ''}
         </div>`).join('')}
     </div>` : ''}
@@ -2406,7 +2427,7 @@ function renderSourceDetail(){
       ${url ? `<a href="${url}" target="_blank" rel="noopener" style="text-decoration:none;display:block">
         <div style="background:${p.brand};border-radius:10px;padding:14px;text-align:center">
           <div style="font-size:14px;font-weight:700;color:#fff">元記事を読む ↗</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px">${s.org} で開く</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px">${escapeHtml(s.org)} で開く</div>
         </div>
       </a>` : ''}
       <div style="background:#1a2a4a22;border:1px solid #1a2a4a;border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="switchNav('explore')">
