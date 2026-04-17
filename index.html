@@ -1535,7 +1535,7 @@ function renderSourcesTab(){
       '<span style="font-size:11px;color:var(--text-2)">' + articleCount + '件の記事</span>' +
       '</div></div>' +
       '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
-      '<a href="https://news.google.com/search?q=' + encodeURIComponent(q + ' ' + s.org) + '&hl=ja&gl=JP&ceid=JP:ja" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:10px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:3px 8px;border-radius:99px;text-decoration:none;white-space:nowrap">Google News ↗</a>' +
+      '<a href="' + (mediaMeta ? getOrgSearchUrl(mediaMeta.domain, q) : 'https://www.google.com/search?q=' + encodeURIComponent(q + ' ' + s.org)) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:10px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:3px 8px;border-radius:99px;text-decoration:none;white-space:nowrap">' + (mediaMeta ? '検索 ↗' : 'Google ↗') + '</a>' +
       '<span style="font-family:monospace;font-size:13px;font-weight:900;color:' + rankColor + ';background:' + rankColor + '22;border:1px solid ' + rankColor + '55;border-radius:4px;padding:1px 6px;letter-spacing:0.5px">' + mediaRank + '</span>' +
       '<span style="font-family:monospace;font-size:18px;font-weight:900;color:' + rankColor + '">' + s.score + '</span>' +
       '<span style="font-size:10px;color:' + rankColor + '">pt</span>' +
