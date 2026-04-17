@@ -1521,9 +1521,15 @@ function renderSourcesTab(){
     var isExpanded = state.expandedMediaId == s.id;
     var articleCount = s.articles ? s.articles.length : 0;
     var latestArticle = s.articles && s.articles[0];
+
+    // D: 実URLを持つ記事が1件でもあるか判定
+    var hasRealUrl = s.articles && s.articles.some(function(a){ return !isFakeUrl(a.url); });
+
+    // B: 最新記事タイトルをプレビュー表示
     var previewHtml = latestArticle ?
-      '<div style="font-size:10px;color:var(--text-2);margin-top:6px;line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
-      '📅 ' + (latestArticle.date||'') + ' · ' + (latestArticle.summary||'').slice(0,40) + ((latestArticle.summary||'').length>40?'…':'') +
+      '<div style="font-size:11px;color:' + (hasRealUrl ? '#c0cfe0' : 'var(--text-2)') + ';margin-top:5px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' +
+      escapeHtml((latestArticle.title || latestArticle.summary || '').slice(0, 36)) +
+      ((latestArticle.title || latestArticle.summary || '').length > 36 ? '…' : '') +
       '</div>' : '';
 
     var articleListHtml = '';
@@ -1549,8 +1555,13 @@ function renderSourcesTab(){
       '<div>' +
       '<span style="font-size:15px;font-weight:700;color:#e0e6f0">' + escapeHtml(s.org) + '</span>' +
       '<div style="display:flex;align-items:center;gap:6px;margin-top:4px">' +
-      '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px">' + s.type + '</span>' +
+      '<span class="type-tag ' + typeClass(s.type) + '" style="font-size:10px">' + escapeHtml(s.type) + '</span>' +
       '<span style="font-size:11px;color:var(--text-2)">' + articleCount + '件の記事</span>' +
+      (articleCount > 0 ? '<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:99px;' +
+        (hasRealUrl
+          ? 'color:' + p.high + ';background:' + p.high + '18;border:1px solid ' + p.high + '44">直リンク'
+          : 'color:var(--text-3);background:#1a2a4a;border:1px solid #1a2a4a">検索のみ') +
+        '</span>' : '') +
       '</div>' + previewHtml + '</div>' +
       '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
       '<a href="' + (mediaMeta ? getOrgSearchUrl(mediaMeta.domain, q) : 'https://www.google.com/search?q=' + encodeURIComponent(q + ' ' + s.org)) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:10px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:3px 8px;border-radius:99px;text-decoration:none;white-space:nowrap">' + (mediaMeta ? '検索 ↗' : 'Google ↗') + '</a>' +
