@@ -1508,12 +1508,12 @@ function renderSourcesTab(){
     var mediaRank = mediaMeta ? mediaMeta.rank : (s.score>=90?'S':s.score>=80?'A':'B');
     var mediaRankColors = { S: p.high, A: p.brand, B: p.mid };
     var rankColor = mediaRankColors[mediaRank] || p.mid;
-    var isExpanded = state.expandedMediaId == s.id; // 文字列・数値の型差を吸収
+    var isExpanded = state.expandedMediaId == s.id;
     var articleCount = s.articles ? s.articles.length : 0;
 
-    var articleList = '';
-    if(isExpanded && s.articles){
-      articleList = '<div style="margin-top:12px;border-top:1px solid #1a2a4a;padding-top:12px">' +
+    var articleListHtml = '';
+    if(s.articles && s.articles.length > 0){
+      var innerHtml = '<div style="margin-top:12px;border-top:1px solid #1a2a4a;padding-top:12px">' +
         s.articles.map(function(a){
           var safeUrl = getArticleUrl(a, s.org);
           return '<div style="padding:10px 0;border-bottom:1px solid #0f1a2e">' +
@@ -1523,9 +1523,10 @@ function renderSourcesTab(){
             (safeUrl ? '<a href="' + safeUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:4px 14px;border-radius:99px;cursor:pointer;text-decoration:none;display:inline-block">記事を読む ↗</a>' : '') +
             '</div>';
         }).join('') + '</div>';
+      articleListHtml = '<div id="al-' + s.id + '" style="overflow:hidden;transition:max-height 0.3s ease,opacity 0.25s ease;max-height:' + (isExpanded?'2000px':'0') + ';opacity:' + (isExpanded?'1':'0') + '">' + innerHtml + '</div>';
     }
 
-    return '<div style="background:#0c1525;border:1px solid ' + (isExpanded?p.brand+'66':'#1a2a4a') + ';border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer" onclick="state.expandedMediaId=(state.expandedMediaId===\'' + s.id + '\'?null:\'' + s.id + '\');render()">' +
+    return '<div id="mc-' + s.id + '" style="background:#0c1525;border:1px solid ' + (isExpanded?p.brand+'66':'#1a2a4a') + ';border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color 0.2s" onclick="toggleSourceCard(\'' + s.id + '\')">' +
       '<div style="display:flex;align-items:center;justify-content:space-between">' +
       '<div>' +
       '<span style="font-size:15px;font-weight:700;color:#e0e6f0">' + s.org + '</span>' +
@@ -1537,9 +1538,9 @@ function renderSourcesTab(){
       '<span style="font-family:monospace;font-size:13px;font-weight:900;color:' + rankColor + ';background:' + rankColor + '22;border:1px solid ' + rankColor + '55;border-radius:4px;padding:1px 6px;letter-spacing:0.5px">' + mediaRank + '</span>' +
       '<span style="font-family:monospace;font-size:18px;font-weight:900;color:' + rankColor + '">' + s.score + '</span>' +
       '<span style="font-size:10px;color:' + rankColor + '">pt</span>' +
-      '<span style="font-size:14px;color:var(--text-2)">' + (isExpanded?'▼':'›') + '</span>' +
+      '<span id="chev-' + s.id + '" style="font-size:14px;color:var(--text-2)">' + (isExpanded?'▼':'›') + '</span>' +
       '</div></div>' +
-      articleList + '</div>';
+      articleListHtml + '</div>';
   };
 
   // 他のメディアセクション
@@ -2463,6 +2464,29 @@ if('serviceWorker' in navigator){
 }
 
 // ESCキーでポップアップを閉じる
+function toggleSourceCard(id){
+  var wasExpanded = state.expandedMediaId == id;
+  var p = P();
+  // 開いているカードを閉じる
+  if(state.expandedMediaId != null){
+    var prevAl = document.getElementById('al-' + state.expandedMediaId);
+    var prevMc = document.getElementById('mc-' + state.expandedMediaId);
+    var prevChev = document.getElementById('chev-' + state.expandedMediaId);
+    if(prevAl){ prevAl.style.maxHeight='0'; prevAl.style.opacity='0'; }
+    if(prevMc){ prevMc.style.borderColor='#1a2a4a'; }
+    if(prevChev){ prevChev.textContent='›'; }
+  }
+  state.expandedMediaId = wasExpanded ? null : id;
+  if(!wasExpanded){
+    var al = document.getElementById('al-' + id);
+    var mc = document.getElementById('mc-' + id);
+    var chev = document.getElementById('chev-' + id);
+    if(al){ al.style.maxHeight = al.scrollHeight + 'px'; al.style.opacity='1'; }
+    if(mc){ mc.style.borderColor = p.brand+'66'; }
+    if(chev){ chev.textContent='▼'; }
+  }
+}
+
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closePopup(); });
 
 // スワイプ検出 — document レベルで登録し画面全体をカバー
