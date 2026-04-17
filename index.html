@@ -442,7 +442,7 @@ function makeGNewsUrl(domain, query){
 }
 
 // ドメインごとの自社検索URL
-function getOrgSearchUrl(domain, title){
+function getOrgSearchUrl(domain, title, orgName){
   var q = encodeURIComponent(title);
   var map = {
     'bloomberg.co.jp':   'https://www.bloomberg.co.jp/search?query=' + q,
@@ -464,7 +464,7 @@ function getOrgSearchUrl(domain, title){
     'ntv.co.jp':         'https://news.ntv.co.jp/search/' + q,
     'tbs.co.jp':         'https://newsdig.tbs.co.jp/search?q=' + q,
   };
-  return map[domain] || (domain ? makeGNewsUrl(domain, title) : 'https://www.google.com/search?q=' + q);
+  return map[domain] || 'https://www.google.com/search?q=' + encodeURIComponent(title + (orgName ? ' ' + orgName : ''));
 }
 
 // 架空・無効URLを検出して自社検索URLにフォールバック
@@ -1561,7 +1561,7 @@ function renderSourcesTab(){
           '<div style="font-size:11px;font-weight:700;color:' + g.color + ';margin-bottom:8px">' + g.label + '</div>' +
           '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
           medias.map(function(m){
-            var url = makeGNewsUrl(m.domain, q);
+            var url = getOrgSearchUrl(m.domain, q, m.name);
             return '<div onclick="openUrl(\'' + url + '\')" style="cursor:pointer;padding:6px 12px;background:#0c1525;border:1px solid #1a2a4a;border-radius:99px;display:flex;align-items:center;gap:3px">' +
               '<span style="font-size:12px;color:#e0e6f0">' + m.name + '</span>' +
               (m.lang==='en'?'<span style="font-size:10px;color:var(--text-2);margin-left:2px">EN</span>':'') +
@@ -1586,7 +1586,7 @@ function renderSourcesTab(){
     '<div style="border-top:1px solid #1a2a4a;margin:16px 0"></div>' +
     '<div onclick="state.showOtherMedia=!state.showOtherMedia;render()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0">' +
     '<div><div style="font-size:13px;font-weight:600;color:#aaa">他のメディアでも探す</div>' +
-    '<div style="font-size:11px;color:var(--text-2);margin-top:2px">Google News 経由で' + MEDIA_MASTER.length + 'メディアを検索</div>' +
+    '<div style="font-size:11px;color:var(--text-2);margin-top:2px">各メディア・機関のサイトで' + MEDIA_MASTER.length + '件を検索</div>' +
     '</div><span style="font-size:14px;color:var(--text-2)">' + (state.showOtherMedia?'▲':'▼') + '</span>' +
     '</div>' + otherHtml + '</div>';
 }
