@@ -67,7 +67,7 @@ body { background: var(--bg); color: var(--text-1); font-family: 'Noto Sans JP',
 .sensitivity-badge { margin-left: auto; font-size: 10px; color: var(--text-3); font-family: monospace; }
 
 /* コンテンツ */
-#content { flex: 1; overflow-y: auto; padding-bottom: 70px; touch-action: pan-y; }
+#content { flex: 1; overflow-y: auto; padding-bottom: 76px; touch-action: pan-y; }
 
 /* 下部ナビ */
 #bottom-nav {
@@ -80,7 +80,7 @@ body { background: var(--bg); color: var(--text-1); font-family: 'Noto Sans JP',
   box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
 }
 .nav-btn {
-  flex: 1; padding: 9px 2px 7px;
+  flex: 1; padding: 11px 2px 9px; min-height: 48px;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   border: none; background: none; cursor: pointer;
   border-top: 2px solid transparent;
@@ -2523,45 +2523,63 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') closePopu
 
 // 初期描画：topics_meta.json + home_data.json を並行フェッチしてからレンダリング（詳細データは遅延ロード）
 applyColorMode();
-Promise.all([
-  fetch('./data/topics_meta.json').then(function(r){ return r.json(); }),
-  fetch('./data/home_data.json').then(function(r){ return r.json(); })
-])
-  .then(function(results){
-    var meta = results[0];
-    var home = results[1];
-    FACT_TOPICS = meta.FACT_TOPICS;
-    // CATEGORY_DEFS に count・alert を付与して CATEGORIES を確定
-    CATEGORIES = CATEGORY_DEFS.map(function(def){
-      return Object.assign({}, def, {
-        count: FACT_TOPICS.filter(function(t){ return t.cat === def.label; }).length,
-        alert: FACT_TOPICS.some(function(t){ return t.cat === def.label && !!t.alert; })
+function showInitialLoadError(){
+  var p = P();
+  var content = document.getElementById('content');
+  if(!content) return;
+  content.innerHTML =
+    '<div style="padding:48px 24px;text-align:center;max-width:320px;margin:0 auto">' +
+      '<div style="font-size:48px;margin-bottom:16px">📡</div>' +
+      '<div style="font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:8px">読み込みに失敗しました</div>' +
+      '<div style="font-size:12px;color:var(--text-2);line-height:1.6;margin-bottom:24px">' +
+        'ネットワーク接続を確認してください。オフラインの場合、以前開いたデータのみ表示できます。' +
+      '</div>' +
+      '<button onclick="retryInitialLoad()" style="padding:12px 28px;min-height:48px;border:none;border-radius:8px;background:'+p.brand+';color:#0a1020;font-size:14px;font-weight:700;cursor:pointer">再読み込み</button>' +
+    '</div>';
+}
+function retryInitialLoad(){ location.reload(); }
+function loadInitialData(){
+  Promise.all([
+    fetch('./data/topics_meta.json').then(function(r){ if(!r.ok) throw new Error('meta '+r.status); return r.json(); }),
+    fetch('./data/home_data.json').then(function(r){ if(!r.ok) throw new Error('home '+r.status); return r.json(); })
+  ])
+    .then(function(results){
+      var meta = results[0];
+      var home = results[1];
+      FACT_TOPICS = meta.FACT_TOPICS;
+      // CATEGORY_DEFS に count・alert を付与して CATEGORIES を確定
+      CATEGORIES = CATEGORY_DEFS.map(function(def){
+        return Object.assign({}, def, {
+          count: FACT_TOPICS.filter(function(t){ return t.cat === def.label; }).length,
+          alert: FACT_TOPICS.some(function(t){ return t.cat === def.label && !!t.alert; })
+        });
       });
+      // alert フィールドを持つトピックから ALERTS を動的生成
+      ALERTS = FACT_TOPICS
+        .filter(function(t){ return t.alert; })
+        .map(function(t){
+          return {
+            type:    t.alert.type,
+            sev:     t.alert.sev || 'high',
+            cat:     t.cat,
+            topicId: t.id,
+            title:   t.title,
+            msg:     t.alert.msg,
+            date:    t.date
+          };
+        });
+      // home_data.json からホーム画面データを設定
+      RANKING  = home.RANKING  || RANKING;
+      PICKUP   = home.PICKUP   || PICKUP;
+      FOLLOWUP = home.FOLLOWUP || FOLLOWUP;
+      render();
+    })
+    .catch(function(e){
+      console.error('初期データの読み込みに失敗しました:', e);
+      showInitialLoadError();
     });
-    // alert フィールドを持つトピックから ALERTS を動的生成
-    ALERTS = FACT_TOPICS
-      .filter(function(t){ return t.alert; })
-      .map(function(t){
-        return {
-          type:    t.alert.type,
-          sev:     t.alert.sev || 'high',
-          cat:     t.cat,
-          topicId: t.id,
-          title:   t.title,
-          msg:     t.alert.msg,
-          date:    t.date
-        };
-      });
-    // home_data.json からホーム画面データを設定
-    RANKING  = home.RANKING  || RANKING;
-    PICKUP   = home.PICKUP   || PICKUP;
-    FOLLOWUP = home.FOLLOWUP || FOLLOWUP;
-    render();
-  })
-  .catch(function(e){
-    console.error('初期データの読み込みに失敗しました:', e);
-    render();
-  });
+}
+loadInitialData();
 </script>
 </body>
 </html>
