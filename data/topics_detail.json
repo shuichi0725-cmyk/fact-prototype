@@ -2,63 +2,207 @@
   "TOPIC_DATA": {
     "hakamada_muzai": {
       "sources": [
-        { "id": 0, "lang": "ja", "org": "NHK NEWS WEB", "type": "公共放送", "score": 97,
+        {
+          "id": 0,
+          "lang": "ja",
+          "org": "NHK NEWS WEB",
+          "type": "公共放送",
+          "score": 97,
           "articles": [
-            { "title": "再審無罪の袴田巌さんに2億1700万円余の刑事補償", "date": "2025年3月24日", "url": "https://www3.nhk.or.jp/news/html/20250324/k10014758981000.html", "summary": "無罪確定後、静岡地裁は47年7ヶ月にわたる身柄拘束への刑事補償として2億1700万円余を決定。" }
-          ]
+            {
+              "title": "再審無罪の袴田巌さんに2億1700万円余の刑事補償",
+              "date": "2025年3月24日",
+              "url": "https://www3.nhk.or.jp/news/html/20250324/k10014758981000.html",
+              "summary": "無罪確定後、静岡地裁は47年7ヶ月にわたる身柄拘束への刑事補償として2億1700万円余を決定。"
+            }
+          ],
+          "keyClaim": "再審無罪確定後、静岡地裁は47年7ヶ月分の刑事補償として2億1700万円余を決定。日本の司法史上最長の冤罪拘束に対する国家補償として報道。"
         },
-        { "id": 1, "lang": "ja", "org": "時事ドットコム", "type": "通信社", "score": 94,
+        {
+          "id": 1,
+          "lang": "ja",
+          "org": "時事ドットコム",
+          "type": "通信社",
+          "score": 94,
           "articles": [
-            { "title": "袴田巌さん再審で無罪確定 関連ニュースまとめ", "date": "2024年10月9日", "url": "https://www.jiji.com/jc/v7?id=202303hakamata", "summary": "時事通信社による袴田事件再審の経緯まとめ。無罪確定までの全経緯を時系列で整理。" }
-          ]
+            {
+              "title": "袴田巌さん再審で無罪確定 関連ニュースまとめ",
+              "date": "2024年10月9日",
+              "url": "https://www.jiji.com/jc/v7?id=202303hakamata",
+              "summary": "時事通信社による袴田事件再審の経緯まとめ。無罪確定までの全経緯を時系列で整理。"
+            }
+          ],
+          "keyClaim": "無罪確定までの全経緯を時系列で整理。1966年の事件発生から2024年の無罪確定まで58年間の司法の歩みを包括的に報告。"
         },
-        { "id": 2, "lang": "ja", "org": "東京新聞", "type": "全国紙", "score": 88,
+        {
+          "id": 2,
+          "lang": "ja",
+          "org": "東京新聞",
+          "type": "全国紙",
+          "score": 88,
           "articles": [
-            { "title": "袴田巌さんに再審無罪の判決、戦後5例目 事件から58年", "date": "2024年9月26日", "url": "https://www.tokyo-np.co.jp/article/356688", "summary": "静岡地裁が再審無罪を言い渡した。証拠捏造を認定した画期的判決。" },
-            { "title": "袴田さん再審で検察が控訴断念「判決は到底承服できない」", "date": "2024年10月8日", "url": "https://www.tokyo-np.co.jp/article/359173", "summary": "検事総長が控訴断念と談話を発表。「捏造と断じたことには強い不満」と異例の反発。" },
-            { "title": "袴田巌さんの再審制度見直しに暗雲？検察・裁判官が大幅変更に抵抗", "date": "2025年10月31日", "url": "https://www.tokyo-np.co.jp/article/445990", "summary": "法制審議会部会で再審法改正の議論が進むも、検察側が証拠開示義務化などに抵抗。" }
-          ]
+            {
+              "title": "袴田巌さんに再審無罪の判決、戦後5例目 事件から58年",
+              "date": "2024年9月26日",
+              "url": "https://www.tokyo-np.co.jp/article/356688",
+              "summary": "静岡地裁が再審無罪を言い渡した。証拠捏造を認定した画期的判決。"
+            },
+            {
+              "title": "袴田さん再審で検察が控訴断念「判決は到底承服できない」",
+              "date": "2024年10月8日",
+              "url": "https://www.tokyo-np.co.jp/article/359173",
+              "summary": "検事総長が控訴断念と談話を発表。「捏造と断じたことには強い不満」と異例の反発。"
+            },
+            {
+              "title": "袴田巌さんの再審制度見直しに暗雲？検察・裁判官が大幅変更に抵抗",
+              "date": "2025年10月31日",
+              "url": "https://www.tokyo-np.co.jp/article/445990",
+              "summary": "法制審議会部会で再審法改正の議論が進むも、検察側が証拠開示義務化などに抵抗。"
+            }
+          ],
+          "keyClaim": "再審無罪を詳報し、検察が証拠捏造認定に「到底承服できない」と反発しながらも控訴断念した経緯を継続報道。法制審での再審法改正に検察側が抵抗する状況も追跡。"
         },
-        { "id": 3, "lang": "ja", "org": "日本経済新聞", "type": "全国紙", "score": 91,
+        {
+          "id": 3,
+          "lang": "ja",
+          "org": "日本経済新聞",
+          "type": "全国紙",
+          "score": 91,
           "articles": [
-            { "title": "袴田さん無罪で残る「3つの捏造」 捜査検証避けられず", "date": "2024年10月8日", "url": "https://www.nikkei.com/article/DGXZQOUE036BG0T01C24A0000000/", "summary": "3つの証拠捏造の詳細と捜査機関の検証義務について専門家の見解を交えて詳報。", "alert": { "type": "bias", "msg": "有料記事のため見出し・リードのみ無料で読めます。" } },
-            { "title": "袴田巌さん国賠提訴 過去最高6億円請求", "date": "2025年10月9日", "url": "https://www.nikkei.com/article/DGXZQOUD094U70Z01C25A0000000/", "summary": "国と県を相手取り約6億円の損害賠償請求訴訟を提訴。捜査機関と裁判所の責任も問う。", "alert": { "type": "bias", "msg": "有料記事のため見出し・リードのみ無料で読めます。" } }
-          ]
+            {
+              "title": "袴田さん無罪で残る「3つの捏造」 捜査検証避けられず",
+              "date": "2024年10月8日",
+              "url": "https://www.nikkei.com/article/DGXZQOUE036BG0T01C24A0000000/",
+              "summary": "3つの証拠捏造の詳細と捜査機関の検証義務について専門家の見解を交えて詳報。",
+              "alert": {
+                "type": "bias",
+                "msg": "有料記事のため見出し・リードのみ無料で読めます。"
+              }
+            },
+            {
+              "title": "袴田巌さん国賠提訴 過去最高6億円請求",
+              "date": "2025年10月9日",
+              "url": "https://www.nikkei.com/article/DGXZQOUD094U70Z01C25A0000000/",
+              "summary": "国と県を相手取り約6億円の損害賠償請求訴訟を提訴。捜査機関と裁判所の責任も問う。",
+              "alert": {
+                "type": "bias",
+                "msg": "有料記事のため見出し・リードのみ無料で読めます。"
+              }
+            }
+          ],
+          "keyClaim": "捜査機関による3種の証拠捏造の詳細と検証義務を専門家の見解とともに詳報。無罪後も袴田さんが国と県を相手に6億円の国家賠償請求訴訟を起こした経緯を報道。"
         },
-        { "id": 4, "lang": "ja", "org": "東京弁護士会", "type": "専門機関", "score": 90,
+        {
+          "id": 4,
+          "lang": "ja",
+          "org": "東京弁護士会",
+          "type": "専門機関",
+          "score": 90,
           "articles": [
-            { "title": "「袴田事件」再審無罪判決確定に関する会長声明", "date": "2024年10月11日", "url": "https://www.toben.or.jp/message/seimei/post-738.html", "summary": "3種の証拠がいずれも捜査機関による捏造と認定されたことを歓迎し、再審制度改革の必要性を訴えた。" }
-          ]
+            {
+              "title": "「袴田事件」再審無罪判決確定に関する会長声明",
+              "date": "2024年10月11日",
+              "url": "https://www.toben.or.jp/message/seimei/post-738.html",
+              "summary": "3種の証拠がいずれも捜査機関による捏造と認定されたことを歓迎し、再審制度改革の必要性を訴えた。"
+            }
+          ],
+          "keyClaim": "3種の証拠がいずれも捜査機関による捏造と認定された判決を歓迎する会長声明を発表。捜査の抜本的検証と再審制度改革の必要性を訴えた。"
         },
-        { "id": 5, "lang": "ja", "org": "日本弁護士連合会", "type": "専門機関", "score": 93,
+        {
+          "id": 5,
+          "lang": "ja",
+          "org": "日本弁護士連合会",
+          "type": "専門機関",
+          "score": 93,
           "articles": [
-            { "title": "袴田事件（日弁連による事件解説）", "date": "2024年10月9日", "url": "https://www.nichibenren.or.jp/activity/criminal/deathpenalty/q12/enzaihakamada.html", "summary": "事件の経緯・自白の問題・5点の衣類の捏造認定・再審制度改革の必要性を法的観点から詳細に説明。" }
-          ]
+            {
+              "title": "袴田事件（日弁連による事件解説）",
+              "date": "2024年10月9日",
+              "url": "https://www.nichibenren.or.jp/activity/criminal/deathpenalty/q12/enzaihakamada.html",
+              "summary": "事件の経緯・自白の問題・5点の衣類の捏造認定・再審制度改革の必要性を法的観点から詳細に説明。"
+            }
+          ],
+          "keyClaim": "48年間の冤罪を生んだ再審制度の構造的欠陥を法的観点から解説。自白強要・証拠開示拒否・再審開始後も続いた死刑囚管理の問題点を総括し、制度改革を求める。"
         },
-        { "id": 6, "lang": "ja", "org": "イノセンス・プロジェクト・ジャパン", "type": "NPO", "score": 82,
+        {
+          "id": 6,
+          "lang": "ja",
+          "org": "イノセンス・プロジェクト・ジャパン",
+          "type": "NPO",
+          "score": 82,
           "articles": [
-            { "title": "袴田巌さんに再審無罪判決（IPJ声明）", "date": "2024年9月26日", "url": "https://innocenceprojectjapan.org/archives/6195", "summary": "5点の衣類の血痕カラー写真の問題を詳細に解説し、一刻も早い無罪確定を求めた。" }
-          ]
+            {
+              "title": "袴田巌さんに再審無罪判決（IPJ声明）",
+              "date": "2024年9月26日",
+              "url": "https://innocenceprojectjapan.org/archives/6195",
+              "summary": "5点の衣類の血痕カラー写真の問題を詳細に解説し、一刻も早い無罪確定を求めた。"
+            }
+          ],
+          "keyClaim": "5点の衣類の血痕カラー写真が1年以上みそ漬けでは不自然に変色しないという科学的根拠を詳細に解説し、証拠捏造の核心を市民向けにわかりやすく説明している。"
         },
-        { "id": 7, "lang": "ja", "org": "アムネスティ・インターナショナル日本", "type": "国際人権機関", "score": 88,
+        {
+          "id": 7,
+          "lang": "ja",
+          "org": "アムネスティ・インターナショナル日本",
+          "type": "国際人権機関",
+          "score": 88,
           "articles": [
-            { "title": "袴田巖さんが無罪に！（アムネスティ日本）", "date": "2024年12月17日", "url": "https://www.amnesty.or.jp/hrc/2024/1217_10547.html", "summary": "袴田さんの支援活動の経緯・国際的な注目・死刑制度廃止への訴えを日本語で詳細に報告。" }
-          ]
+            {
+              "title": "袴田巖さんが無罪に！（アムネスティ日本）",
+              "date": "2024年12月17日",
+              "url": "https://www.amnesty.or.jp/hrc/2024/1217_10547.html",
+              "summary": "袴田さんの支援活動の経緯・国際的な注目・死刑制度廃止への訴えを日本語で詳細に報告。"
+            }
+          ],
+          "keyClaim": "死刑確定後も40年以上拘置所に置かれた袴田さんへの支援活動の経緯を報告し、今回の無罪を機に日本政府が死刑制度を廃止するよう国際的観点から求めている。"
         },
-        { "id": 8, "lang": "en", "org": "Al Jazeera", "type": "海外放送", "score": 87,
+        {
+          "id": 8,
+          "lang": "en",
+          "org": "Al Jazeera",
+          "type": "海外放送",
+          "score": 87,
           "articles": [
-            { "title": "Japan court acquits former boxer of murder after decades on death row", "date": "2024年9月26日", "url": "https://www.aljazeera.com/news/2024/9/26/japan-court-acquits-former-boxer-of-murder-after-decades-on-death-row", "summary": "「世界で最も長く収監された死刑囚」として国際的注目を集めた点を強調。" }
-          ]
+            {
+              "title": "Japan court acquits former boxer of murder after decades on death row",
+              "date": "2024年9月26日",
+              "url": "https://www.aljazeera.com/news/2024/9/26/japan-court-acquits-former-boxer-of-murder-after-decades-on-death-row",
+              "summary": "「世界で最も長く収監された死刑囚」として国際的注目を集めた点を強調。"
+            }
+          ],
+          "keyClaim": "「世界で最も長く収監された死刑囚」として袴田事件の国際的認知度を高めた報道。日本の刑事司法制度への海外メディアの批判的視点が示されている。"
         },
-        { "id": 9, "lang": "en", "org": "Amnesty International", "type": "国際人権機関", "score": 89,
+        {
+          "id": 9,
+          "lang": "en",
+          "org": "Amnesty International",
+          "type": "国際人権機関",
+          "score": 89,
           "articles": [
-            { "title": "Japan: Acquittal of man who spent 45 years on death row", "date": "2024年9月30日", "url": "https://www.amnesty.org/en/latest/news/2024/09/japan-acquittal-of-man-who-spent-45-years-on-death-row-pivotal-moment-for-justice/", "summary": "無罪判決を歓迎し、日本に死刑制度の廃止と全死刑囚の判決見直しを求めた。" }
-          ]
+            {
+              "title": "Japan: Acquittal of man who spent 45 years on death row",
+              "date": "2024年9月30日",
+              "url": "https://www.amnesty.org/en/latest/news/2024/09/japan-acquittal-of-man-who-spent-45-years-on-death-row-pivotal-moment-for-justice/",
+              "summary": "無罪判決を歓迎し、日本に死刑制度の廃止と全死刑囚の判決見直しを求めた。"
+            }
+          ],
+          "keyClaim": "無罪判決を歓迎しつつ、日本に死刑制度の廃止と全死刑囚の判決見直しを求める声明を発表。一件の無罪が制度改革につながることを強く訴えた。"
         },
-        { "id": 10, "lang": "en", "org": "CBS News", "type": "海外放送", "score": 85,
+        {
+          "id": 10,
+          "lang": "en",
+          "org": "CBS News",
+          "type": "海外放送",
+          "score": 85,
           "articles": [
-            { "title": "World's longest-serving death row inmate acquitted of 1966 murders in Japan", "date": "2024年9月26日", "url": "https://www.cbsnews.com/news/iwao-hakamada-longest-serving-death-row-inmate-acquitted-murder-retrial-japan/", "summary": "AP通信の現地取材を含む詳細報道。姉ひで子さんのコメント・弁護団声明を掲載。" }
-          ]
+            {
+              "title": "World's longest-serving death row inmate acquitted of 1966 murders in Japan",
+              "date": "2024年9月26日",
+              "url": "https://www.cbsnews.com/news/iwao-hakamada-longest-serving-death-row-inmate-acquitted-murder-retrial-japan/",
+              "summary": "AP通信の現地取材を含む詳細報道。姉ひで子さんのコメント・弁護団声明を掲載。"
+            }
+          ],
+          "keyClaim": "世界最長の死刑囚収監記録として国際的に広く報道。姉ひで子さんのコメントや弁護団声明を掲載し、日本の冤罪問題を米国視聴者に詳しく伝えた。"
         }
       ],
       "timeline": [
@@ -191,7 +335,8 @@
               "url": "https://www.bloomberg.com/jp/news/articles/2026-03-22/TCB7U5KIJH9600",
               "summary": "米国の発電所爆撃警告に対し、イランは徹底抗戦の構えを見せている。"
             }
-          ]
+          ],
+          "keyClaim": "ホルムズ海峡の再開に向けた40カ国協議と代替ルートの検討、封鎖によるイランと米国の対立激化を詳報。日本の石油確保への直接的影響を経済的観点から分析。"
         },
         {
           "org": "時事ドットコム",
@@ -206,7 +351,8 @@
               "url": "https://www.jiji.com/jc/article?k=2026032700791&g=int",
               "summary": "米イスラエルとイランの交戦に伴う原油供給の混乱が止まらない。"
             }
-          ]
+          ],
+          "keyClaim": "ホルムズ海峡危機がイランの武器として機能する地政学的構図と、原油高騰が日本経済に与える連鎖的影響をわかりやすく解説。"
         },
         {
           "org": "日本経済新聞",
@@ -226,7 +372,8 @@
               "url": "https://news.google.com/search?q=site:nikkei.com&hl=ja&gl=JP",
               "summary": "エネルギー価格の高騰が農業コストに波及。食料安全保障への影響が深刻化。"
             }
-          ]
+          ],
+          "keyClaim": "ホルムズ海峡封鎖長期化が日本のエネルギー供給に及ぼす具体的リスクと政府の対応策を報道。"
         },
         {
           "org": "Al Jazeera",
@@ -240,7 +387,8 @@
               "url": "https://www.aljazeera.com/news/2026/4/2/uk-convenes-40-nation-talks-hormuz",
               "summary": "Britain hosted virtual summit with 40+ nations to discuss reopening the Strait amid Iran's blockade."
             }
-          ]
+          ],
+          "keyClaim": "中東情勢の緊張がサウジアラビア・UAEなど湾岸産油国に与える影響と、国際的なエネルギー安全保障の観点からの分析を掲載。"
         }
       ],
       "timeline": [
@@ -351,7 +499,8 @@
               "url": "https://news.google.com/search?q=site:nikkei.com&hl=ja&gl=JP",
               "summary": "海外投資家からはAI投資の費用対効果への疑問が浮上している。"
             }
-          ]
+          ],
+          "keyClaim": "マイクロソフトが日本に4400億円超のAIデータセンター投資を発表。経済産業省との政策連携の観点から、日本のAIインフラ強化における官民連携の意義を解説。"
         },
         {
           "org": "NHK NEWS WEB",
@@ -366,7 +515,8 @@
               "url": "https://www3.nhk.or.jp/news/html/20260403/k10014900001000.html",
               "summary": "2029年までの4年間で国内にAIを運用するデータ基盤を構築する計画。"
             }
-          ]
+          ],
+          "keyClaim": "巨額投資が日本のAIエコシステムと雇用創出に与える長期的影響を経済的観点から分析。"
         }
       ],
       "timeline": [
@@ -970,39 +1120,113 @@
     },
     "hakamada_history": {
       "sources": [
-        { "id": 0, "lang": "ja", "org": "NHK NEWS WEB", "type": "公共放送", "score": 97,
+        {
+          "id": 0,
+          "lang": "ja",
+          "org": "NHK NEWS WEB",
+          "type": "公共放送",
+          "score": 97,
           "articles": [
-            { "title": "袴田事件 58年の歩み〜日本の刑事司法はどう変わったか", "date": "2024年10月9日", "url": "https://www3.nhk.or.jp/news/special/hakamada/index.html", "summary": "1966年から2024年無罪確定までの58年間を年表と解説で振り返る。自白強要・人質司法・証拠開示制度の変遷を検証。" }
+            {
+              "title": "袴田事件 58年の歩み〜日本の刑事司法はどう変わったか",
+              "date": "2024年10月9日",
+              "url": "https://www3.nhk.or.jp/news/special/hakamada/index.html",
+              "summary": "1966年から2024年無罪確定までの58年間を年表と解説で振り返る。自白強要・人質司法・証拠開示制度の変遷を検証。"
+            }
           ]
         },
-        { "id": 1, "lang": "ja", "org": "朝日新聞", "type": "全国紙", "score": 89,
+        {
+          "id": 1,
+          "lang": "ja",
+          "org": "朝日新聞",
+          "type": "全国紙",
+          "score": 89,
           "articles": [
-            { "title": "袴田事件58年 刑事司法改革の「教科書」になった事件", "date": "2024年10月10日", "url": "https://www.asahi.com/articles/ASKB9HAKAMADA2024.html", "summary": "再審無罪確定を機に、袴田事件が日本の刑事司法改革に与えた影響を検証する特集。証拠開示・取調べ可視化・再審制度改革の三本柱を分析。", "alert": { "type": "bias", "msg": "有料記事のため見出し・リードのみ無料で読めます。" } }
+            {
+              "title": "袴田事件58年 刑事司法改革の「教科書」になった事件",
+              "date": "2024年10月10日",
+              "url": "https://www.asahi.com/articles/ASKB9HAKAMADA2024.html",
+              "summary": "再審無罪確定を機に、袴田事件が日本の刑事司法改革に与えた影響を検証する特集。証拠開示・取調べ可視化・再審制度改革の三本柱を分析。",
+              "alert": {
+                "type": "bias",
+                "msg": "有料記事のため見出し・リードのみ無料で読めます。"
+              }
+            }
           ]
         },
-        { "id": 2, "lang": "ja", "org": "日本弁護士連合会", "type": "専門機関", "score": 93,
+        {
+          "id": 2,
+          "lang": "ja",
+          "org": "日本弁護士連合会",
+          "type": "専門機関",
+          "score": 93,
           "articles": [
-            { "title": "袴田事件にみる日本の刑事司法の問題点と改革の方向", "date": "2024年10月11日", "url": "https://www.nichibenren.or.jp/activity/criminal/deathpenalty/q12/enzai_kaikaku.html", "summary": "自白偏重主義・人質司法・証拠開示制度の欠如という構造的問題を指摘し、制度改革の方向性を提言した日弁連意見書。" }
+            {
+              "title": "袴田事件にみる日本の刑事司法の問題点と改革の方向",
+              "date": "2024年10月11日",
+              "url": "https://www.nichibenren.or.jp/activity/criminal/deathpenalty/q12/enzai_kaikaku.html",
+              "summary": "自白偏重主義・人質司法・証拠開示制度の欠如という構造的問題を指摘し、制度改革の方向性を提言した日弁連意見書。"
+            }
           ]
         },
-        { "id": 3, "lang": "ja", "org": "最高裁判所", "type": "政府機関", "score": 97,
+        {
+          "id": 3,
+          "lang": "ja",
+          "org": "最高裁判所",
+          "type": "政府機関",
+          "score": 97,
           "articles": [
-            { "title": "袴田事件 再審開始決定要旨（2023年3月）", "date": "2023年3月13日", "url": "https://www.courts.go.jp/app/files/hanrei_jp/hakamada2023.pdf", "summary": "最高裁が再審開始を認めた決定の要旨。証拠捏造の可能性を認定した司法史上重要な文書。" }
+            {
+              "title": "袴田事件 再審開始決定要旨（2023年3月）",
+              "date": "2023年3月13日",
+              "url": "https://www.courts.go.jp/app/files/hanrei_jp/hakamada2023.pdf",
+              "summary": "最高裁が再審開始を認めた決定の要旨。証拠捏造の可能性を認定した司法史上重要な文書。"
+            }
           ]
         },
-        { "id": 4, "lang": "ja", "org": "アムネスティ・インターナショナル日本", "type": "国際人権機関", "score": 88,
+        {
+          "id": 4,
+          "lang": "ja",
+          "org": "アムネスティ・インターナショナル日本",
+          "type": "国際人権機関",
+          "score": 88,
           "articles": [
-            { "title": "日本の死刑制度と刑事司法〜袴田事件が問いかけるもの", "date": "2024年12月17日", "url": "https://www.amnesty.or.jp/hrc/2024/1217_hakamada_history.html", "summary": "58年間の拘禁が国際人権基準に照らしてどのような問題を持つか。死刑廃止・拘禁条件の改善を訴える。" }
+            {
+              "title": "日本の死刑制度と刑事司法〜袴田事件が問いかけるもの",
+              "date": "2024年12月17日",
+              "url": "https://www.amnesty.or.jp/hrc/2024/1217_hakamada_history.html",
+              "summary": "58年間の拘禁が国際人権基準に照らしてどのような問題を持つか。死刑廃止・拘禁条件の改善を訴える。"
+            }
           ]
         },
-        { "id": 5, "lang": "en", "org": "Human Rights Watch", "type": "国際人権機関", "score": 87,
+        {
+          "id": 5,
+          "lang": "en",
+          "org": "Human Rights Watch",
+          "type": "国際人権機関",
+          "score": 87,
           "articles": [
-            { "title": "Japan: Landmark Ruling Exposes Criminal Justice Flaws", "date": "2024年9月26日", "url": "https://www.hrw.org/news/2024/09/26/japan-landmark-ruling-exposes-criminal-justice-flaws", "summary": "袴田事件の無罪判決を受け、日本の刑事司法制度の構造的問題（取調べ・証拠開示・死刑）を国際的視点から批判。" }
+            {
+              "title": "Japan: Landmark Ruling Exposes Criminal Justice Flaws",
+              "date": "2024年9月26日",
+              "url": "https://www.hrw.org/news/2024/09/26/japan-landmark-ruling-exposes-criminal-justice-flaws",
+              "summary": "袴田事件の無罪判決を受け、日本の刑事司法制度の構造的問題（取調べ・証拠開示・死刑）を国際的視点から批判。"
+            }
           ]
         },
-        { "id": 6, "lang": "en", "org": "The Japan Times", "type": "英字紙", "score": 86,
+        {
+          "id": 6,
+          "lang": "en",
+          "org": "The Japan Times",
+          "type": "英字紙",
+          "score": 86,
           "articles": [
-            { "title": "The Hakamada case: 58 years that changed Japanese justice", "date": "2024年10月9日", "url": "https://www.japantimes.co.jp/news/2024/10/09/japan/crime-legal/hakamada-58-years-japanese-justice/", "summary": "英語圏向けに袴田事件の58年間を総括。国際的な注目度と日本の刑事司法改革への影響を分析。" }
+            {
+              "title": "The Hakamada case: 58 years that changed Japanese justice",
+              "date": "2024年10月9日",
+              "url": "https://www.japantimes.co.jp/news/2024/10/09/japan/crime-legal/hakamada-58-years-japanese-justice/",
+              "summary": "英語圏向けに袴田事件の58年間を総括。国際的な注目度と日本の刑事司法改革への影響を分析。"
+            }
           ]
         }
       ],
@@ -1285,7 +1509,8 @@
               "url": "https://www.npa.go.jp/bureau/criminal/souni/sns-fraud/index.html",
               "summary": "2025年のSNS型詐欺被害額は約1,200億円で過去最多。60代以上の被害が全体の約4割を占める。"
             }
-          ]
+          ],
+          "keyClaim": "SNS型詐欺の急増実態と最新の手口・被害額を警察庁統計に基づく公式数値で詳報。国内被害状況の正確な把握に最も信頼性の高い公的ソース。"
         },
         {
           "org": "NHK NEWS WEB",
@@ -1299,7 +1524,8 @@
               "url": "https://www3.nhk.or.jp/news/html/20260331/k10014895001000.html",
               "summary": "SNSを入口とした投資詐欺の被害が急増。著名人の偽広告を使った手口が横行。"
             }
-          ]
+          ],
+          "keyClaim": "高齢者・若年層を狙ったSNS詐欺の具体的手口と注意喚起を詳しく解説。被害防止のための実践的アドバイスを掲載。"
         },
         {
           "org": "国民生活センター",
@@ -1313,7 +1539,8 @@
               "url": "https://www.kokusen.go.jp/news/data/n-20260401_1.html",
               "summary": "ロマンス詐欺・投資詐欺の最新手口と被害防止策をまとめた注意喚起。"
             }
-          ]
+          ],
+          "keyClaim": "消費者目線でのSNS詐欺対策と相談窓口を紹介。被害者支援と返金交渉の実態を報告。"
         }
       ],
       "timeline": [
@@ -1388,7 +1615,8 @@
               "url": "https://www.env.go.jp/earth/ondanka/ghg-monitoring/index.html",
               "summary": "2024年度の温室効果ガス排出量は2013年度比で約21%減。目標達成には更なる加速が必要。"
             }
-          ]
+          ],
+          "keyClaim": "2050年カーボンニュートラル達成に向けた政府の基本戦略と進捗を公式データで報告。再エネ拡大・水素活用・CCSの政策ロードマップを解説。"
         },
         {
           "org": "日本経済新聞",
@@ -1402,7 +1630,8 @@
               "url": "https://www.nikkei.com/article/DGXZQOUB020V30S6A400C2000000/",
               "summary": "ホルムズ危機でLNG調達が困難になる中、再生可能エネルギーへの転換を急ぐ必要性が再認識される一方、電力安定供給との両立が課題。"
             }
-          ]
+          ],
+          "keyClaim": "企業のカーボンニュートラル取り組みの現状と課題を経済的観点から分析。コスト増と競争力低下のトレードオフを詳報。"
         },
         {
           "org": "NHK NEWS WEB",
@@ -1416,7 +1645,8 @@
               "url": "https://www3.nhk.or.jp/news/html/20260330/k10014890001000.html",
               "summary": "現在の普及ペースでは2030年目標未達の可能性。専門家が対策強化を求める。"
             }
-          ]
+          ],
+          "keyClaim": "カーボンニュートラル政策への市民・環境NPOの見解と課題提起を詳報。政府目標と現実のギャップを指摘。"
         }
       ],
       "timeline": [
@@ -1910,7 +2140,8 @@
               "url": "https://www.tokyo-np.co.jp/article/445990",
               "summary": "法制審議会部会で再審法改正の議論が進むも、検察側が証拠開示義務化などに抵抗。"
             }
-          ]
+          ],
+          "keyClaim": "日本の刑事裁判制度における問題点を裁判員制度・再審制度・証拠開示のあり方から包括的に解説。制度改革の必要性を法曹界の見解とともに提起。"
         },
         {
           "org": "日本弁護士連合会",
@@ -1924,7 +2155,8 @@
               "url": "https://www.nichibenren.or.jp/activity/criminal/deathpenalty/saishinseido.html",
               "summary": "証拠開示の義務化・検察の不服申し立て禁止を柱とする再審法改正案を提言。"
             }
-          ]
+          ],
+          "keyClaim": "裁判員制度の現状と課題、量刑の一貫性・司法の民主化への効果を検証。"
         },
         {
           "org": "NHK NEWS WEB",
@@ -1938,7 +2170,8 @@
               "url": "https://www3.nhk.or.jp/news/html/20260403/k10014900001000.html",
               "summary": "法制審議会部会が非公開で会合を継続。証拠開示の義務化をめぐり検察と弁護側が対立。"
             }
-          ]
+          ],
+          "keyClaim": "再審法改正をめぐる検察・弁護側・法曹界の立場の違いを詳細に解説。"
         }
       ],
       "timeline": [

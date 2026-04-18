@@ -1543,15 +1543,23 @@ function renderSourcesTab(){
           var safeUrl = articleResult.url;
           var btnLabel = articleResult.isFallback ? 'ソースで探す ↗' : '記事を読む ↗';
           var btnColor = articleResult.isFallback ? p.mid : p.brand;
+          var alertMsg = a.alert && typeof a.alert === 'object' ? a.alert.msg : '';
+          var origUrl = (a.url && !isFakeUrl(a.url)) ? a.url : '';
           return '<div style="padding:10px 0;border-bottom:1px solid #0f1a2e">' +
-            '<div style="font-size:13px;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:4px">' + (a.title||'') + '</div>' +
-            '<div style="font-size:11px;color:var(--text-2);margin-bottom:4px">📅 ' + (a.date||'') + '</div>' +
-            '<div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px">' + (a.summary||'') + '</div>' +
-            (safeUrl ? '<a href="' + safeUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;font-weight:600;color:' + btnColor + ';background:' + btnColor + '15;border:1px solid ' + btnColor + '44;padding:4px 14px;border-radius:99px;cursor:pointer;text-decoration:none;display:inline-block">' + btnLabel + '</a>' : '') +
-            '</div>';
+            '<div style="font-size:13px;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:4px">' + escapeHtml(a.title||'') + '</div>' +
+            '<div style="font-size:11px;color:var(--text-2);margin-bottom:4px">📅 ' + escapeHtml(a.date||'') + '</div>' +
+            (alertMsg ? '<div style="font-size:10px;color:#e8b84b;background:#e8b84b15;border:1px solid #e8b84b44;border-radius:6px;padding:3px 8px;margin-bottom:6px">⚠ ' + escapeHtml(alertMsg) + '</div>' : '') +
+            '<div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px">' + escapeHtml(a.summary||'') + '</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+            (safeUrl ? '<a href="' + safeUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;font-weight:600;color:' + btnColor + ';background:' + btnColor + '15;border:1px solid ' + btnColor + '44;padding:4px 14px;border-radius:99px;cursor:pointer;text-decoration:none">' + btnLabel + '</a>' : '') +
+            (origUrl ? '<a href="https://web.archive.org/web/*/' + origUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:11px;color:var(--text-2);background:#1a2a4a;border:1px solid #1a2a4a;padding:4px 10px;border-radius:99px;cursor:pointer;text-decoration:none">archive ↗</a>' : '') +
+            '</div></div>';
         }).join('') + '</div>';
       articleListHtml = '<div id="al-' + s.id + '" style="overflow:hidden;transition:max-height 0.3s ease,opacity 0.25s ease;max-height:' + (isExpanded?'2000px':'0') + ';opacity:' + (isExpanded?'1':'0') + '">' + innerHtml + '</div>';
     }
+
+    var keyClaimHtml = s.keyClaim ?
+      '<div style="font-size:12px;color:#b0c4de;line-height:1.55;margin-top:7px;padding:6px 10px;background:#070f1e;border-left:2px solid ' + p.brand + ';border-radius:0 6px 6px 0">' + escapeHtml(s.keyClaim) + '</div>' : '';
 
     return '<div id="mc-' + s.id + '" style="background:#0c1525;border:1px solid ' + (isExpanded?p.brand+'66':'#1a2a4a') + ';border-radius:12px;padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:border-color 0.2s" onclick="toggleSourceCard(\'' + s.id + '\')">' +
       /* 行1: org名 ← → スコア+シェブロン */
@@ -1573,8 +1581,10 @@ function renderSourcesTab(){
         '</span>' : '') +
       '<a href="' + (mediaMeta ? getOrgSearchUrl(mediaMeta.domain, q) : 'https://www.google.com/search?q=' + encodeURIComponent(q + ' ' + s.org)) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:10px;font-weight:600;color:' + p.brand + ';background:' + p.brand + '15;border:1px solid ' + p.brand + '44;padding:2px 8px;border-radius:99px;text-decoration:none;white-space:nowrap">' + (mediaMeta ? '検索 ↗' : 'Google ↗') + '</a>' +
       '</div>' +
-      /* プレビュー */
-      previewHtml +
+      /* keyClaim */
+      keyClaimHtml +
+      /* プレビュー（keyClaimがない場合のみ表示） */
+      (s.keyClaim ? '' : previewHtml) +
       articleListHtml + '</div>';
   };
 
