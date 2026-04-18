@@ -485,7 +485,10 @@ function getArticleUrl(article, orgName){
         || m.name.indexOf(orgName) >= 0;
     });
     var domain = media ? media.domain : '';
-    return { url: getOrgSearchUrl(domain, article.title, orgName), isFallback: true };
+    // searchKey があればそれを使用、なければタイトル先頭20文字で自動短縮
+    var query = article.searchKey
+      || (article.title || '').slice(0, 20);
+    return { url: getOrgSearchUrl(domain, query, orgName), isFallback: true };
   }
   return { url: url, isFallback: false };
 }

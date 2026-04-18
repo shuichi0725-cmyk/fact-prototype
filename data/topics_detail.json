@@ -179,12 +179,14 @@
           "articles": [
             {
               "title": "ホルムズ海峡 40カ国が再開協議、代替ルートも検討",
+              "searchKey": "ホルムズ海峡 再開協議 代替ルート",
               "date": "2026年4月2日",
               "url": "https://www.bloomberg.com/jp/news/articles/2026-04-02/TCVVXDKGZAIS00",
               "summary": "英国主催で日欧など40カ国余りが2日、ホルムズ海峡の再開に向けた対応を協議。制裁措置と代替ルートを検討。"
             },
             {
               "title": "ホルムズ海峡危機 深まる封鎖 米国の開放要求にイランは完全封鎖を警告",
+              "searchKey": "ホルムズ海峡 封鎖 イラン 米国",
               "date": "2026年3月22日",
               "url": "https://www.bloomberg.com/jp/news/articles/2026-03-22/TCB7U5KIJH9600",
               "summary": "米国の発電所爆撃警告に対し、イランは徹底抗戦の構えを見せている。"
@@ -199,6 +201,7 @@
           "articles": [
             {
               "title": "イラン、ホルムズ海峡を「武器化」 長引く原油高、拭えぬ供給不安",
+              "searchKey": "ホルムズ海峡 武器化 イラン 原油高",
               "date": "2026年3月28日",
               "url": "https://www.jiji.com/jc/article?k=2026032700791&g=int",
               "summary": "米イスラエルとイランの交戦に伴う原油供給の混乱が止まらない。"
@@ -358,6 +361,7 @@
           "articles": [
             {
               "title": "マイクロソフト 日本に約1兆6000億円投資 AIデータセンター整備へ",
+              "searchKey": "マイクロソフト 日本投資 AIデータセンター",
               "date": "2026年4月3日",
               "url": "https://www3.nhk.or.jp/news/html/20260403/k10014900001000.html",
               "summary": "2029年までの4年間で国内にAIを運用するデータ基盤を構築する計画。"
