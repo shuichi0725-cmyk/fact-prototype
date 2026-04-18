@@ -223,6 +223,35 @@ body { background: var(--bg); color: var(--text-1); font-family: 'Noto Sans JP',
 @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes fadeUp   { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+/* 登録オーバーレイ */
+#reg-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 200; justify-content: center; align-items: flex-start;
+  padding: 16px; overflow-y: auto;
+}
+#reg-overlay.show { display: flex; }
+#reg-box {
+  background: var(--surface-2); border: 1px solid var(--border-2);
+  border-radius: 16px; padding: 20px;
+  width: 100%; max-width: 480px; margin-bottom: 80px;
+  animation: fadeUp 0.25s ease;
+}
+.reg-section { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.reg-label { font-size: 11px; font-weight: 700; color: var(--text-2); letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+.reg-required { color: #ef5350; margin-left: 2px; }
+.reg-input {
+  width: 100%; box-sizing: border-box;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 9px 12px; color: var(--text-1); font-size: 13px;
+  outline: none; font-family: 'Noto Sans JP', sans-serif;
+  transition: border-color var(--t-fast);
+}
+.reg-input:focus { border-color: rgba(74,158,255,0.5); }
+.reg-input::placeholder { color: var(--text-3); }
+textarea.reg-input { resize: vertical; min-height: 64px; }
+
 /* トースト通知 */
 #toast {
   position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -519,6 +548,7 @@ function loadPersistedState(){
       history:      JSON.parse(localStorage.getItem('fact_history')) || ["能登地震の復興状況","ワクチンの安全性は","袴田事件の詳細","円安はいつ終わるか","少子化対策の効果"],
       isPremium:    localStorage.getItem('fact_isPremium') === 'true',
       readAlerts:   JSON.parse(localStorage.getItem('fact_readAlerts')) || [],
+      ghPat:        localStorage.getItem('fact_gh_pat') || '',
     };
   } catch(e){ return {}; }
 }
@@ -529,12 +559,218 @@ function persistState(){
     localStorage.setItem('fact_history',     JSON.stringify(state.history));
     localStorage.setItem('fact_isPremium',   state.isPremium);
     localStorage.setItem('fact_readAlerts',  JSON.stringify(state.readAlerts));
+    localStorage.setItem('fact_gh_pat',      state.ghPat);
   } catch(e){}
+}
+
+// ===== トピック登録 =====
+var regSources = [];
+
+function savePat(){
+  var input = document.getElementById('pat-input');
+  if(!input) return;
+  var val = input.value.trim();
+  if(!val){ showToast('PATを入力してください'); return; }
+  state.ghPat = val;
+  persistState();
+  input.value = '';
+  input.placeholder = '設定済み（変更する場合は入力）';
+  showToast('GitHub PATを保存しました');
+  render();
+}
+
+function openRegister(){
+  regSources = [{org:'',type:'',keyClaim:'',title:'',date:'',url:'',summary:''}];
+  var existing = document.getElementById('reg-overlay');
+  if(existing){ existing.classList.add('show'); _renderRegSources(); return; }
+  document.body.insertAdjacentHTML('beforeend', _buildRegOverlay());
+  _renderRegSources();
+}
+
+function closeRegister(){
+  var el = document.getElementById('reg-overlay');
+  if(el) el.classList.remove('show');
+}
+
+function _buildRegOverlay(){
+  return `<div id="reg-overlay" class="show" onclick="if(event.target===this)closeRegister()">
+  <div id="reg-box">
+    <div style="display:flex;align-items:center;margin-bottom:20px">
+      <span style="font-size:15px;font-weight:700;color:var(--text-1)">📝 新規トピック登録</span>
+      <button onclick="closeRegister()" style="margin-left:auto;background:none;border:none;color:var(--text-2);font-size:24px;cursor:pointer;line-height:1;padding:0 4px">×</button>
+    </div>
+
+    <div class="reg-section">
+      <div style="font-size:11px;font-weight:700;color:var(--brand);margin-bottom:14px;letter-spacing:0.5px">基本情報</div>
+      <label class="reg-label">トピックタイトル<span class="reg-required">*</span></label>
+      <input class="reg-input" id="reg-title" placeholder="例：ホルムズ海峡危機 日本への影響" style="margin-bottom:10px">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div style="flex:1"><label class="reg-label">カテゴリ<span class="reg-required">*</span></label><input class="reg-input" id="reg-cat" placeholder="例：地政学・安保"></div>
+        <div style="flex:1"><label class="reg-label">サブカテゴリ</label><input class="reg-input" id="reg-subcat" placeholder="例：ホルムズ危機"></div>
+      </div>
+      <label class="reg-label">基準日<span class="reg-required">*</span></label>
+      <input class="reg-input" id="reg-date" placeholder="例：2026年4月3日 継続中" style="margin-bottom:10px">
+      <label class="reg-label">サマリー（200字以内）<span class="reg-required">*</span></label>
+      <textarea class="reg-input" id="reg-summary" placeholder="何が起きているか、なぜ重要かを簡潔に。" style="margin-bottom:10px"></textarea>
+      <label class="reg-label">タグ（カンマ区切り、3〜5個）<span class="reg-required">*</span></label>
+      <input class="reg-input" id="reg-tags" placeholder="例：ホルムズ海峡, 原油, イラン, 日本経済">
+    </div>
+
+    <div class="reg-section">
+      <div style="display:flex;align-items:center;margin-bottom:12px">
+        <span style="font-size:11px;font-weight:700;color:var(--brand);letter-spacing:0.5px">ソース情報</span>
+        <span style="font-size:10px;color:var(--text-2);margin-left:6px">2〜8件推奨</span>
+      </div>
+      <div id="reg-sources-container"></div>
+      <button onclick="addRegSource()" style="width:100%;padding:8px;background:#4a9eff11;border:1px dashed #4a9eff44;border-radius:8px;color:#4a9eff;font-size:12px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-top:2px">＋ ソースを追加</button>
+    </div>
+
+    <div class="reg-section" style="border-bottom:none;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--brand);margin-bottom:12px;letter-spacing:0.5px">アラート（任意）</div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:0 0 140px">
+          <label class="reg-label">種類</label>
+          <select class="reg-input" id="reg-alert-type">
+            <option value="">なし</option>
+            <option value="bias">bias（偏向）</option>
+            <option value="paywall">paywall（有料）</option>
+            <option value="old">old（古い情報）</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label class="reg-label">メッセージ</label>
+          <input class="reg-input" id="reg-alert-msg" placeholder="例：一部メディアで偏りがあります">
+        </div>
+      </div>
+    </div>
+
+    <button onclick="submitRegistration()" id="reg-submit-btn" style="width:100%;padding:13px;background:var(--brand);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif">登録申請を送る</button>
+    <div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:8px">送信後、管理者がラベルを付与するとClaude審査→PR生成が始まります</div>
+  </div>
+</div>`;
+}
+
+function _renderRegSources(){
+  var container = document.getElementById('reg-sources-container');
+  if(!container) return;
+  container.innerHTML = regSources.map(function(s, i){
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+        '<span style="font-size:11px;font-weight:700;color:var(--text-2)">ソース ' + (i+1) + '</span>' +
+        (regSources.length > 1 ? '<button onclick="removeRegSource(' + i + ')" style="background:none;border:none;color:var(--text-3);font-size:16px;cursor:pointer;padding:0">×</button>' : '') +
+      '</div>' +
+      '<label class="reg-label">メディア名<span class="reg-required">*</span></label>' +
+      '<input class="reg-input" id="reg-src-' + i + '-org" placeholder="例：NHK NEWS WEB" value="' + escapeHtml(s.org) + '" style="margin-bottom:8px">' +
+      '<label class="reg-label">メディア種別</label>' +
+      '<input class="reg-input" id="reg-src-' + i + '-type" placeholder="公共放送・全国紙・通信社 など" value="' + escapeHtml(s.type) + '" style="margin-bottom:8px">' +
+      '<label class="reg-label">このソースの主張（keyClaim）<span class="reg-required">*</span></label>' +
+      '<textarea class="reg-input" id="reg-src-' + i + '-keyClaim" placeholder="このソースがトピックについて述べていること（1〜2文）" style="min-height:52px;margin-bottom:8px">' + escapeHtml(s.keyClaim) + '</textarea>' +
+      '<label class="reg-label">記事タイトル</label>' +
+      '<input class="reg-input" id="reg-src-' + i + '-title" placeholder="記事タイトル" value="' + escapeHtml(s.title) + '" style="margin-bottom:8px">' +
+      '<div style="display:flex;gap:8px;margin-bottom:8px">' +
+        '<div style="flex:1"><label class="reg-label">記事日付</label><input class="reg-input" id="reg-src-' + i + '-date" placeholder="2026年4月1日" value="' + escapeHtml(s.date) + '"></div>' +
+      '</div>' +
+      '<label class="reg-label">URL</label>' +
+      '<input class="reg-input" id="reg-src-' + i + '-url" placeholder="https://..." value="' + escapeHtml(s.url) + '" style="margin-bottom:8px">' +
+      '<label class="reg-label">記事要約</label>' +
+      '<textarea class="reg-input" id="reg-src-' + i + '-summary" placeholder="50〜100字" style="min-height:52px">' + escapeHtml(s.summary) + '</textarea>' +
+    '</div>';
+  }).join('');
+}
+
+function addRegSource(){
+  _saveRegSourceValues();
+  regSources.push({org:'',type:'',keyClaim:'',title:'',date:'',url:'',summary:''});
+  _renderRegSources();
+}
+
+function removeRegSource(i){
+  _saveRegSourceValues();
+  regSources.splice(i, 1);
+  _renderRegSources();
+}
+
+function _saveRegSourceValues(){
+  regSources.forEach(function(s, i){
+    var g = function(f){ var el=document.getElementById('reg-src-'+i+'-'+f); return el?el.value:''; };
+    s.org=g('org'); s.type=g('type'); s.keyClaim=g('keyClaim');
+    s.title=g('title'); s.date=g('date'); s.url=g('url'); s.summary=g('summary');
+  });
+}
+
+function _val(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
+
+function submitRegistration(){
+  var title   = _val('reg-title');
+  var cat     = _val('reg-cat');
+  var date    = _val('reg-date');
+  var summary = _val('reg-summary');
+  var tags    = _val('reg-tags');
+  if(!title||!cat||!date||!summary||!tags){
+    showToast('必須項目（タイトル・カテゴリ・基準日・サマリー・タグ）を入力してください');
+    return;
+  }
+  _saveRegSourceValues();
+  var validSources = regSources.filter(function(s){ return s.org && s.keyClaim; });
+  if(validSources.length === 0){
+    showToast('ソースを最低1件入力してください（メディア名とkeyClaimは必須）');
+    return;
+  }
+  var btn = document.getElementById('reg-submit-btn');
+  if(btn){ btn.disabled=true; btn.textContent='送信中…'; }
+  var issueBody = _formatRegIssueBody();
+  fetch('https://api.github.com/repos/shuichi0725-cmyk/fact-prototype/issues', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + state.ghPat,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ title: '[TOPIC] ' + title, body: issueBody }),
+  })
+  .then(function(res){
+    if(!res.ok) return res.json().then(function(e){ throw new Error(e.message||res.status); });
+    return res.json();
+  })
+  .then(function(issue){
+    closeRegister();
+    showToast('申請を送信しました（Issue #' + issue.number + '）。管理者がラベルを付与すると審査が始まります。', 5000);
+  })
+  .catch(function(e){
+    showToast('送信失敗: ' + e.message, 4000);
+    if(btn){ btn.disabled=false; btn.textContent='登録申請を送る'; }
+  });
+}
+
+function _formatRegIssueBody(){
+  var subcat     = _val('reg-subcat');
+  var summary    = _val('reg-summary');
+  var tags       = _val('reg-tags');
+  var alertType  = _val('reg-alert-type');
+  var alertMsg   = _val('reg-alert-msg');
+  var sourcesStr = regSources.filter(function(s){ return s.org; }).map(function(s){
+    return 'org: ' + s.org + '\n' +
+      'type: ' + (s.type||'') + '\n' +
+      'keyClaim: ' + (s.keyClaim||'') + '\n' +
+      'article_title: ' + (s.title||'') + '\n' +
+      'article_date: ' + (s.date||'') + '\n' +
+      'article_url: ' + (s.url||'') + '\n' +
+      'article_summary: ' + (s.summary||'');
+  }).join('\n---\n');
+  var alertStr = (alertType && alertMsg) ? 'type: ' + alertType + '\nmsg: ' + alertMsg : '_No response_';
+  return '### トピックタイトル\n\n' + _val('reg-title') + '\n\n' +
+    '### カテゴリ\n\n' + _val('reg-cat') + '\n\n' +
+    '### サブカテゴリ\n\n' + (subcat||'_No response_') + '\n\n' +
+    '### 基準日\n\n' + _val('reg-date') + '\n\n' +
+    '### サマリー（200字以内）\n\n' + summary + '\n\n' +
+    '### タグ（カンマ区切り、3〜5個）\n\n' + tags + '\n\n' +
+    '### ソース情報\n\n' + sourcesStr + '\n\n' +
+    '### アラート（任意）\n\n' + alertStr;
 }
 
 // ===== 状態 =====
 const _persisted = loadPersistedState();
-let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null };
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'' };
 
 
 // カラーパレット定義
@@ -2048,6 +2284,22 @@ function renderSettings(){
     <div class="section-title">🛒 Amazonで探す</div>
     <div class="card" style="padding:14px">
       ${amazonSearchHTML('settings')}
+    </div>
+  </div>
+
+  <div style="margin-top:20px">
+    <div class="section-title">🔐 管理者ツール</div>
+    <div class="card">
+      <div style="font-size:12px;color:var(--text-2);line-height:1.6;margin-bottom:12px">GitHub PAT（Personal Access Token）を設定すると、このアプリから直接トピック登録申請を送ることができます。</div>
+      <label class="reg-label" style="font-size:11px;color:var(--text-2);letter-spacing:0.5px;display:block;margin-bottom:5px">GitHub Personal Access Token</label>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="password" id="pat-input" class="search-input" style="flex:1;font-size:13px" placeholder="${state.ghPat?'設定済み（変更する場合は入力）':'ghp_xxxx...'}" value="">
+        <button onclick="savePat()" class="search-btn" style="white-space:nowrap">保存</button>
+      </div>
+      ${state.ghPat
+        ? `<button onclick="openRegister()" style="width:100%;padding:12px;background:#4CAF5022;border:1px solid #4CAF5055;border-radius:10px;color:#4CAF50;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif">📝 新規トピック登録</button>`
+        : `<button disabled style="width:100%;padding:12px;background:#1a2a4a;border:1px solid #2a3a5a;border-radius:10px;color:#5a6a80;font-size:13px;font-weight:700;cursor:not-allowed;font-family:'Noto Sans JP',sans-serif">📝 新規トピック登録（PAT未設定）</button>`
+      }
     </div>
   </div>
   </div>`;
