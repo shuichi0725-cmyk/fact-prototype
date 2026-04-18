@@ -369,6 +369,15 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
   </div>
 </div>
 
+<button id="fab-register" onclick="openRegister()" aria-label="新規トピックを投稿" style="
+  position:fixed;right:16px;bottom:72px;z-index:150;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--brand);border:none;cursor:pointer;
+  box-shadow:0 4px 20px rgba(74,158,255,0.5);
+  font-size:22px;display:flex;align-items:center;justify-content:center;
+  transition:transform 0.15s,box-shadow 0.15s;
+">📝</button>
+
 <script>
 // ===== データ =====
 // カテゴリ定義（id/label/icon のみ）。count/alert は起動fetch後に FACT_TOPICS から計算して付与される
