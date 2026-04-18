@@ -312,6 +312,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 #content.page-enter { animation: pageIn 0.18s ease-out; }
 /* スケルトンUI */
 @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+@keyframes spin { to { transform: rotate(360deg); } }
 .skel { background:linear-gradient(90deg,#1a2a4a 25%,#253550 50%,#1a2a4a 75%); background-size:400px 100%; animation:shimmer 1.4s infinite linear; border-radius:4px; }
 
 /* prefers-reduced-motion (article checklist 必須項目) */
@@ -559,6 +560,7 @@ function loadPersistedState(){
       readAlerts:   JSON.parse(localStorage.getItem('fact_readAlerts')) || [],
       ghPat:        localStorage.getItem('fact_gh_pat') || '',
       conceptSeen:  localStorage.getItem('fact_concept_seen') === 'true',
+      anthropicKey: localStorage.getItem('fact_anthropic_key') || '',
     };
   } catch(e){ return {}; }
 }
@@ -569,8 +571,9 @@ function persistState(){
     localStorage.setItem('fact_history',     JSON.stringify(state.history));
     localStorage.setItem('fact_isPremium',   state.isPremium);
     localStorage.setItem('fact_readAlerts',  JSON.stringify(state.readAlerts));
-    localStorage.setItem('fact_gh_pat',      state.ghPat);
-    localStorage.setItem('fact_concept_seen', state.conceptSeen);
+    localStorage.setItem('fact_gh_pat',        state.ghPat);
+    localStorage.setItem('fact_concept_seen',  state.conceptSeen);
+    localStorage.setItem('fact_anthropic_key', state.anthropicKey);
   } catch(e){}
 }
 
@@ -661,9 +664,11 @@ function _regHeader(){
 }
 
 function _regBody(){
-  if(_regState.phase === 'input')    return _regInputHTML();
-  if(_regState.phase === 'found')    return _regFoundHTML();
-  if(_regState.phase === 'notfound') return _regNotFoundHTML();
+  if(_regState.phase === 'input')      return _regInputHTML();
+  if(_regState.phase === 'found')      return _regFoundHTML();
+  if(_regState.phase === 'notfound')   return _regNotFoundHTML();
+  if(_regState.phase === 'generating') return _regGeneratingHTML();
+  if(_regState.phase === 'preview')    return _regPreviewHTML();
   return '';
 }
 
@@ -712,19 +717,150 @@ function _regFoundHTML(){
 }
 
 function _regNotFoundHTML(){
-  return '<div style="background:#FF980011;border:1px solid #FF980033;border-radius:10px;padding:12px;margin-bottom:16px">' +
-    '<div style="font-size:12px;font-weight:700;color:#FF9800;margin-bottom:4px">📋 まだFACT記録がありません</div>' +
-    '<div style="font-size:13px;color:var(--text-1);font-weight:600">「' + escapeHtml(_regState.keywords) + '」</div>' +
+  var kw = escapeHtml(_regState.keywords);
+  var googleUrl = 'https://www.google.com/search?q=' + encodeURIComponent(_regState.keywords);
+  var savedKey = state.anthropicKey ? '●'.repeat(Math.min(state.anthropicKey.length, 20)) : '';
+  return '<div style="background:#FF980011;border:1px solid #FF980033;border-radius:10px;padding:12px;margin-bottom:14px">' +
+    '<div style="font-size:11px;font-weight:700;color:#FF9800;margin-bottom:3px">📋 まだFACT記録がありません</div>' +
+    '<div style="font-size:14px;color:var(--text-1);font-weight:700">「' + kw + '」</div>' +
     '</div>' +
-    '<div style="font-size:13px;color:var(--text-2);line-height:1.8;margin-bottom:16px">' +
-    '登録申請を送ると、編集者とAIが内容を確認・構造化します。<br>詳細情報の入力は不要です。</div>' +
-    '<label class="reg-label" style="display:block;margin-bottom:5px">トピックの概要（任意・1〜2文）</label>' +
-    '<textarea class="reg-input" id="reg-context" placeholder="例：ホルムズ海峡の緊張が日本の原油輸入に影響している問題" style="min-height:68px;margin-bottom:12px"></textarea>' +
-    '<label class="reg-label" style="display:block;margin-bottom:5px">参考になる記事のURL（任意）</label>' +
-    '<input class="reg-input" id="reg-ref-url" placeholder="https://..." style="margin-bottom:18px">' +
-    '<button onclick="submitSimpleRegistration()" id="reg-submit-btn" style="width:100%;padding:13px;background:var(--brand);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">登録申請を送る</button>' +
-    '<div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:8px">編集者が確認後、FACT記録として公開されます</div>' +
-    '<button onclick="_regState.phase=\'input\';_renderReg()" style="width:100%;margin-top:8px;padding:8px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← キーワードを変えて探す</button>';
+    // ① Web検索
+    '<a href="' + googleUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface-3,#162030);border:1px solid var(--border);border-radius:10px;text-decoration:none;margin-bottom:14px">' +
+    '<span style="font-size:18px">🔍</span>' +
+    '<div>' +
+    '<div style="font-size:12px;font-weight:700;color:var(--text-1)">「' + kw + '」をWebで調べる</div>' +
+    '<div style="font-size:10px;color:var(--text-2);margin-top:1px">Google検索で該当事件を確認できます</div>' +
+    '</div>' +
+    '<span style="margin-left:auto;color:var(--text-3);font-size:14px">↗</span>' +
+    '</a>' +
+    // ② トークン注意喚起
+    '<div style="background:#FF444411;border:1px solid #FF444433;border-radius:10px;padding:10px 12px;margin-bottom:10px">' +
+    '<div style="font-size:11px;font-weight:700;color:#FF6B6B;margin-bottom:3px">⚠️ APIトークン使用について</div>' +
+    '<div style="font-size:11px;color:var(--text-2);line-height:1.7">AI自動生成にはAnthropicのAPIキーを使用します。<br>使用量・料金は<strong style="color:var(--text-1)">あなたのアカウント</strong>に課金されます。</div>' +
+    '</div>' +
+    // ③ プライバシー告知
+    '<div style="background:#4a9eff11;border:1px solid #4a9eff33;border-radius:10px;padding:10px 12px;margin-bottom:14px">' +
+    '<div style="font-size:11px;font-weight:700;color:var(--brand);margin-bottom:3px">🔒 プライバシーについて</div>' +
+    '<div style="font-size:11px;color:var(--text-2);line-height:1.7"><strong style="color:var(--text-1)">誰が申請したかは公開されません。</strong><br>ただし作成された記録の内容は全ユーザーが閲覧できます。</div>' +
+    '</div>' +
+    // ④ AI生成エリア
+    '<label class="reg-label" style="display:block;margin-bottom:5px">Anthropic APIキー</label>' +
+    '<input class="reg-input" id="reg-api-key" type="password" placeholder="sk-ant-..." value="' + savedKey + '" ' +
+    'onfocus="if(this.value.includes(\'●\'))this.value=\'\'" style="margin-bottom:10px">' +
+    '<button onclick="generateWithAI()" style="width:100%;padding:13px;background:linear-gradient(135deg,#4a9eff,#7b5cff);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;margin-bottom:10px">' +
+    '✨ AIで記録を自動生成</button>' +
+    '<div style="display:flex;gap:8px;margin-bottom:4px">' +
+    '<button onclick="_manualApply()" style="flex:1;padding:9px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-2);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">📝 手動で申請</button>' +
+    '<button onclick="_regState.phase=\'input\';_renderReg()" style="flex:1;padding:9px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 検索に戻る</button>' +
+    '</div>';
+}
+
+function _manualApply(){
+  var issueTitle = '[TOPIC申請] ' + _regState.keywords;
+  var issueBody  = '### キーワード\n\n' + _regState.keywords;
+  var url = 'https://github.com/shuichi0725-cmyk/fact-prototype/issues/new?title=' +
+    encodeURIComponent(issueTitle) + '&body=' + encodeURIComponent(issueBody);
+  window.open(url, '_blank');
+  closeRegister();
+  showToast('GitHubのページで「Submit new issue」を押してください', 5000);
+}
+
+function _regGeneratingHTML(){
+  return '<div style="text-align:center;padding:32px 0">' +
+    '<div style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div>' +
+    '<div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:6px">AIが記録を生成中…</div>' +
+    '<div style="font-size:12px;color:var(--text-2)">「' + escapeHtml(_regState.keywords) + '」の情報を構造化しています</div>' +
+    '</div>';
+}
+
+function _regPreviewHTML(){
+  var g = _regState.generated || {};
+  var m = g.meta_entry || {};
+  var tags = (m.tags||[]).map(function(t){ return '<span style="display:inline-block;padding:2px 7px;background:var(--surface-3,#162030);border:1px solid var(--border);border-radius:12px;font-size:10px;color:var(--text-2);margin:2px">' + escapeHtml(t) + '</span>'; }).join('');
+  return '<div style="font-size:11px;font-weight:700;color:#4CAF50;margin-bottom:10px">✅ AI生成プレビュー</div>' +
+    '<div style="background:var(--surface-3,#162030);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px">' +
+    '<div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:4px">' + escapeHtml(m.title||'') + '</div>' +
+    '<div style="font-size:11px;color:var(--text-2);margin-bottom:6px">' + escapeHtml(m.cat||'') + (m.subcat?' / '+escapeHtml(m.subcat):'') + '</div>' +
+    '<div style="font-size:12px;color:var(--text-1);line-height:1.7;margin-bottom:8px">' + escapeHtml(m.summary||'') + '</div>' +
+    '<div style="margin-bottom:4px">' + tags + '</div>' +
+    '</div>' +
+    '<div style="font-size:10px;color:var(--text-3);line-height:1.6;margin-bottom:14px;padding:8px;background:#FF980011;border-radius:8px">' +
+    '⚠️ AIが生成した内容は参考情報です。ソース検証は編集者が行います。</div>' +
+    '<button onclick="submitAIGenerated()" id="reg-submit-btn" style="width:100%;padding:13px;background:var(--brand);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;margin-bottom:8px">GitHub Issueとして申請</button>' +
+    '<button onclick="_regState.phase=\'notfound\';_renderReg()" style="width:100%;padding:9px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← やり直す</button>';
+}
+
+async function generateWithAI(){
+  var keyInput = document.getElementById('reg-api-key');
+  var apiKey = (keyInput && !keyInput.value.includes('●')) ? keyInput.value.trim() : state.anthropicKey;
+  if(!apiKey){ showToast('Anthropic APIキーを入力してください'); return; }
+  state.anthropicKey = apiKey;
+  persistState();
+  _regState.phase = 'generating';
+  _renderReg();
+
+  var prompt = 'あなたはFACTというファクトチェックサービスのコンテンツ編集者です。\n' +
+    '以下のキーワードに関連するトピック記録を生成してください。\n\n' +
+    'キーワード: ' + _regState.keywords + '\n\n' +
+    '以下のJSON形式のみを返してください（マークダウン不要）:\n' +
+    '{\n' +
+    '  "topic_id": "snake_case英語のID（例: hormuz_crisis）",\n' +
+    '  "meta_entry": {\n' +
+    '    "id": "topic_idと同じ",\n' +
+    '    "title": "トピックタイトル（20〜40字）",\n' +
+    '    "cat": "カテゴリ（地政学・安保/経済・産業/司法・裁判/科学・医療/社会/政治）",\n' +
+    '    "subcat": "サブカテゴリ",\n' +
+    '    "score": 0,\n' +
+    '    "sourceCount": 0,\n' +
+    '    "date": "推定される基準日",\n' +
+    '    "summary": "トピックの概要（200字以内）",\n' +
+    '    "tags": ["タグ1","タグ2","タグ3"],\n' +
+    '    "alert": null\n' +
+    '  },\n' +
+    '  "detail_sources": []\n' +
+    '}';
+
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-7',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error((data.error && data.error.message) || res.status);
+    var text = data.content[0].text.trim();
+    var match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    _regState.generated = JSON.parse(match ? match[1] : text);
+    _regState.phase = 'preview';
+    _renderReg();
+  } catch(e) {
+    _regState.phase = 'notfound';
+    _renderReg();
+    showToast('AI生成エラー: ' + e.message, 5000);
+  }
+}
+
+function submitAIGenerated(){
+  var g = _regState.generated || {};
+  var m = g.meta_entry || {};
+  var issueTitle = '[TOPIC申請] ' + (m.title || _regState.keywords);
+  var issueBody = '### キーワード\n\n' + _regState.keywords + '\n\n' +
+    '### AI生成データ\n\n```json\n' + JSON.stringify(g, null, 2) + '\n```\n\n' +
+    '> AIが自動生成したドラフトです。編集者がソース検証を行います。';
+  var url = 'https://github.com/shuichi0725-cmyk/fact-prototype/issues/new?title=' +
+    encodeURIComponent(issueTitle) + '&body=' + encodeURIComponent(issueBody);
+  window.open(url, '_blank');
+  closeRegister();
+  showToast('GitHubのページで「Submit new issue」を押してください', 5000);
 }
 
 function submitSimpleRegistration(){
@@ -846,7 +982,7 @@ function _formatRegIssueBody(){
 
 // ===== 状態 =====
 const _persisted = loadPersistedState();
-let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'', conceptSeen:_persisted.conceptSeen||false };
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'', conceptSeen:_persisted.conceptSeen||false, anthropicKey:_persisted.anthropicKey||'' };
 
 
 // カラーパレット定義
