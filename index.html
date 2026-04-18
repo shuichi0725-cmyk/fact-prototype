@@ -329,7 +329,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 <div id="app">
   <header id="header" role="banner">
     <span class="logo">FACT</span>
-    <span class="logo-sub">VERIFIED INTELLIGENCE</span>
+    <span class="logo-sub">OPEN VERIFICATION</span>
     <span class="sensitivity-badge" id="sens-badge">感度 Lv.3<span id="color-mode-badge" style="color:#666"></span></span>
   </header>
   <main id="content" role="main" aria-live="polite" aria-atomic="false"><div style="padding:60px 0;text-align:center;color:#3a5a7a;font-size:13px">読み込み中...</div></main>
@@ -549,6 +549,7 @@ function loadPersistedState(){
       isPremium:    localStorage.getItem('fact_isPremium') === 'true',
       readAlerts:   JSON.parse(localStorage.getItem('fact_readAlerts')) || [],
       ghPat:        localStorage.getItem('fact_gh_pat') || '',
+      conceptSeen:  localStorage.getItem('fact_concept_seen') === 'true',
     };
   } catch(e){ return {}; }
 }
@@ -560,11 +561,53 @@ function persistState(){
     localStorage.setItem('fact_isPremium',   state.isPremium);
     localStorage.setItem('fact_readAlerts',  JSON.stringify(state.readAlerts));
     localStorage.setItem('fact_gh_pat',      state.ghPat);
+    localStorage.setItem('fact_concept_seen', state.conceptSeen);
   } catch(e){}
 }
 
 // ===== トピック登録 =====
 var regSources = [];
+
+function dismissConcept(){
+  state.conceptSeen = true;
+  persistState();
+  var banner = document.querySelector('[onclick="openAbout()"]');
+  if(banner) banner.style.display = 'none';
+}
+
+function openAbout(){
+  state.conceptSeen = true;
+  persistState();
+  var existing = document.getElementById('about-overlay');
+  if(existing){ existing.classList.add('show'); return; }
+  document.body.insertAdjacentHTML('beforeend',
+    '<div id="about-overlay" class="show" onclick="if(event.target===this)closeAbout()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;justify-content:center;align-items:flex-start;padding:16px;overflow-y:auto">' +
+    '<div style="background:var(--surface-2);border:1px solid var(--border-2);border-radius:16px;padding:24px;width:100%;max-width:480px;margin-bottom:80px;animation:fadeUp 0.25s ease">' +
+    '<div style="display:flex;align-items:center;margin-bottom:20px">' +
+    '<span style="font-size:22px;font-weight:900;color:var(--brand);font-family:monospace;letter-spacing:2px">FACT</span>' +
+    '<span style="font-size:10px;color:var(--brand);opacity:0.6;margin-left:8px;letter-spacing:1px">OPEN VERIFICATION</span>' +
+    '<button onclick="closeAbout()" style="margin-left:auto;background:none;border:none;color:var(--text-2);font-size:24px;cursor:pointer;line-height:1;padding:0 4px">×</button>' +
+    '</div>' +
+    '<div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:12px;line-height:1.6">「答えを出すのではなく、<br>考えるきっかけを作る」</div>' +
+    '<div style="font-size:13px;color:var(--text-2);line-height:1.9;margin-bottom:20px">' +
+    'FACTは情報検証プラットフォームです。ニュースや話題のトピックを誰でも投稿でき、編集者とAIが複数のソースを整理し、信頼度スコア・時系列・多角的視点・ソース一覧を構造化します。' +
+    '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">' +
+    '<div style="display:flex;align-items:flex-start;gap:10px"><span style="font-size:20px">📰</span><div><div style="font-size:12px;font-weight:700;color:var(--text-1);margin-bottom:2px">SNSとは逆の設計</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">感情的な拡散ではなく、「疑問→検証→理解」の流れを作ります。</div></div></div>' +
+    '<div style="display:flex;align-items:flex-start;gap:10px"><span style="font-size:20px">🔍</span><div><div style="font-size:12px;font-weight:700;color:var(--text-1);margin-bottom:2px">FACTは断定しない</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">AIは判断の材料を整えます。最終的に考えるのは、あなた自身です。</div></div></div>' +
+    '<div style="display:flex;align-items:flex-start;gap:10px"><span style="font-size:20px">📝</span><div><div style="font-size:12px;font-weight:700;color:var(--text-1);margin-bottom:2px">誰でも投稿できる</div><div style="font-size:12px;color:var(--text-2);line-height:1.6">ユーザーがトリガーになり、編集者とAIがコンテンツを構造化します。</div></div></div>' +
+    '</div>' +
+    '<button onclick="openRegister();closeAbout()" style="width:100%;padding:12px;background:#4a9eff22;border:1px solid #4a9eff44;border-radius:10px;color:#4a9eff;font-size:13px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">📝 トピックを投稿する</button>' +
+    '</div></div>'
+  );
+  document.getElementById('about-overlay').style.display = 'flex';
+}
+
+function closeAbout(){
+  var el = document.getElementById('about-overlay');
+  if(el) el.classList.remove('show');
+  if(el) el.style.display = 'none';
+}
 
 function savePat(){
   var input = document.getElementById('pat-input');
@@ -716,6 +759,16 @@ function submitRegistration(){
     showToast('ソースを最低1件入力してください（メディア名とkeyClaimは必須）');
     return;
   }
+  // PAT 未設定の場合は GitHub Issue 作成ページをブラウザで開く
+  if(!state.ghPat){
+    var ghUrl = 'https://github.com/shuichi0725-cmyk/fact-prototype/issues/new?template=topic_registration.yml&title=' +
+      encodeURIComponent('[TOPIC] ' + title);
+    window.open(ghUrl, '_blank');
+    closeRegister();
+    showToast('GitHubのIssue作成ページを開きました。内容を貼り付けて送信してください。', 5000);
+    return;
+  }
+
   var btn = document.getElementById('reg-submit-btn');
   if(btn){ btn.disabled=true; btn.textContent='送信中…'; }
   var issueBody = _formatRegIssueBody();
@@ -770,7 +823,7 @@ function _formatRegIssueBody(){
 
 // ===== 状態 =====
 const _persisted = loadPersistedState();
-let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'' };
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'', conceptSeen:_persisted.conceptSeen||false };
 
 
 // カラーパレット定義
@@ -788,7 +841,7 @@ function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(
 
 // ===== ユーティリティ =====
 function scoreColor(s){ const p=P(); return s>=90?p.high:s>=70?p.mid:s>=50?p.warn:p.danger; }
-function scoreLabel(s){ return s>=90?"高信頼":s>=70?"信頼":s>=50?"要確認":"注意"; }
+function scoreLabel(s){ return s>=90?"確証度 高":s>=70?"確証度 中":s>=50?"確証度 低":"未検証"; }
 function alertColor(t){ const p=P(); return {bias:p.bias,fact:p.fact,sns:p.sns,old:p.old,conflict:p.conflict}[t]||p.warn; }
 function alertIcon(t){  return {bias:"📰",fact:"⚠️",sns:"📣",old:"🕐",conflict:"⚖️"}[t]||"⚠️"; }
 function typeClass(t){ return {公共放送:"tag-nhk",主要紙:"tag-paper",政府機関:"tag-gov",学術:"tag-academic"}[t]||""; }
@@ -926,7 +979,18 @@ function renderHome(){
       <span style="font-size:10px;color:${state.homeTab===t.id?p.brand:'#8899b0'};font-weight:${state.homeTab===t.id?700:400};letter-spacing:0.3px">${t.label}</span>
     </button>`).join('');
 
+  const conceptBanner = !state.conceptSeen ? `
+  <div onclick="openAbout()" style="margin:14px 14px 0;padding:10px 14px;background:#4a9eff11;border:1px solid #4a9eff33;border-radius:10px;display:flex;align-items:center;gap:10px;cursor:pointer">
+    <span style="font-size:18px;flex-shrink:0">📋</span>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:700;color:#4a9eff;margin-bottom:2px">FACTは答えを出しません</div>
+      <div style="font-size:11px;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">複数のソースから「考えるきっかけ」を整理します　→ 詳しく</div>
+    </div>
+    <button onclick="event.stopPropagation();dismissConcept()" style="background:none;border:none;color:var(--text-3);font-size:16px;cursor:pointer;padding:0;flex-shrink:0">×</button>
+  </div>` : '';
+
   return `
+  ${conceptBanner}
   <div style="padding:14px 14px 0;">
     <div class="search-box">
       <input class="search-input" id="home-search" placeholder="今日、何を知りたいですか？" value="${state.searchQuery}">
@@ -1903,7 +1967,16 @@ function renderPerspectivesTab(){
       '</div>';
   }).join('');
 
-  return disclaimer + cards +
+  var reflection = items.length > 0 ?
+    '<div style="margin-top:16px;padding:14px 16px;background:#4a9eff08;border:1px solid #4a9eff22;border-radius:12px">' +
+    '<div style="font-size:12px;font-weight:700;color:var(--brand);margin-bottom:8px">💭 考えてみよう</div>' +
+    '<div style="font-size:12px;color:var(--text-2);line-height:1.8">' +
+    'どの視点が最も説得力があると感じましたか？<br>' +
+    'このトピックについて、さらに調べてみたい点はありますか？' +
+    '</div>' +
+    '</div>' : '';
+
+  return disclaimer + cards + reflection +
     '<div style="margin-top:12px;padding:10px;background:#0c1525;border:1px solid #1a2a4a;border-radius:10px;text-align:center">' +
     '<div style="font-size:11px;color:var(--text-2)">他の立場のソースはソースタブで確認できます</div>' +
     '<button onclick="state.searchTab=2;render()" style="margin-top:6px;font-size:11px;color:' + p.brand + ';background:transparent;border:none;cursor:pointer;font-family:sans-serif">📰 ソースタブを開く →</button>' +
