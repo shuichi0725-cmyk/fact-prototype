@@ -575,7 +575,7 @@ function persistState(){
 }
 
 // ===== トピック登録 =====
-var regSources = [];
+var _regState = { phase:'input', keywords:'' };
 
 function dismissConcept(){
   state.conceptSeen = true;
@@ -614,8 +614,7 @@ function openAbout(){
 
 function closeAbout(){
   var el = document.getElementById('about-overlay');
-  if(el) el.classList.remove('show');
-  if(el) el.style.display = 'none';
+  if(el){ el.classList.remove('show'); el.style.display = 'none'; }
 }
 
 function savePat(){
@@ -631,12 +630,16 @@ function savePat(){
   render();
 }
 
+// ── 登録フォーム（3フェーズ）───────────────────────────────
 function openRegister(){
-  regSources = [{org:'',type:'',keyClaim:'',title:'',date:'',url:'',summary:''}];
+  _regState = { phase:'input', keywords:'' };
   var existing = document.getElementById('reg-overlay');
-  if(existing){ existing.classList.add('show'); _renderRegSources(); return; }
-  document.body.insertAdjacentHTML('beforeend', _buildRegOverlay());
-  _renderRegSources();
+  if(existing){ existing.classList.add('show'); _renderReg(); return; }
+  document.body.insertAdjacentHTML('beforeend',
+    '<div id="reg-overlay" class="show" onclick="if(event.target===this)closeRegister()">' +
+    '<div id="reg-box"></div></div>'
+  );
+  _renderReg();
 }
 
 function closeRegister(){
@@ -644,110 +647,121 @@ function closeRegister(){
   if(el) el.classList.remove('show');
 }
 
-function _buildRegOverlay(){
-  return `<div id="reg-overlay" class="show" onclick="if(event.target===this)closeRegister()">
-  <div id="reg-box">
-    <div style="display:flex;align-items:center;margin-bottom:20px">
-      <span style="font-size:15px;font-weight:700;color:var(--text-1)">📝 新規トピック登録</span>
-      <button onclick="closeRegister()" style="margin-left:auto;background:none;border:none;color:var(--text-2);font-size:24px;cursor:pointer;line-height:1;padding:0 4px">×</button>
-    </div>
-
-    <div class="reg-section">
-      <div style="font-size:11px;font-weight:700;color:var(--brand);margin-bottom:14px;letter-spacing:0.5px">基本情報</div>
-      <label class="reg-label">トピックタイトル<span class="reg-required">*</span></label>
-      <input class="reg-input" id="reg-title" placeholder="例：ホルムズ海峡危機 日本への影響" style="margin-bottom:10px">
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <div style="flex:1"><label class="reg-label">カテゴリ<span class="reg-required">*</span></label><input class="reg-input" id="reg-cat" placeholder="例：地政学・安保"></div>
-        <div style="flex:1"><label class="reg-label">サブカテゴリ</label><input class="reg-input" id="reg-subcat" placeholder="例：ホルムズ危機"></div>
-      </div>
-      <label class="reg-label">基準日<span class="reg-required">*</span></label>
-      <input class="reg-input" id="reg-date" placeholder="例：2026年4月3日 継続中" style="margin-bottom:10px">
-      <label class="reg-label">サマリー（200字以内）<span class="reg-required">*</span></label>
-      <textarea class="reg-input" id="reg-summary" placeholder="何が起きているか、なぜ重要かを簡潔に。" style="margin-bottom:10px"></textarea>
-      <label class="reg-label">タグ（カンマ区切り、3〜5個）<span class="reg-required">*</span></label>
-      <input class="reg-input" id="reg-tags" placeholder="例：ホルムズ海峡, 原油, イラン, 日本経済">
-    </div>
-
-    <div class="reg-section">
-      <div style="display:flex;align-items:center;margin-bottom:12px">
-        <span style="font-size:11px;font-weight:700;color:var(--brand);letter-spacing:0.5px">ソース情報</span>
-        <span style="font-size:10px;color:var(--text-2);margin-left:6px">2〜8件推奨</span>
-      </div>
-      <div id="reg-sources-container"></div>
-      <button onclick="addRegSource()" style="width:100%;padding:8px;background:#4a9eff11;border:1px dashed #4a9eff44;border-radius:8px;color:#4a9eff;font-size:12px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-top:2px">＋ ソースを追加</button>
-    </div>
-
-    <div class="reg-section" style="border-bottom:none;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--brand);margin-bottom:12px;letter-spacing:0.5px">アラート（任意）</div>
-      <div style="display:flex;gap:8px">
-        <div style="flex:0 0 140px">
-          <label class="reg-label">種類</label>
-          <select class="reg-input" id="reg-alert-type">
-            <option value="">なし</option>
-            <option value="bias">bias（偏向）</option>
-            <option value="paywall">paywall（有料）</option>
-            <option value="old">old（古い情報）</option>
-          </select>
-        </div>
-        <div style="flex:1">
-          <label class="reg-label">メッセージ</label>
-          <input class="reg-input" id="reg-alert-msg" placeholder="例：一部メディアで偏りがあります">
-        </div>
-      </div>
-    </div>
-
-    <button onclick="submitRegistration()" id="reg-submit-btn" style="width:100%;padding:13px;background:var(--brand);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif">登録申請を送る</button>
-    <div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:8px">送信後、管理者がラベルを付与するとClaude審査→PR生成が始まります</div>
-  </div>
-</div>`;
+function _renderReg(){
+  var box = document.getElementById('reg-box');
+  if(!box) return;
+  box.innerHTML = _regHeader() + _regBody();
 }
 
-function _renderRegSources(){
-  var container = document.getElementById('reg-sources-container');
-  if(!container) return;
-  container.innerHTML = regSources.map(function(s, i){
-    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
-        '<span style="font-size:11px;font-weight:700;color:var(--text-2)">ソース ' + (i+1) + '</span>' +
-        (regSources.length > 1 ? '<button onclick="removeRegSource(' + i + ')" style="background:none;border:none;color:var(--text-3);font-size:16px;cursor:pointer;padding:0">×</button>' : '') +
-      '</div>' +
-      '<label class="reg-label">メディア名<span class="reg-required">*</span></label>' +
-      '<input class="reg-input" id="reg-src-' + i + '-org" placeholder="例：NHK NEWS WEB" value="' + escapeHtml(s.org) + '" style="margin-bottom:8px">' +
-      '<label class="reg-label">メディア種別</label>' +
-      '<input class="reg-input" id="reg-src-' + i + '-type" placeholder="公共放送・全国紙・通信社 など" value="' + escapeHtml(s.type) + '" style="margin-bottom:8px">' +
-      '<label class="reg-label">このソースの主張（keyClaim）<span class="reg-required">*</span></label>' +
-      '<textarea class="reg-input" id="reg-src-' + i + '-keyClaim" placeholder="このソースがトピックについて述べていること（1〜2文）" style="min-height:52px;margin-bottom:8px">' + escapeHtml(s.keyClaim) + '</textarea>' +
-      '<label class="reg-label">記事タイトル</label>' +
-      '<input class="reg-input" id="reg-src-' + i + '-title" placeholder="記事タイトル" value="' + escapeHtml(s.title) + '" style="margin-bottom:8px">' +
-      '<div style="display:flex;gap:8px;margin-bottom:8px">' +
-        '<div style="flex:1"><label class="reg-label">記事日付</label><input class="reg-input" id="reg-src-' + i + '-date" placeholder="2026年4月1日" value="' + escapeHtml(s.date) + '"></div>' +
-      '</div>' +
-      '<label class="reg-label">URL</label>' +
-      '<input class="reg-input" id="reg-src-' + i + '-url" placeholder="https://..." value="' + escapeHtml(s.url) + '" style="margin-bottom:8px">' +
-      '<label class="reg-label">記事要約</label>' +
-      '<textarea class="reg-input" id="reg-src-' + i + '-summary" placeholder="50〜100字" style="min-height:52px">' + escapeHtml(s.summary) + '</textarea>' +
+function _regHeader(){
+  return '<div style="display:flex;align-items:center;margin-bottom:20px">' +
+    '<span style="font-size:15px;font-weight:700;color:var(--text-1)">📝 FACTに投稿する</span>' +
+    '<button onclick="closeRegister()" style="margin-left:auto;background:none;border:none;color:var(--text-2);font-size:24px;cursor:pointer;line-height:1;padding:0 4px">×</button>' +
     '</div>';
+}
+
+function _regBody(){
+  if(_regState.phase === 'input')    return _regInputHTML();
+  if(_regState.phase === 'found')    return _regFoundHTML();
+  if(_regState.phase === 'notfound') return _regNotFoundHTML();
+  return '';
+}
+
+function _regInputHTML(){
+  return '<div style="font-size:13px;color:var(--text-2);line-height:1.8;margin-bottom:18px">' +
+    '調べたいニュースや出来事のキーワードを入力してください。<br>' +
+    'すでにFACT記録があれば表示します。</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:8px">' +
+    '<input class="reg-input" id="reg-kw" placeholder="例: ホルムズ海峡 原油 日本" style="flex:1" ' +
+    'onkeydown="if(event.key===\'Enter\')searchRegTopic()" autofocus>' +
+    '<button onclick="searchRegTopic()" style="padding:9px 16px;background:var(--brand);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:\'Noto Sans JP\',sans-serif">検索</button>' +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--text-3)">スペース区切りで複数キーワード入力可（1つでも可）</div>';
+}
+
+function searchRegTopic(){
+  var kw = (document.getElementById('reg-kw')||{value:''}).value.trim();
+  if(!kw){ showToast('キーワードを入力してください'); return; }
+  _regState.keywords = kw;
+  var terms = kw.split(/\s+/).filter(Boolean).map(function(k){ return k.toLowerCase(); });
+  var matches = FACT_TOPICS.filter(function(t){
+    var haystack = (t.title + ' ' + (t.summary||'') + ' ' + (t.tags||[]).join(' ')).toLowerCase();
+    return terms.some(function(k){ return haystack.includes(k); });
+  }).slice(0, 3);
+  _regState.phase = matches.length ? 'found' : 'notfound';
+  _regState.matches = matches;
+  _renderReg();
+}
+
+function _regFoundHTML(){
+  var p = P();
+  var cards = _regState.matches.map(function(t){
+    var c = scoreColor(t.score);
+    return '<div class="card clickable" style="margin-bottom:8px" onclick="closeRegister();goTopic(\'' + escapeHtml(t.id) + '\')">' +
+      '<div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:4px">' + escapeHtml(t.title) + '</div>' +
+      '<div style="font-size:11px;color:var(--text-2);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml((t.summary||'').slice(0,60)) + '…</div>' +
+      '<div style="font-size:11px;color:' + c + ';font-weight:700">' + scoreLabel(t.score) + '　' + escapeHtml(t.cat) + '</div>' +
+      '</div>';
   }).join('');
+  return '<div style="font-size:12px;font-weight:700;color:#4CAF50;margin-bottom:12px">✅ 「' + escapeHtml(_regState.keywords) + '」の記録が見つかりました</div>' +
+    cards +
+    '<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">' +
+    '<div style="font-size:12px;color:var(--text-2);margin-bottom:8px">探している記録と違いますか？</div>' +
+    '<button onclick="_regState.phase=\'notfound\';_renderReg()" style="width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-2);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">新しいトピックとして申請する →</button>' +
+    '</div>';
 }
 
-function addRegSource(){
-  _saveRegSourceValues();
-  regSources.push({org:'',type:'',keyClaim:'',title:'',date:'',url:'',summary:''});
-  _renderRegSources();
+function _regNotFoundHTML(){
+  return '<div style="background:#FF980011;border:1px solid #FF980033;border-radius:10px;padding:12px;margin-bottom:16px">' +
+    '<div style="font-size:12px;font-weight:700;color:#FF9800;margin-bottom:4px">📋 まだFACT記録がありません</div>' +
+    '<div style="font-size:13px;color:var(--text-1);font-weight:600">「' + escapeHtml(_regState.keywords) + '」</div>' +
+    '</div>' +
+    '<div style="font-size:13px;color:var(--text-2);line-height:1.8;margin-bottom:16px">' +
+    '登録申請を送ると、編集者とAIが内容を確認・構造化します。<br>詳細情報の入力は不要です。</div>' +
+    '<label class="reg-label" style="display:block;margin-bottom:5px">トピックの概要（任意・1〜2文）</label>' +
+    '<textarea class="reg-input" id="reg-context" placeholder="例：ホルムズ海峡の緊張が日本の原油輸入に影響している問題" style="min-height:68px;margin-bottom:12px"></textarea>' +
+    '<label class="reg-label" style="display:block;margin-bottom:5px">参考になる記事のURL（任意）</label>' +
+    '<input class="reg-input" id="reg-ref-url" placeholder="https://..." style="margin-bottom:18px">' +
+    '<button onclick="submitSimpleRegistration()" id="reg-submit-btn" style="width:100%;padding:13px;background:var(--brand);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">登録申請を送る</button>' +
+    '<div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:8px">編集者が確認後、FACT記録として公開されます</div>' +
+    '<button onclick="_regState.phase=\'input\';_renderReg()" style="width:100%;margin-top:8px;padding:8px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← キーワードを変えて探す</button>';
 }
 
-function removeRegSource(i){
-  _saveRegSourceValues();
-  regSources.splice(i, 1);
-  _renderRegSources();
-}
+function submitSimpleRegistration(){
+  var el = document.getElementById('reg-context');
+  var urlEl = document.getElementById('reg-ref-url');
+  var context = el ? el.value.trim() : '';
+  var refUrl  = urlEl ? urlEl.value.trim() : '';
+  var issueTitle = '[TOPIC申請] ' + _regState.keywords;
+  var issueBody  = '### キーワード\n\n' + _regState.keywords + '\n\n' +
+    '### 概要（任意）\n\n' + (context || '_No response_') + '\n\n' +
+    '### 参考URL（任意）\n\n' + (refUrl || '_No response_');
+  var btn = document.getElementById('reg-submit-btn');
 
-function _saveRegSourceValues(){
-  regSources.forEach(function(s, i){
-    var g = function(f){ var el=document.getElementById('reg-src-'+i+'-'+f); return el?el.value:''; };
-    s.org=g('org'); s.type=g('type'); s.keyClaim=g('keyClaim');
-    s.title=g('title'); s.date=g('date'); s.url=g('url'); s.summary=g('summary');
-  });
+  function fallbackOpen(){
+    var url = 'https://github.com/shuichi0725-cmyk/fact-prototype/issues/new?title=' +
+      encodeURIComponent(issueTitle) + '&body=' + encodeURIComponent(issueBody);
+    window.open(url, '_blank');
+    closeRegister();
+    showToast('GitHubのページで「Submit new issue」を押してください', 5000);
+  }
+
+  if(!state.ghPat){ fallbackOpen(); return; }
+  if(btn){ btn.disabled=true; btn.textContent='送信中…'; }
+  fetch('https://api.github.com/repos/shuichi0725-cmyk/fact-prototype/issues', {
+    method:'POST',
+    headers:{ 'Authorization':'Bearer '+state.ghPat, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json' },
+    body: JSON.stringify({ title: issueTitle, body: issueBody }),
+  })
+  .then(function(res){
+    if(!res.ok) throw new Error(res.status);
+    return res.json();
+  })
+  .then(function(issue){
+    closeRegister();
+    showToast('申請を送信しました（Issue #' + issue.number + '）', 4000);
+  })
+  .catch(function(){ fallbackOpen(); });
 }
 
 function _val(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
