@@ -561,6 +561,7 @@ function loadPersistedState(){
       ghPat:        localStorage.getItem('fact_gh_pat') || '',
       conceptSeen:  localStorage.getItem('fact_concept_seen') === 'true',
       anthropicKey: localStorage.getItem('fact_anthropic_key') || '',
+      submissions:  JSON.parse(localStorage.getItem('fact_submissions') || '[]'),
     };
   } catch(e){ return {}; }
 }
@@ -574,6 +575,7 @@ function persistState(){
     localStorage.setItem('fact_gh_pat',        state.ghPat);
     localStorage.setItem('fact_concept_seen',  state.conceptSeen);
     localStorage.setItem('fact_anthropic_key', state.anthropicKey);
+    localStorage.setItem('fact_submissions',   JSON.stringify(state.submissions||[]));
   } catch(e){}
 }
 
@@ -681,7 +683,17 @@ function _regInputHTML(){
     'onkeydown="if(event.key===\'Enter\')searchRegTopic()" autofocus>' +
     '<button onclick="searchRegTopic()" style="padding:9px 16px;background:var(--brand);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:\'Noto Sans JP\',sans-serif">検索</button>' +
     '</div>' +
-    '<div style="font-size:11px;color:var(--text-3)">スペース区切りで複数キーワード入力可（1つでも可）</div>';
+    '<div style="font-size:11px;color:var(--text-3)">スペース区切りで複数キーワード入力可（1つでも可）</div>' +
+    (state.submissions && state.submissions.length > 0 ?
+      '<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:8px">📋 過去の申請（' + state.submissions.length + '件）</div>' +
+      state.submissions.slice(0,3).map(function(s){
+        return '<div style="padding:7px 10px;background:#0c1525;border-radius:8px;margin-bottom:5px">' +
+          '<div style="font-size:12px;color:var(--text-1);font-weight:600">' + escapeHtml(s.keywords) + '</div>' +
+          '<div style="font-size:10px;color:var(--text-3);margin-top:1px">' + escapeHtml(s.date) + ' 申請</div>' +
+          '</div>';
+      }).join('') +
+      '</div>' : '');
 }
 
 function searchRegTopic(){
@@ -761,6 +773,7 @@ function _manualApply(){
   var url = 'https://github.com/shuichi0725-cmyk/fact-prototype/issues/new?title=' +
     encodeURIComponent(issueTitle) + '&body=' + encodeURIComponent(issueBody);
   window.open(url, '_blank');
+  _saveSubmission(_regState.keywords, issueTitle);
   closeRegister();
   showToast('GitHubのページで「Submit new issue」を押してください', 5000);
 }
@@ -859,6 +872,7 @@ function submitAIGenerated(){
   var url = 'https://github.com/shuichi0725-cmyk/fact-prototype/issues/new?title=' +
     encodeURIComponent(issueTitle) + '&body=' + encodeURIComponent(issueBody);
   window.open(url, '_blank');
+  _saveSubmission(_regState.keywords, issueTitle);
   closeRegister();
   showToast('GitHubのページで「Submit new issue」を押してください', 5000);
 }
@@ -982,7 +996,7 @@ function _formatRegIssueBody(){
 
 // ===== 状態 =====
 const _persisted = loadPersistedState();
-let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'', conceptSeen:_persisted.conceptSeen||false, anthropicKey:_persisted.anthropicKey||'' };
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'', conceptSeen:_persisted.conceptSeen||false, anthropicKey:_persisted.anthropicKey||'', submissions:_persisted.submissions||[] };
 
 
 // カラーパレット定義
@@ -1001,6 +1015,36 @@ function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(
 // ===== ユーティリティ =====
 function scoreColor(s){ const p=P(); return s>=90?p.high:s>=70?p.mid:s>=50?p.warn:p.danger; }
 function scoreLabel(s){ return s>=90?"確証度 高":s>=70?"確証度 中":s>=50?"確証度 低":"未検証"; }
+
+function _staleMonths(dateStr){
+  var m=(dateStr||'').match(/(\d{4})年(\d{1,2})月/);
+  if(!m) return null;
+  var d=new Date(parseInt(m[1]),parseInt(m[2])-1,1);
+  var now=new Date();
+  return (now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());
+}
+function staleBadgeHtml(dateStr){
+  var mo=_staleMonths(dateStr);
+  if(mo===null||mo<6) return '';
+  return '<span style="font-size:10px;color:#FF9800;background:#FF980011;border:1px solid #FF980033;border-radius:99px;padding:1px 7px;margin-left:6px">⏰ '+mo+'ヶ月前</span>';
+}
+
+function _saveSubmission(keywords, issueTitle){
+  var s=state.submissions||[];
+  s.unshift({ keywords:keywords, issueTitle:issueTitle, date:new Date().toLocaleDateString('ja-JP') });
+  state.submissions=s.slice(0,10);
+  persistState();
+}
+
+function proposeUpdate(){
+  var t=FACT_TOPICS.find(function(x){ return x.id===state.currentTopicId; });
+  if(!t) return;
+  var issueTitle='[UPDATE申請] '+t.title;
+  var issueBody='### 対象トピック\n\n'+t.title+' ('+t.id+')\n\n### 更新内容・修正点\n\n_（ここに更新したい内容を記載してください）_';
+  window.open('https://github.com/shuichi0725-cmyk/fact-prototype/issues/new?title='+encodeURIComponent(issueTitle)+'&body='+encodeURIComponent(issueBody),'_blank');
+  showToast('GitHubで更新内容を記入して送信してください',4000);
+}
+
 function alertColor(t){ const p=P(); return {bias:p.bias,fact:p.fact,sns:p.sns,old:p.old,conflict:p.conflict}[t]||p.warn; }
 function alertIcon(t){  return {bias:"📰",fact:"⚠️",sns:"📣",old:"🕐",conflict:"⚖️"}[t]||"⚠️"; }
 function typeClass(t){ return {公共放送:"tag-nhk",主要紙:"tag-paper",政府機関:"tag-gov",学術:"tag-academic"}[t]||""; }
@@ -1636,6 +1680,7 @@ function renderSearchResults(p){
       '<div style="display:flex;align-items:center;gap:10px">' +
       '<span style="font-size:11px;color:var(--text-2)">📰 ' + srcCount + '件のソースを分析</span>' +
       '<span style="font-size:11px;color:var(--text-2)">📅 ' + t.date + '</span>' +
+      staleBadgeHtml(t.date) +
       '</div>' +
       '<div style="font-size:12px;color:' + p.brand + ';font-weight:600">詳細を見る →</div>' +
       '</div>' +
@@ -1687,6 +1732,7 @@ function renderSearchDetail(p){
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
     '<button onclick="popNav()" style="padding:5px 10px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:#4a9eff;font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 戻る</button>' +
     '<span style="font-size:13px;color:#e0e6f0;flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(q) + '</span>' +
+    '<button onclick="proposeUpdate()" style="flex-shrink:0;padding:5px 10px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:var(--text-2);font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;white-space:nowrap">✏️ 更新提案</button>' +
     '</div>' +
     // タブバー
     '<div id="search-tab-bar" style="display:flex;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none">' +
@@ -1878,7 +1924,10 @@ function renderSummaryTab(){
     '<div style="height:8px;background:#1a2035;border-radius:99px;overflow:hidden;margin-bottom:6px">' +
     '<div style="width:' + currentTopic.score + '%;height:100%;background:linear-gradient(90deg,' + c + '88,' + c + ');border-radius:99px"></div>' +
     '</div>' +
-    '<div style="font-size:11px;color:' + c + ';font-weight:600;margin-bottom:6px">● ' + scoreLabel(currentTopic.score) + '</div>' +
+    '<div style="display:flex;align-items:center;margin-bottom:6px">' +
+    '<span style="font-size:11px;color:' + c + ';font-weight:600">● ' + scoreLabel(currentTopic.score) + '</span>' +
+    staleBadgeHtml(currentTopic.date) +
+    '</div>' +
     '<div style="font-size:11px;color:var(--text-2);line-height:1.6">' + scoreReason + '</div>' +
     '</div>' +
     '<div style="margin-bottom:4px">' +
