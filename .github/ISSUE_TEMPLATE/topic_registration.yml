@@ -1,0 +1,99 @@
+name: トピック登録申請
+description: FACTに新しいトピックを登録します（管理者がラベルを付与すると自動審査が開始されます）
+title: "[TOPIC] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## FACT トピック登録フォーム
+        登録後、管理者が `topic-registration` ラベルを付与すると Claude による自動審査が開始されます。
+
+        **登録できないトピック:** 芸能・不倫・スキャンダル・個人攻撃・個人情報・ゴシップ
+
+  - type: input
+    id: title
+    attributes:
+      label: トピックタイトル
+      description: 記録のタイトル（20〜40字程度）
+      placeholder: 例：ホルムズ海峡危機 日本への影響
+    validations:
+      required: true
+
+  - type: input
+    id: category
+    attributes:
+      label: カテゴリ
+      description: "地政学・安保 / 経済・産業 / 司法・裁判 / 科学・医療 / 社会 / 政治 など"
+      placeholder: 例：地政学・安保
+    validations:
+      required: true
+
+  - type: input
+    id: subcat
+    attributes:
+      label: サブカテゴリ
+      placeholder: 例：ホルムズ危機
+    validations:
+      required: true
+
+  - type: input
+    id: date
+    attributes:
+      label: 基準日
+      description: トピックの主要イベント日
+      placeholder: 例：2026年4月3日 継続中
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: サマリー（200字以内）
+      description: トピックの概要。何が起きているか、なぜ重要かを簡潔に。
+      placeholder: 例：ホルムズ海峡の緊張が高まり、日本の原油輸入の約8割が通過するこの海峡の安全保障が脅かされている。イランの圧力強化により各国が代替ルートを模索している。
+    validations:
+      required: true
+
+  - type: textarea
+    id: tags
+    attributes:
+      label: タグ（カンマ区切り、3〜5個）
+      placeholder: 例：ホルムズ海峡, 原油, イラン, 日本経済
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: ソース情報
+      description: |
+        各ソースを `---` で区切って記述してください。ソース数は2〜8件推奨。
+        信頼できるメディア（新聞・通信社・公共放送・学術機関等）のみ登録可能です。
+      value: |
+        org: NHK NEWS WEB
+        type: 公共放送
+        keyClaim: このソースがトピックについて述べていること（1〜2文）
+        article_title: 記事タイトル
+        article_date: 2026年4月1日
+        article_url: https://...
+        article_summary: 記事の要約（50〜100字）
+        ---
+        org: 朝日新聞
+        type: 全国紙
+        keyClaim:
+        article_title:
+        article_date:
+        article_url:
+        article_summary:
+    validations:
+      required: true
+
+  - type: textarea
+    id: alert
+    attributes:
+      label: アラート（任意）
+      description: バイアス警告・ペイウォール注記・報道姿勢の偏りなど
+      placeholder: |
+        type: bias
+        msg: 一部メディアで報道姿勢に偏りがあります。
