@@ -1042,7 +1042,7 @@ function _initGoogleAuth(){
   if(_googleTokenClient) return true;
   _googleTokenClient = google.accounts.oauth2.initTokenClient({
     client_id: GOOGLE_CLIENT_ID,
-    scope: 'https://www.googleapis.com/auth/generative-language',
+    scope: 'https://www.googleapis.com/auth/generative-language.peruserquota',
     callback: function(resp){
       if(resp.error){ showToast('Googleログインに失敗しました'); return; }
       _googleToken = resp.access_token;
