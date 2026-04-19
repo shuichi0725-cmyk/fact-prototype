@@ -1041,6 +1041,7 @@ function _initGoogleAuth(){
   _googleTokenClient = google.accounts.oauth2.initTokenClient({
     client_id: GOOGLE_CLIENT_ID,
     scope: 'https://www.googleapis.com/auth/cloud-platform',
+    prompt: 'consent',
     callback: function(resp){
       if(resp.error){ showToast('Googleログインに失敗しました'); return; }
       _googleToken = resp.access_token;
