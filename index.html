@@ -11,6 +11,7 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23080e1e'/%3E%3Ctext x='96' y='130' font-family='monospace' font-weight='900' font-size='80' fill='%234a9eff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
 <title>FACT — Verified Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async></script>
 <style>
 /* ===== デザインシステム (ui-ux-pro-max principles: News/FactCheck / Dark Editorial) ===== */
 :root {
@@ -563,7 +564,6 @@ function loadPersistedState(){
       isPremium:    localStorage.getItem('fact_isPremium') === 'true',
       readAlerts:   JSON.parse(localStorage.getItem('fact_readAlerts')) || [],
       ghPat:        localStorage.getItem('fact_gh_pat') || '',
-      geminiKey:    localStorage.getItem('fact_gemini_key') || '',
       conceptSeen:  localStorage.getItem('fact_concept_seen') === 'true',
       submissions:  JSON.parse(localStorage.getItem('fact_submissions') || '[]'),
     };
@@ -577,7 +577,6 @@ function persistState(){
     localStorage.setItem('fact_isPremium',   state.isPremium);
     localStorage.setItem('fact_readAlerts',  JSON.stringify(state.readAlerts));
     localStorage.setItem('fact_gh_pat',        state.ghPat);
-    localStorage.setItem('fact_gemini_key',    state.geminiKey);
     localStorage.setItem('fact_concept_seen',  state.conceptSeen);
     localStorage.setItem('fact_submissions',   JSON.stringify(state.submissions||[]));
   } catch(e){}
@@ -737,7 +736,6 @@ function _regFoundHTML(){
 function _regNotFoundHTML(){
   var kw = escapeHtml(_regState.keywords);
   var googleUrl = 'https://www.google.com/search?q=' + encodeURIComponent(_regState.keywords);
-  var savedKey = state.geminiKey ? '●'.repeat(Math.min(state.geminiKey.length, 20)) : '';
   return '<div style="background:#FF980011;border:1px solid #FF980033;border-radius:10px;padding:12px;margin-bottom:14px">' +
     '<div style="font-size:11px;font-weight:700;color:#FF9800;margin-bottom:3px">📋 まだFACT記録がありません</div>' +
     '<div style="font-size:14px;color:var(--text-1);font-weight:700">「' + kw + '」</div>' +
@@ -762,14 +760,19 @@ function _regNotFoundHTML(){
         '<div style="font-size:11px;color:var(--text-2);line-height:1.7">全員に公開するには設定でGitHub PATを設定してください。</div>' +
         '</div>'
     ) +
-    // ④ AI生成エリア（Gemini APIキー）
-    '<div style="font-size:11px;color:var(--text-2);line-height:1.7;margin-bottom:8px;padding:10px;background:#4a9eff11;border:1px solid #4a9eff33;border-radius:10px">' +
-    '🔑 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--brand)">Google AI Studio</a> で無料取得できます（クレジットカード不要）</div>' +
-    '<label class="reg-label" style="display:block;margin-bottom:5px">Gemini APIキー</label>' +
-    '<input class="reg-input" id="reg-api-key" type="password" placeholder="AIza..." value="' + savedKey + '" ' +
-    'onfocus="if(this.value.includes(\'●\'))this.value=\'\'" style="margin-bottom:10px">' +
+    // ④ AI生成エリア（Google OAuth）
+    (_googleToken
+      ? '<div style="background:#4CAF5011;border:1px solid #4CAF5033;border-radius:10px;padding:10px 12px;margin-bottom:10px">' +
+        '<div style="font-size:12px;color:#4CAF50;font-weight:700">✅ Googleアカウントでログイン済み</div>' +
+        '<div style="font-size:11px;color:var(--text-2);margin-top:3px">AIで記録を生成できます（無料）</div>' +
+        '</div>'
+      : '<div style="font-size:11px;color:var(--text-2);line-height:1.7;margin-bottom:10px;padding:10px;background:#4a9eff11;border:1px solid #4a9eff33;border-radius:10px">' +
+        '✨ AIで記録を自動生成するにはGoogleアカウントでログインしてください。<br>' +
+        '<span style="font-size:10px;opacity:0.7">無料・APIキー不要</span>' +
+        '</div>'
+    ) +
     '<button onclick="generateWithAI()" style="width:100%;padding:13px;background:linear-gradient(135deg,#4a9eff,#7b5cff);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;margin-bottom:10px">' +
-    '✨ AIで記録を自動生成</button>' +
+    (_googleToken ? '✨ AIで記録を自動生成' : 'Googleでログインして自動生成') + '</button>' +
     '<button onclick="_regState.phase=\'input\';_renderReg()" style="width:100%;padding:9px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 検索に戻る</button>';
 }
 
@@ -813,11 +816,15 @@ function _regPreviewHTML(){
 }
 
 async function generateWithAI(){
-  var keyInput = document.getElementById('reg-api-key');
-  var apiKey = (keyInput && !keyInput.value.includes('●')) ? keyInput.value.trim() : state.geminiKey;
-  if(!apiKey){ showToast('Gemini APIキーを入力してください'); return; }
-  state.geminiKey = apiKey;
-  persistState();
+  if(!_googleToken){
+    if(!_googleTokenClient && !_initGoogleAuth()){
+      showToast('Googleログインの準備中です。少し待ってから再試行してください');
+      return;
+    }
+    _googleTokenClient.requestAccessToken();
+    return;
+  }
+
   _regState.phase = 'generating';
   _renderReg();
 
@@ -844,13 +851,22 @@ async function generateWithAI(){
 
   try {
     var res = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey),
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': 'Bearer ' + _googleToken,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
       }
     );
+    if(res.status === 401){
+      _googleToken = null;
+      _renderReg();
+      showToast('セッションが切れました。再度ログインしてください');
+      return;
+    }
     var data = await res.json();
     if(!res.ok) throw new Error((data.error||{}).message || res.status);
     var text = data.candidates[0].content.parts[0].text.trim();
@@ -1012,7 +1028,28 @@ function _formatRegIssueBody(){
 
 // ===== 状態 =====
 const _persisted = loadPersistedState();
-let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'', geminiKey:_persisted.geminiKey||'', conceptSeen:_persisted.conceptSeen||false, submissions:_persisted.submissions||[] };
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'', conceptSeen:_persisted.conceptSeen||false, submissions:_persisted.submissions||[] };
+
+// ===== Google OAuth =====
+const GOOGLE_CLIENT_ID = '1071375800581-s3nrsboav3ggcpdiltm0fg42q84e3g1u.apps.googleusercontent.com';
+let _googleToken = null;
+let _googleTokenClient = null;
+
+function _initGoogleAuth(){
+  if(typeof google === 'undefined' || !google.accounts) return false;
+  if(_googleTokenClient) return true;
+  _googleTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/cloud-platform',
+    callback: function(resp){
+      if(resp.error){ showToast('Googleログインに失敗しました'); return; }
+      _googleToken = resp.access_token;
+      generateWithAI();
+    }
+  });
+  return true;
+}
+window.addEventListener('load', function(){ setTimeout(_initGoogleAuth, 500); });
 
 // カラーパレット定義
 const PALETTES = {
