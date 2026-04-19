@@ -659,8 +659,9 @@ function _renderReg(){
 }
 
 function _regHeader(){
+  var title = _regState.phase === 'update' ? '✏️ 更新を提案する' : '📝 FACTに投稿する';
   return '<div style="display:flex;align-items:center;margin-bottom:20px">' +
-    '<span style="font-size:15px;font-weight:700;color:var(--text-1)">📝 FACTに投稿する</span>' +
+    '<span style="font-size:15px;font-weight:700;color:var(--text-1)">' + title + '</span>' +
     '<button onclick="closeRegister()" style="margin-left:auto;background:none;border:none;color:var(--text-2);font-size:24px;cursor:pointer;line-height:1;padding:0 4px">×</button>' +
     '</div>';
 }
@@ -671,6 +672,7 @@ function _regBody(){
   if(_regState.phase === 'notfound')   return _regNotFoundHTML();
   if(_regState.phase === 'generating') return _regGeneratingHTML();
   if(_regState.phase === 'preview')    return _regPreviewHTML();
+  if(_regState.phase === 'update')     return _regUpdateHTML();
   return '';
 }
 
@@ -1039,10 +1041,60 @@ function _saveSubmission(keywords, issueTitle){
 function proposeUpdate(){
   var t=FACT_TOPICS.find(function(x){ return x.id===state.currentTopicId; });
   if(!t) return;
-  var issueTitle='[UPDATE申請] '+t.title;
-  var issueBody='### 対象トピック\n\n'+t.title+' ('+t.id+')\n\n### 更新内容・修正点\n\n_（ここに更新したい内容を記載してください）_';
-  window.open('https://github.com/shuichi0725-cmyk/fact-prototype/issues/new?title='+encodeURIComponent(issueTitle)+'&body='+encodeURIComponent(issueBody),'_blank');
-  showToast('GitHubで更新内容を記入して送信してください',4000);
+  _regState = { phase:'update', updateTopic: t };
+  var existing = document.getElementById('reg-overlay');
+  if(existing){ existing.classList.add('show'); _renderReg(); return; }
+  document.body.insertAdjacentHTML('beforeend',
+    '<div id="reg-overlay" class="show" onclick="if(event.target===this)closeRegister()">' +
+    '<div id="reg-box"></div></div>'
+  );
+  _renderReg();
+}
+
+function _regUpdateHTML(){
+  var t = _regState.updateTopic || {};
+  var hasPat = !!state.ghPat;
+  return '<div style="background:#4a9eff11;border:1px solid #4a9eff33;border-radius:10px;padding:12px;margin-bottom:16px">' +
+    '<div style="font-size:11px;color:var(--text-2);margin-bottom:3px">対象記録</div>' +
+    '<div style="font-size:14px;font-weight:700;color:var(--text-1)">' + escapeHtml(t.title||'') + '</div>' +
+    '</div>' +
+    '<label class="reg-label" style="display:block;margin-bottom:5px">更新・修正の内容 <span class="reg-required">必須</span></label>' +
+    '<textarea class="reg-input" id="reg-update-body" placeholder="例：ソースURLが古くなっています。最新記事は…" style="min-height:100px;margin-bottom:16px"></textarea>' +
+    (hasPat
+      ? '<button onclick="submitUpdateProposal()" id="reg-update-btn" style="width:100%;padding:13px;background:var(--brand);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">送信する</button>' +
+        '<div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:8px">GitHub Issue として直接送信されます</div>'
+      : '<div style="background:#FF980011;border:1px solid #FF980033;border-radius:10px;padding:12px;font-size:12px;color:var(--text-2);line-height:1.7">' +
+        '⚠️ 直接送信するには設定から <strong style="color:var(--text-1)">GitHub PAT</strong> を設定してください。' +
+        '<button onclick="closeRegister();switchNav(\'settings\')" style="display:block;width:100%;margin-top:8px;padding:9px;background:var(--brand);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">設定を開く →</button>' +
+        '</div>'
+    );
+}
+
+function submitUpdateProposal(){
+  var bodyEl = document.getElementById('reg-update-body');
+  var body = bodyEl ? bodyEl.value.trim() : '';
+  if(!body){ showToast('更新内容を入力してください'); return; }
+  var t = _regState.updateTopic || {};
+  var issueTitle = '[UPDATE申請] ' + (t.title||'');
+  var issueBody  = '### 対象トピック\n\n' + (t.title||'') + ' (' + (t.id||'') + ')\n\n' +
+    '### 更新・修正の内容\n\n' + body;
+  var btn = document.getElementById('reg-update-btn');
+  if(btn){ btn.disabled=true; btn.textContent='送信中…'; }
+  fetch('https://api.github.com/repos/shuichi0725-cmyk/fact-prototype/issues', {
+    method:'POST',
+    headers:{ 'Authorization':'Bearer '+state.ghPat, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json' },
+    body: JSON.stringify({ title: issueTitle, body: issueBody }),
+  })
+  .then(function(res){ if(!res.ok) throw new Error(res.status); return res.json(); })
+  .then(function(issue){
+    _saveSubmission(t.title||'', issueTitle);
+    closeRegister();
+    showToast('更新提案を送信しました（Issue #'+issue.number+'）', 4000);
+  })
+  .catch(function(e){
+    if(btn){ btn.disabled=false; btn.textContent='送信する'; }
+    showToast('送信に失敗しました: '+e.message, 4000);
+  });
 }
 
 function alertColor(t){ const p=P(); return {bias:p.bias,fact:p.fact,sns:p.sns,old:p.old,conflict:p.conflict}[t]||p.warn; }
