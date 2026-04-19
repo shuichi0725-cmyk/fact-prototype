@@ -1,0 +1,37 @@
+name: Auto Label Topic Registration
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  label:
+    if: contains(github.event.issue.title, '[TOPIC申請]') || contains(github.event.issue.title, '[UPDATE申請]')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Add topic-registration label
+        if: contains(github.event.issue.title, '[TOPIC申請]')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['topic-registration']
+            });
+
+      - name: Add update-request label
+        if: contains(github.event.issue.title, '[UPDATE申請]')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['update-request']
+            });

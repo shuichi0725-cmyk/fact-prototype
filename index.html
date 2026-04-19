@@ -312,6 +312,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 #content.page-enter { animation: pageIn 0.18s ease-out; }
 /* スケルトンUI */
 @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+@keyframes spin { to { transform: rotate(360deg); } }
 .skel { background:linear-gradient(90deg,#1a2a4a 25%,#253550 50%,#1a2a4a 75%); background-size:400px 100%; animation:shimmer 1.4s infinite linear; border-radius:4px; }
 
 /* prefers-reduced-motion (article checklist 必須項目) */
@@ -413,6 +414,10 @@ function ensureDetailLoaded() {
     .then(function(r){ return r.json(); })
     .then(function(d){
       TOPIC_DATA = d.TOPIC_DATA;
+      try {
+        var _ud = JSON.parse(localStorage.getItem('fact_user_topics') || '{}');
+        if(_ud.detail) Object.assign(TOPIC_DATA, _ud.detail);
+      } catch(e){}
       _detailLoaded = true;
     })
     .catch(function(e){
@@ -559,6 +564,8 @@ function loadPersistedState(){
       readAlerts:   JSON.parse(localStorage.getItem('fact_readAlerts')) || [],
       ghPat:        localStorage.getItem('fact_gh_pat') || '',
       conceptSeen:  localStorage.getItem('fact_concept_seen') === 'true',
+      anthropicKey: localStorage.getItem('fact_anthropic_key') || '',
+      submissions:  JSON.parse(localStorage.getItem('fact_submissions') || '[]'),
     };
   } catch(e){ return {}; }
 }
@@ -569,8 +576,10 @@ function persistState(){
     localStorage.setItem('fact_history',     JSON.stringify(state.history));
     localStorage.setItem('fact_isPremium',   state.isPremium);
     localStorage.setItem('fact_readAlerts',  JSON.stringify(state.readAlerts));
-    localStorage.setItem('fact_gh_pat',      state.ghPat);
-    localStorage.setItem('fact_concept_seen', state.conceptSeen);
+    localStorage.setItem('fact_gh_pat',        state.ghPat);
+    localStorage.setItem('fact_concept_seen',  state.conceptSeen);
+    localStorage.setItem('fact_anthropic_key', state.anthropicKey);
+    localStorage.setItem('fact_submissions',   JSON.stringify(state.submissions||[]));
   } catch(e){}
 }
 
@@ -654,16 +663,20 @@ function _renderReg(){
 }
 
 function _regHeader(){
+  var title = _regState.phase === 'update' ? '✏️ 更新を提案する' : '📝 FACTに投稿する';
   return '<div style="display:flex;align-items:center;margin-bottom:20px">' +
-    '<span style="font-size:15px;font-weight:700;color:var(--text-1)">📝 FACTに投稿する</span>' +
+    '<span style="font-size:15px;font-weight:700;color:var(--text-1)">' + title + '</span>' +
     '<button onclick="closeRegister()" style="margin-left:auto;background:none;border:none;color:var(--text-2);font-size:24px;cursor:pointer;line-height:1;padding:0 4px">×</button>' +
     '</div>';
 }
 
 function _regBody(){
-  if(_regState.phase === 'input')    return _regInputHTML();
-  if(_regState.phase === 'found')    return _regFoundHTML();
-  if(_regState.phase === 'notfound') return _regNotFoundHTML();
+  if(_regState.phase === 'input')      return _regInputHTML();
+  if(_regState.phase === 'found')      return _regFoundHTML();
+  if(_regState.phase === 'notfound')   return _regNotFoundHTML();
+  if(_regState.phase === 'generating') return _regGeneratingHTML();
+  if(_regState.phase === 'preview')    return _regPreviewHTML();
+  if(_regState.phase === 'update')     return _regUpdateHTML();
   return '';
 }
 
@@ -676,7 +689,17 @@ function _regInputHTML(){
     'onkeydown="if(event.key===\'Enter\')searchRegTopic()" autofocus>' +
     '<button onclick="searchRegTopic()" style="padding:9px 16px;background:var(--brand);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:\'Noto Sans JP\',sans-serif">検索</button>' +
     '</div>' +
-    '<div style="font-size:11px;color:var(--text-3)">スペース区切りで複数キーワード入力可（1つでも可）</div>';
+    '<div style="font-size:11px;color:var(--text-3)">スペース区切りで複数キーワード入力可（1つでも可）</div>' +
+    (state.submissions && state.submissions.length > 0 ?
+      '<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:8px">📋 過去の申請（' + state.submissions.length + '件）</div>' +
+      state.submissions.slice(0,3).map(function(s){
+        return '<div style="padding:7px 10px;background:#0c1525;border-radius:8px;margin-bottom:5px">' +
+          '<div style="font-size:12px;color:var(--text-1);font-weight:600">' + escapeHtml(s.keywords) + '</div>' +
+          '<div style="font-size:10px;color:var(--text-3);margin-top:1px">' + escapeHtml(s.date) + ' 申請</div>' +
+          '</div>';
+      }).join('') +
+      '</div>' : '');
 }
 
 function searchRegTopic(){
@@ -712,19 +735,171 @@ function _regFoundHTML(){
 }
 
 function _regNotFoundHTML(){
-  return '<div style="background:#FF980011;border:1px solid #FF980033;border-radius:10px;padding:12px;margin-bottom:16px">' +
-    '<div style="font-size:12px;font-weight:700;color:#FF9800;margin-bottom:4px">📋 まだFACT記録がありません</div>' +
-    '<div style="font-size:13px;color:var(--text-1);font-weight:600">「' + escapeHtml(_regState.keywords) + '」</div>' +
+  var kw = escapeHtml(_regState.keywords);
+  var googleUrl = 'https://www.google.com/search?q=' + encodeURIComponent(_regState.keywords);
+  var savedKey = state.anthropicKey ? '●'.repeat(Math.min(state.anthropicKey.length, 20)) : '';
+  return '<div style="background:#FF980011;border:1px solid #FF980033;border-radius:10px;padding:12px;margin-bottom:14px">' +
+    '<div style="font-size:11px;font-weight:700;color:#FF9800;margin-bottom:3px">📋 まだFACT記録がありません</div>' +
+    '<div style="font-size:14px;color:var(--text-1);font-weight:700">「' + kw + '」</div>' +
     '</div>' +
-    '<div style="font-size:13px;color:var(--text-2);line-height:1.8;margin-bottom:16px">' +
-    '登録申請を送ると、編集者とAIが内容を確認・構造化します。<br>詳細情報の入力は不要です。</div>' +
-    '<label class="reg-label" style="display:block;margin-bottom:5px">トピックの概要（任意・1〜2文）</label>' +
-    '<textarea class="reg-input" id="reg-context" placeholder="例：ホルムズ海峡の緊張が日本の原油輸入に影響している問題" style="min-height:68px;margin-bottom:12px"></textarea>' +
-    '<label class="reg-label" style="display:block;margin-bottom:5px">参考になる記事のURL（任意）</label>' +
-    '<input class="reg-input" id="reg-ref-url" placeholder="https://..." style="margin-bottom:18px">' +
-    '<button onclick="submitSimpleRegistration()" id="reg-submit-btn" style="width:100%;padding:13px;background:var(--brand);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">登録申請を送る</button>' +
-    '<div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:8px">編集者が確認後、FACT記録として公開されます</div>' +
-    '<button onclick="_regState.phase=\'input\';_renderReg()" style="width:100%;margin-top:8px;padding:8px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← キーワードを変えて探す</button>';
+    // ① Web検索
+    '<a href="' + googleUrl + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface-3,#162030);border:1px solid var(--border);border-radius:10px;text-decoration:none;margin-bottom:14px">' +
+    '<span style="font-size:18px">🔍</span>' +
+    '<div>' +
+    '<div style="font-size:12px;font-weight:700;color:var(--text-1)">「' + kw + '」をWebで調べる</div>' +
+    '<div style="font-size:10px;color:var(--text-2);margin-top:1px">Google検索で該当事件を確認できます</div>' +
+    '</div>' +
+    '<span style="margin-left:auto;color:var(--text-3);font-size:14px">↗</span>' +
+    '</a>' +
+    // ② トークン注意喚起
+    '<div style="background:#FF444411;border:1px solid #FF444433;border-radius:10px;padding:10px 12px;margin-bottom:10px">' +
+    '<div style="font-size:11px;font-weight:700;color:#FF6B6B;margin-bottom:3px">⚠️ APIトークン使用について</div>' +
+    '<div style="font-size:11px;color:var(--text-2);line-height:1.7">AI自動生成にはAnthropicのAPIキーを使用します。<br>使用量・料金は<strong style="color:var(--text-1)">あなたのアカウント</strong>に課金されます。</div>' +
+    '</div>' +
+    // ③ 公開範囲の説明
+    (state.ghPat
+      ? '<div style="background:#4CAF5011;border:1px solid #4CAF5033;border-radius:10px;padding:10px 12px;margin-bottom:14px">' +
+        '<div style="font-size:11px;font-weight:700;color:#4CAF50;margin-bottom:3px">🌐 全員に公開されます</div>' +
+        '<div style="font-size:11px;color:var(--text-2);line-height:1.7">GitHub PATが設定されています。<br>追加した記録は全ユーザーに即時公開されます（反映まで1〜2分）。</div>' +
+        '</div>'
+      : '<div style="background:#4a9eff11;border:1px solid #4a9eff33;border-radius:10px;padding:10px 12px;margin-bottom:14px">' +
+        '<div style="font-size:11px;font-weight:700;color:var(--brand);margin-bottom:3px">📱 この端末のみに保存されます</div>' +
+        '<div style="font-size:11px;color:var(--text-2);line-height:1.7">全員に公開するには設定でGitHub PATを設定してください。</div>' +
+        '</div>'
+    ) +
+    // ④ AI生成エリア
+    '<label class="reg-label" style="display:block;margin-bottom:5px">Anthropic APIキー</label>' +
+    '<input class="reg-input" id="reg-api-key" type="password" placeholder="sk-ant-..." value="' + savedKey + '" ' +
+    'onfocus="if(this.value.includes(\'●\'))this.value=\'\'" style="margin-bottom:10px">' +
+    '<button onclick="generateWithAI()" style="width:100%;padding:13px;background:linear-gradient(135deg,#4a9eff,#7b5cff);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;margin-bottom:10px">' +
+    '✨ AIで記録を自動生成</button>' +
+    '<button onclick="_regState.phase=\'input\';_renderReg()" style="width:100%;padding:9px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 検索に戻る</button>';
+}
+
+function _manualApply(){
+  var issueTitle = '[TOPIC申請] ' + _regState.keywords;
+  var issueBody  = '### キーワード\n\n' + _regState.keywords;
+  var url = 'https://github.com/shuichi0725-cmyk/fact-prototype/issues/new?title=' +
+    encodeURIComponent(issueTitle) + '&body=' + encodeURIComponent(issueBody);
+  window.open(url, '_blank');
+  _saveSubmission(_regState.keywords, issueTitle);
+  closeRegister();
+  showToast('GitHubのページで「Submit new issue」を押してください', 5000);
+}
+
+function _regGeneratingHTML(){
+  return '<div style="text-align:center;padding:32px 0">' +
+    '<div style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div>' +
+    '<div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:6px">AIが記録を生成中…</div>' +
+    '<div style="font-size:12px;color:var(--text-2)">「' + escapeHtml(_regState.keywords) + '」の情報を構造化しています</div>' +
+    '</div>';
+}
+
+function _regPreviewHTML(){
+  var g = _regState.generated || {};
+  var m = g.meta_entry || {};
+  var tags = (m.tags||[]).map(function(t){ return '<span style="display:inline-block;padding:2px 7px;background:var(--surface-3,#162030);border:1px solid var(--border);border-radius:12px;font-size:10px;color:var(--text-2);margin:2px">' + escapeHtml(t) + '</span>'; }).join('');
+  return '<div style="font-size:11px;font-weight:700;color:#4CAF50;margin-bottom:10px">✅ AI生成プレビュー</div>' +
+    '<div style="background:var(--surface-3,#162030);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px">' +
+    '<div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:4px">' + escapeHtml(m.title||'') + '</div>' +
+    '<div style="font-size:11px;color:var(--text-2);margin-bottom:6px">' + escapeHtml(m.cat||'') + (m.subcat?' / '+escapeHtml(m.subcat):'') + '</div>' +
+    '<div style="font-size:12px;color:var(--text-1);line-height:1.7;margin-bottom:8px">' + escapeHtml(m.summary||'') + '</div>' +
+    '<div style="margin-bottom:4px">' + tags + '</div>' +
+    '</div>' +
+    '<div style="font-size:10px;color:var(--text-3);line-height:1.6;margin-bottom:14px;padding:8px;background:#FF980011;border-radius:8px">' +
+    '⚠️ AIが生成した内容は参考情報です。正確性はご自身でご確認ください。</div>' +
+    (state.ghPat
+      ? '<div style="font-size:11px;color:#4CAF50;margin-bottom:10px;padding:8px;background:#4CAF5011;border-radius:8px">🌐 GitHub PATが設定されています。追加した記録は<strong>全員に公開</strong>されます。</div>'
+      : '<div style="font-size:11px;color:var(--text-2);margin-bottom:10px;padding:8px;background:var(--surface-3,#162030);border-radius:8px">📱 PATなし: この端末のみに保存されます。<button onclick="closeRegister();switchNav(\'settings\')" style="background:none;border:none;color:var(--brand);font-size:11px;cursor:pointer;padding:0">設定→</button>でPATを設定すると全員に公開できます。</div>') +
+    '<button onclick="submitAIGenerated()" id="reg-submit-btn" style="width:100%;padding:13px;background:var(--brand);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;margin-bottom:8px">' + (state.ghPat ? '🌐 FACTに追加して全員に公開' : '📱 この端末に追加する') + '</button>' +
+    '<button onclick="_regState.phase=\'notfound\';_renderReg()" style="width:100%;padding:9px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← やり直す</button>';
+}
+
+async function generateWithAI(){
+  var keyInput = document.getElementById('reg-api-key');
+  var apiKey = (keyInput && !keyInput.value.includes('●')) ? keyInput.value.trim() : state.anthropicKey;
+  if(!apiKey){ showToast('Anthropic APIキーを入力してください'); return; }
+  state.anthropicKey = apiKey;
+  persistState();
+  _regState.phase = 'generating';
+  _renderReg();
+
+  var prompt = 'あなたはFACTというファクトチェックサービスのコンテンツ編集者です。\n' +
+    '以下のキーワードに関連するトピック記録を生成してください。\n\n' +
+    'キーワード: ' + _regState.keywords + '\n\n' +
+    '以下のJSON形式のみを返してください（マークダウン不要）:\n' +
+    '{\n' +
+    '  "topic_id": "snake_case英語のID（例: hormuz_crisis）",\n' +
+    '  "meta_entry": {\n' +
+    '    "id": "topic_idと同じ",\n' +
+    '    "title": "トピックタイトル（20〜40字）",\n' +
+    '    "cat": "カテゴリ（地政学・安保/経済・産業/司法・裁判/科学・医療/社会/政治）",\n' +
+    '    "subcat": "サブカテゴリ",\n' +
+    '    "score": 0,\n' +
+    '    "sourceCount": 0,\n' +
+    '    "date": "推定される基準日",\n' +
+    '    "summary": "トピックの概要（200字以内）",\n' +
+    '    "tags": ["タグ1","タグ2","タグ3"],\n' +
+    '    "alert": null\n' +
+    '  },\n' +
+    '  "detail_sources": []\n' +
+    '}';
+
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-7',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error((data.error && data.error.message) || res.status);
+    var text = data.content[0].text.trim();
+    var match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    _regState.generated = JSON.parse(match ? match[1] : text);
+    _regState.phase = 'preview';
+    _renderReg();
+  } catch(e) {
+    _regState.phase = 'notfound';
+    _renderReg();
+    showToast('AI生成エラー: ' + e.message, 5000);
+  }
+}
+
+function submitAIGenerated(){
+  var g = _regState.generated || {};
+  var m = Object.assign({}, g.meta_entry || {}, { _user: true });
+  if(!m.id){ showToast('IDが生成されませんでした'); return; }
+  // まずローカルに即時反映
+  _addTopicLocally(g);
+  if(state.ghPat){
+    // PAT があれば GitHub に push して全員に共有
+    var btn = document.getElementById('reg-submit-btn');
+    if(btn){ btn.disabled=true; btn.textContent='GitHubに保存中…'; }
+    _pushTopicToGitHub(g)
+      .then(function(){
+        closeRegister();
+        showToast('記録を追加しました。全員に公開されます（反映まで1〜2分）', 4000);
+        if(m.id) goTopic(m.id);
+      })
+      .catch(function(e){
+        closeRegister();
+        showToast('この端末に保存しました（GitHub同期失敗: '+e.message+'）', 5000);
+        if(m.id) goTopic(m.id);
+      });
+  } else {
+    closeRegister();
+    showToast('この端末に保存しました。全員に公開するには設定でGitHub PATを設定してください。', 5000);
+    if(m.id) goTopic(m.id);
+  }
 }
 
 function submitSimpleRegistration(){
@@ -846,7 +1021,7 @@ function _formatRegIssueBody(){
 
 // ===== 状態 =====
 const _persisted = loadPersistedState();
-let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'', conceptSeen:_persisted.conceptSeen||false };
+let state = { nav:"home", exploreDepth:0, selectedCat:null, selectedSub:null, searchTab:0, searched:false, currentTopicId:"hakamada_muzai", searchQuery:"", exploreQuery:"", sensitivity:_persisted.sensitivity||3, colorMode:_persisted.colorMode||"normal", homeTab:"alerts", rankingPeriod:"day", history:_persisted.history||[], sourceDetail:null, navStack:[], searchFocused:false, filters:{ cats:[], types:[], trust:"", period:"", alert:"" }, isPremium:_persisted.isPremium||false, readAlerts:_persisted.readAlerts||[], alertFilter:'all', searchPhase:null, timelineOrder:'asc', sourceSort:'score', showOtherMedia:false, expandedMediaId:null, ghPat:_persisted.ghPat||'', conceptSeen:_persisted.conceptSeen||false, anthropicKey:_persisted.anthropicKey||'', submissions:_persisted.submissions||[] };
 
 
 // カラーパレット定義
@@ -865,6 +1040,143 @@ function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(
 // ===== ユーティリティ =====
 function scoreColor(s){ const p=P(); return s>=90?p.high:s>=70?p.mid:s>=50?p.warn:p.danger; }
 function scoreLabel(s){ return s>=90?"確証度 高":s>=70?"確証度 中":s>=50?"確証度 低":"未検証"; }
+
+function _staleMonths(dateStr){
+  var m=(dateStr||'').match(/(\d{4})年(\d{1,2})月/);
+  if(!m) return null;
+  var d=new Date(parseInt(m[1]),parseInt(m[2])-1,1);
+  var now=new Date();
+  return (now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());
+}
+function staleBadgeHtml(dateStr){
+  var mo=_staleMonths(dateStr);
+  if(mo===null||mo<6) return '';
+  return '<span style="font-size:10px;color:#FF9800;background:#FF980011;border:1px solid #FF980033;border-radius:99px;padding:1px 7px;margin-left:6px">⏰ '+mo+'ヶ月前</span>';
+}
+
+function _saveSubmission(keywords, issueTitle){
+  var s=state.submissions||[];
+  s.unshift({ keywords:keywords, issueTitle:issueTitle, date:new Date().toLocaleDateString('ja-JP') });
+  state.submissions=s.slice(0,10);
+  persistState();
+}
+
+function _addTopicLocally(generated){
+  var g = generated || {};
+  var m = Object.assign({}, g.meta_entry || {}, { _user: true });
+  if(!m.id) return false;
+  if(FACT_TOPICS.find(function(t){ return t.id===m.id; })) return false;
+  FACT_TOPICS.unshift(m);
+  TOPIC_DATA[m.id] = { sources: g.detail_sources || [] };
+  try {
+    var stored = JSON.parse(localStorage.getItem('fact_user_topics') || '{"meta":[],"detail":{}}');
+    stored.meta = stored.meta.filter(function(t){ return t.id!==m.id; });
+    stored.meta.unshift(m);
+    stored.detail[m.id] = { sources: g.detail_sources || [] };
+    localStorage.setItem('fact_user_topics', JSON.stringify(stored));
+  } catch(e){}
+  return true;
+}
+
+const _GH_REPO = 'shuichi0725-cmyk/fact-prototype';
+const _GH_API  = 'https://api.github.com/repos/' + _GH_REPO + '/contents/';
+
+async function _ghGetFile(path){
+  var res = await fetch(_GH_API + path, {
+    headers:{ 'Authorization':'Bearer '+state.ghPat, 'Accept':'application/vnd.github+json' }
+  });
+  if(!res.ok) throw new Error('GET '+path+' -> '+res.status);
+  var d = await res.json();
+  return { json: JSON.parse(atob(d.content.replace(/\n/g,''))), sha: d.sha };
+}
+
+async function _ghPutFile(path, content, sha, message){
+  var res = await fetch(_GH_API + path, {
+    method:'PUT',
+    headers:{ 'Authorization':'Bearer '+state.ghPat, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json' },
+    body: JSON.stringify({ message:message, content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))), sha:sha, branch:'main' })
+  });
+  if(!res.ok){ var e=await res.json(); throw new Error(e.message||res.status); }
+}
+
+async function _pushTopicToGitHub(generated){
+  var g = generated || {};
+  var m = g.meta_entry || {};
+  var topicId = m.id || g.topic_id;
+
+  // topics_meta.json を更新
+  var meta = await _ghGetFile('data/topics_meta.json');
+  if(meta.json.FACT_TOPICS.find(function(t){ return t.id===topicId; })){
+    throw new Error('このIDはすでに登録済みです');
+  }
+  meta.json.FACT_TOPICS.push(Object.assign({}, m, { _user: undefined }));
+  await _ghPutFile('data/topics_meta.json', meta.json, meta.sha, 'feat: トピック追加 - ' + m.title);
+
+  // topics_detail.json を更新
+  var detail = await _ghGetFile('data/topics_detail.json');
+  detail.json.TOPIC_DATA[topicId] = { sources: g.detail_sources || [] };
+  await _ghPutFile('data/topics_detail.json', detail.json, detail.sha, 'feat: ソースデータ追加 - ' + topicId);
+}
+
+function proposeUpdate(){
+  var t=FACT_TOPICS.find(function(x){ return x.id===state.currentTopicId; });
+  if(!t) return;
+  _regState = { phase:'update', updateTopic: t };
+  var existing = document.getElementById('reg-overlay');
+  if(existing){ existing.classList.add('show'); _renderReg(); return; }
+  document.body.insertAdjacentHTML('beforeend',
+    '<div id="reg-overlay" class="show" onclick="if(event.target===this)closeRegister()">' +
+    '<div id="reg-box"></div></div>'
+  );
+  _renderReg();
+}
+
+function _regUpdateHTML(){
+  var t = _regState.updateTopic || {};
+  var hasPat = !!state.ghPat;
+  return '<div style="background:#4a9eff11;border:1px solid #4a9eff33;border-radius:10px;padding:12px;margin-bottom:16px">' +
+    '<div style="font-size:11px;color:var(--text-2);margin-bottom:3px">対象記録</div>' +
+    '<div style="font-size:14px;font-weight:700;color:var(--text-1)">' + escapeHtml(t.title||'') + '</div>' +
+    '</div>' +
+    '<label class="reg-label" style="display:block;margin-bottom:5px">更新・修正の内容 <span class="reg-required">必須</span></label>' +
+    '<textarea class="reg-input" id="reg-update-body" placeholder="例：ソースURLが古くなっています。最新記事は…" style="min-height:100px;margin-bottom:16px"></textarea>' +
+    (hasPat
+      ? '<button onclick="submitUpdateProposal()" id="reg-update-btn" style="width:100%;padding:13px;background:var(--brand);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">送信する</button>' +
+        '<div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:8px">GitHub Issue として直接送信されます</div>'
+      : '<div style="background:#FF980011;border:1px solid #FF980033;border-radius:10px;padding:12px;font-size:12px;color:var(--text-2);line-height:1.7">' +
+        '⚠️ 直接送信するには設定から <strong style="color:var(--text-1)">GitHub PAT</strong> を設定してください。' +
+        '<button onclick="closeRegister();switchNav(\'settings\')" style="display:block;width:100%;margin-top:8px;padding:9px;background:var(--brand);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">設定を開く →</button>' +
+        '</div>'
+    );
+}
+
+function submitUpdateProposal(){
+  var bodyEl = document.getElementById('reg-update-body');
+  var body = bodyEl ? bodyEl.value.trim() : '';
+  if(!body){ showToast('更新内容を入力してください'); return; }
+  var t = _regState.updateTopic || {};
+  var issueTitle = '[UPDATE申請] ' + (t.title||'');
+  var issueBody  = '### 対象トピック\n\n' + (t.title||'') + ' (' + (t.id||'') + ')\n\n' +
+    '### 更新・修正の内容\n\n' + body;
+  var btn = document.getElementById('reg-update-btn');
+  if(btn){ btn.disabled=true; btn.textContent='送信中…'; }
+  fetch('https://api.github.com/repos/shuichi0725-cmyk/fact-prototype/issues', {
+    method:'POST',
+    headers:{ 'Authorization':'Bearer '+state.ghPat, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json' },
+    body: JSON.stringify({ title: issueTitle, body: issueBody }),
+  })
+  .then(function(res){ if(!res.ok) throw new Error(res.status); return res.json(); })
+  .then(function(issue){
+    _saveSubmission(t.title||'', issueTitle);
+    closeRegister();
+    showToast('更新提案を送信しました（Issue #'+issue.number+'）', 4000);
+  })
+  .catch(function(e){
+    if(btn){ btn.disabled=false; btn.textContent='送信する'; }
+    showToast('送信に失敗しました: '+e.message, 4000);
+  });
+}
+
 function alertColor(t){ const p=P(); return {bias:p.bias,fact:p.fact,sns:p.sns,old:p.old,conflict:p.conflict}[t]||p.warn; }
 function alertIcon(t){  return {bias:"📰",fact:"⚠️",sns:"📣",old:"🕐",conflict:"⚖️"}[t]||"⚠️"; }
 function typeClass(t){ return {公共放送:"tag-nhk",主要紙:"tag-paper",政府機関:"tag-gov",学術:"tag-academic"}[t]||""; }
@@ -1485,8 +1797,9 @@ function renderSearchResults(p){
       ' data-tid="' + t.id + '" data-ttl="' + t.title.replace(/"/g,'&quot;') + '"' +
       ' onclick="goTopicDetail(this)">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
-      '<div style="display:flex;align-items:center;gap:6px">' +
+      '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
       '<span style="font-size:11px;color:var(--text-2);background:#1a2a4a;padding:2px 8px;border-radius:99px">' + t.cat + '</span>' +
+      (t._user ? '<span style="font-size:10px;color:#7b5cff;background:#7b5cff11;padding:2px 7px;border-radius:99px;border:1px solid #7b5cff33">👤 あなたの記録</span>' : '') +
       alertBadge +
       visitedBadge +
       '</div>' +
@@ -1500,6 +1813,7 @@ function renderSearchResults(p){
       '<div style="display:flex;align-items:center;gap:10px">' +
       '<span style="font-size:11px;color:var(--text-2)">📰 ' + srcCount + '件のソースを分析</span>' +
       '<span style="font-size:11px;color:var(--text-2)">📅 ' + t.date + '</span>' +
+      staleBadgeHtml(t.date) +
       '</div>' +
       '<div style="font-size:12px;color:' + p.brand + ';font-weight:600">詳細を見る →</div>' +
       '</div>' +
@@ -1551,6 +1865,7 @@ function renderSearchDetail(p){
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
     '<button onclick="popNav()" style="padding:5px 10px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:#4a9eff;font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 戻る</button>' +
     '<span style="font-size:13px;color:#e0e6f0;flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(q) + '</span>' +
+    '<button onclick="proposeUpdate()" style="flex-shrink:0;padding:5px 10px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:var(--text-2);font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;white-space:nowrap">✏️ 更新提案</button>' +
     '</div>' +
     // タブバー
     '<div id="search-tab-bar" style="display:flex;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none">' +
@@ -1742,7 +2057,10 @@ function renderSummaryTab(){
     '<div style="height:8px;background:#1a2035;border-radius:99px;overflow:hidden;margin-bottom:6px">' +
     '<div style="width:' + currentTopic.score + '%;height:100%;background:linear-gradient(90deg,' + c + '88,' + c + ');border-radius:99px"></div>' +
     '</div>' +
-    '<div style="font-size:11px;color:' + c + ';font-weight:600;margin-bottom:6px">● ' + scoreLabel(currentTopic.score) + '</div>' +
+    '<div style="display:flex;align-items:center;margin-bottom:6px">' +
+    '<span style="font-size:11px;color:' + c + ';font-weight:600">● ' + scoreLabel(currentTopic.score) + '</span>' +
+    staleBadgeHtml(currentTopic.date) +
+    '</div>' +
     '<div style="font-size:11px;color:var(--text-2);line-height:1.6">' + scoreReason + '</div>' +
     '</div>' +
     '<div style="margin-bottom:4px">' +
@@ -2948,6 +3266,14 @@ function loadInitialData(){
       var meta = results[0];
       var home = results[1];
       FACT_TOPICS = meta.FACT_TOPICS;
+      // ユーザー追加トピック（localStorage）をマージ（サーバー側が同IDを持つ場合はサーバー優先）
+      try {
+        var _ut = JSON.parse(localStorage.getItem('fact_user_topics') || '{"meta":[]}');
+        if(_ut.meta && _ut.meta.length){
+          var _sids = FACT_TOPICS.map(function(t){ return t.id; });
+          FACT_TOPICS = _ut.meta.filter(function(t){ return _sids.indexOf(t.id)<0; }).concat(FACT_TOPICS);
+        }
+      } catch(e){}
       // CATEGORY_DEFS に count・alert を付与して CATEGORIES を確定
       CATEGORIES = CATEGORY_DEFS.map(function(def){
         return Object.assign({}, def, {
