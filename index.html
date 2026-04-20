@@ -811,9 +811,11 @@ async function generateWithAI(){
     '以下のキーワードに関連する詳細なトピック記録を生成してください。\n\n' +
     'キーワード: ' + _regState.keywords + '\n\n' +
     '指示:\n' +
-    '- summaryは400〜600字で背景・経緯・現状・重要ポイントをすべて含めること\n' +
-    '- detail_sourcesには実際にこのトピックを報道しそうな信頼性の高いメディア3〜5件を生成すること\n' +
-    '- 各ソースにはそのメディアが報道しそうな記事を1〜3件含めること\n' +
+    '- summaryは200〜300字の概要\n' +
+    '- detailSummaryは600〜1000字で背景・経緯・現状・重要ポイントをすべて含める\n' +
+    '- detail_sourcesはこのトピックを報道しそうな信頼性の高いメディア3〜5件（各1〜3記事）\n' +
+    '- timelineはトピックに関する重要な出来事を時系列で5〜10件\n' +
+    '- perspectivesは異なる立場の視点を3〜4件（政府・専門家・支持派・批判派など）\n' +
     '- URLは各メディアの公式サイトのドメインを使った推定URLで可\n' +
     '- scoreはメディアの信頼度（NHK/官公庁=95前後、全国紙=88〜92、通信社=90〜94）\n\n' +
     '以下のJSON形式のみを返してください（マークダウン不要、コードブロック不要）:\n' +
@@ -827,10 +829,23 @@ async function generateWithAI(){
     '    "score": 0,\n' +
     '    "sourceCount": 0,\n' +
     '    "date": "推定される基準日（YYYY年MM月DD日）",\n' +
-    '    "summary": "400〜600字の詳細な概要",\n' +
+    '    "summary": "200〜300字の概要",\n' +
     '    "tags": ["タグ1","タグ2","タグ3","タグ4","タグ5"],\n' +
     '    "alert": null\n' +
     '  },\n' +
+    '  "detailSummary": "600〜1000字の詳細な解説",\n' +
+    '  "scoreReason": "信頼度スコアの根拠（50〜100字）",\n' +
+    '  "timeline": [\n' +
+    '    { "date": "YYYY年MM月DD日", "event": "出来事の説明（50〜100字）", "alert": false }\n' +
+    '  ],\n' +
+    '  "perspectives": [\n' +
+    '    {\n' +
+    '      "stance": "立場名（例: 政府・当局）",\n' +
+    '      "color": "#4a9eff",\n' +
+    '      "summary": "この立場の主張（100〜150字）",\n' +
+    '      "sources": ["情報源名"]\n' +
+    '    }\n' +
+    '  ],\n' +
     '  "detail_sources": [\n' +
     '    {\n' +
     '      "id": 0,\n' +
@@ -1066,12 +1081,13 @@ function _addTopicLocally(generated){
   if(!m.id) return false;
   if(FACT_TOPICS.find(function(t){ return t.id===m.id; })) return false;
   FACT_TOPICS.unshift(m);
-  TOPIC_DATA[m.id] = { sources: g.detail_sources || [] };
+  var detailObj = { sources: g.detail_sources || [], timeline: g.timeline || [], perspectives: g.perspectives || [], detailSummary: g.detailSummary || '', scoreReason: g.scoreReason || '' };
+  TOPIC_DATA[m.id] = detailObj;
   try {
     var stored = JSON.parse(localStorage.getItem('fact_user_topics') || '{"meta":[],"detail":{}}');
     stored.meta = stored.meta.filter(function(t){ return t.id!==m.id; });
     stored.meta.unshift(m);
-    stored.detail[m.id] = { sources: g.detail_sources || [] };
+    stored.detail[m.id] = detailObj;
     localStorage.setItem('fact_user_topics', JSON.stringify(stored));
   } catch(e){}
   return true;
@@ -1113,7 +1129,7 @@ async function _pushTopicToGitHub(generated){
 
   // topics_detail.json を更新
   var detail = await _ghGetFile('data/topics_detail.json');
-  detail.json.TOPIC_DATA[topicId] = { sources: g.detail_sources || [] };
+  detail.json.TOPIC_DATA[topicId] = { sources: g.detail_sources || [], timeline: g.timeline || [], perspectives: g.perspectives || [], detailSummary: g.detailSummary || '', scoreReason: g.scoreReason || '' };
   await _ghPutFile('data/topics_detail.json', detail.json, detail.sha, 'feat: ソースデータ追加 - ' + topicId);
 }
 
