@@ -1045,6 +1045,7 @@ async function generateWithAI(){
 
 function submitAIGenerated(){
   var g = _regState.generated || {};
+  g._aiGenerated = true;
   var m = Object.assign({}, g.meta_entry || {}, { _user: true, _aiGenerated: true });
   if(!m.id){ showToast('IDが生成されませんでした'); return; }
   if(!_authUser){ _fbLoginThenAction(function(){ submitAIGenerated(); }); return; }
@@ -1235,6 +1236,7 @@ async function _saveTopicToFirestore(generated){
     detailSummary: g.detailSummary || '',
     scoreReason: g.scoreReason || '',
     relatedTopics: g.relatedTopics || [],
+    _aiGenerated: g._aiGenerated || false,
     _updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     _updatedBy: _authUser.email || _authUser.uid
   });
@@ -3459,7 +3461,7 @@ function loadInitialData(){
           var topics = []; var detail = {};
           snap.forEach(function(doc){
             var d = doc.data();
-            topics.push({ id:d.id, title:d.title, cat:d.cat, subcat:d.subcat, score:d.score||0, sourceCount:(d.sources||[]).length, date:d.date, summary:d.summary, tags:d.tags||[], alert:d.alert||null });
+            topics.push({ id:d.id, title:d.title, cat:d.cat, subcat:d.subcat, score:d.score||0, sourceCount:(d.sources||[]).length, date:d.date, summary:d.summary, tags:d.tags||[], alert:d.alert||null, _aiGenerated:d._aiGenerated||false });
             detail[d.id] = { sources:d.sources||[], timeline:d.timeline||[], perspectives:d.perspectives||[], detailSummary:d.detailSummary||'', scoreReason:d.scoreReason||'', relatedTopics:d.relatedTopics||[] };
           });
           return { FACT_TOPICS: topics, _detail: detail };
@@ -3472,14 +3474,8 @@ function loadInitialData(){
       var home = results[1];
       FACT_TOPICS = meta.FACT_TOPICS;
       if(meta._detail){ Object.assign(TOPIC_DATA, meta._detail); _detailLoaded = true; }
-      // ユーザー追加トピック（localStorage）をマージ（サーバー側が同IDを持つ場合はサーバー優先）
-      try {
-        var _ut = JSON.parse(localStorage.getItem('fact_user_topics') || '{"meta":[]}');
-        if(_ut.meta && _ut.meta.length){
-          var _sids = FACT_TOPICS.map(function(t){ return t.id; });
-          FACT_TOPICS = _ut.meta.filter(function(t){ return _sids.indexOf(t.id)<0; }).concat(FACT_TOPICS);
-        }
-      } catch(e){}
+      // Firestore移行後は fact_user_topics localStorage は不要なので削除
+      localStorage.removeItem('fact_user_topics');
       // CATEGORY_DEFS に count・alert を付与して CATEGORIES を確定
       CATEGORIES = CATEGORY_DEFS.map(function(def){
         return Object.assign({}, def, {
