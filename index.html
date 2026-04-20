@@ -780,7 +780,7 @@ function searchRegTopic(){
   var matches = FACT_TOPICS.filter(function(t){
     var haystack = (t.title + ' ' + (t.summary||'') + ' ' + (t.tags||[]).join(' ')).toLowerCase();
     return terms.some(function(k){ return haystack.includes(k); });
-  }).slice(0, 3);
+  }).slice(0, 5);
   _regState.phase = matches.length ? 'found' : 'notfound';
   _regState.matches = matches;
   _renderReg();
@@ -796,7 +796,7 @@ function _regFoundHTML(){
       '<div style="font-size:11px;color:' + c + ';font-weight:700">' + scoreLabel(t.score) + '　' + escapeHtml(t.cat) + '</div>' +
       '</div>';
   }).join('');
-  return '<div style="font-size:12px;font-weight:700;color:#4CAF50;margin-bottom:12px">✅ 「' + escapeHtml(_regState.keywords) + '」の記録が見つかりました</div>' +
+  return '<div style="font-size:12px;font-weight:700;color:#4CAF50;margin-bottom:12px">✅ 「' + escapeHtml(_regState.keywords) + '」に関連する記録が ' + _regState.matches.length + ' 件見つかりました</div>' +
     cards +
     '<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">' +
     '<div style="font-size:12px;color:var(--text-2);margin-bottom:8px">探している記録と違いますか？</div>' +
@@ -1115,6 +1115,15 @@ function _saveSubmission(keywords, issueTitle){
   persistState();
 }
 
+function _recalcCategories(){
+  CATEGORIES = CATEGORY_DEFS.map(function(def){
+    return Object.assign({}, def, {
+      count: FACT_TOPICS.filter(function(t){ return t.cat === def.label; }).length,
+      alert: FACT_TOPICS.some(function(t){ return t.cat === def.label && !!t.alert; })
+    });
+  });
+}
+
 function _addTopicLocally(generated){
   var g = generated || {};
   var m = Object.assign({}, g.meta_entry || {}, { _user: true });
@@ -1123,6 +1132,7 @@ function _addTopicLocally(generated){
   FACT_TOPICS.unshift(m);
   var detailObj = { sources: g.detail_sources || [], timeline: g.timeline || [], perspectives: g.perspectives || [], detailSummary: g.detailSummary || '', scoreReason: g.scoreReason || '' };
   TOPIC_DATA[m.id] = detailObj;
+  _recalcCategories();
   return true;
 }
 
