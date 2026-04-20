@@ -741,12 +741,14 @@ function _regHeader(){
 }
 
 function _regBody(){
-  if(_regState.phase === 'input')      return _regInputHTML();
-  if(_regState.phase === 'found')      return _regFoundHTML();
-  if(_regState.phase === 'notfound')   return _regNotFoundHTML();
-  if(_regState.phase === 'generating') return _regGeneratingHTML();
-  if(_regState.phase === 'preview')    return _regPreviewHTML();
-  if(_regState.phase === 'update')     return _regUpdateHTML();
+  if(_regState.phase === 'input')             return _regInputHTML();
+  if(_regState.phase === 'found')             return _regFoundHTML();
+  if(_regState.phase === 'notfound')          return _regNotFoundHTML();
+  if(_regState.phase === 'candidatesLoading') return _regCandidatesLoadingHTML();
+  if(_regState.phase === 'candidates')        return _regCandidatesHTML();
+  if(_regState.phase === 'generating')        return _regGeneratingHTML();
+  if(_regState.phase === 'preview')           return _regPreviewHTML();
+  if(_regState.phase === 'update')            return _regUpdateHTML();
   return '';
 }
 
@@ -825,7 +827,7 @@ function _regNotFoundHTML(){
     '🔑 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--brand)">Google AI Studio</a> で無料取得（クレジットカード不要・Googleアカウントで即時発行）</div>' +
     '<label class="reg-label" style="display:block;margin-bottom:5px">Gemini APIキー</label>' +
     '<input class="reg-input" id="reg-api-key" type="password" placeholder="AIza..." value="' + savedKey + '" onfocus="if(this.value.includes(\'●\'))this.value=\'\'" style="margin-bottom:10px">' +
-    '<button onclick="generateWithAI()" style="width:100%;padding:13px;background:linear-gradient(135deg,#4a9eff,#7b5cff);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;margin-bottom:10px">✨ AIで記録を自動生成</button>' +
+    '<button onclick="generateCandidates()" style="width:100%;padding:13px;background:linear-gradient(135deg,#4a9eff,#7b5cff);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;margin-bottom:10px">🔍 該当する事件の候補を探す</button>' +
     '<button onclick="_regState.phase=\'input\';_renderReg()" style="width:100%;padding:9px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 検索に戻る</button>';
 }
 
@@ -840,11 +842,85 @@ function _manualApply(){
   showToast('GitHubのページで「Submit new issue」を押してください', 5000);
 }
 
+async function generateCandidates(){
+  var keyInput = document.getElementById('reg-api-key');
+  var apiKey = (keyInput && !keyInput.value.includes('●')) ? keyInput.value.trim() : state.geminiKey;
+  if(!apiKey){ showToast('Gemini APIキーを入力してください'); return; }
+  state.geminiKey = apiKey;
+  persistState();
+  _regState.phase = 'candidatesLoading';
+  _renderReg();
+
+  var prompt = '「' + _regState.keywords + '」というキーワードに関連する実在する日本の事件・出来事・ニュースを最大5件リストアップしてください。\n\n' +
+    '【厳守】実際に確実に知っている事実のみ記載すること。存在しない事件を捏造しないこと。\n\n' +
+    '以下のJSON配列のみを返してください（マークダウン不要）:\n' +
+    '[\n  {\n    "title": "事件・出来事の名称",\n    "date": "おおよその時期（例: 2008年2月）",\n    "description": "2〜3文の概要（確実な情報のみ）",\n    "location": "場所（都道府県・地名など）"\n  }\n]';
+
+  try {
+    var res = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=' + encodeURIComponent(apiKey),
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
+    );
+    var data = await res.json();
+    if(!res.ok) throw new Error((data.error||{}).message || res.status);
+    var text = data.candidates[0].content.parts[0].text.trim();
+    var match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    _regState.candidates = JSON.parse(match ? match[1] : text);
+    _regState.phase = 'candidates';
+    _renderReg();
+  } catch(e) {
+    _regState.phase = 'notfound';
+    _renderReg();
+    showToast('候補取得エラー: ' + e.message, 5000);
+  }
+}
+
+function selectCandidate(i){
+  var c = (_regState.candidates || [])[i];
+  if(!c) return;
+  _regState.selectedCandidate = c;
+  _regState.phase = 'generating';
+  _renderReg();
+  generateWithAI();
+}
+
+function _regCandidatesLoadingHTML(){
+  return '<div style="text-align:center;padding:32px 0">' +
+    '<div style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div>' +
+    '<div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:6px">候補を検索中…</div>' +
+    '<div style="font-size:12px;color:var(--text-2)">「' + escapeHtml(_regState.keywords) + '」に関連する事件を探しています</div>' +
+    '</div>';
+}
+
+function _regCandidatesHTML(){
+  var candidates = _regState.candidates || [];
+  if(candidates.length === 0){
+    return '<div style="text-align:center;padding:20px;font-size:13px;color:var(--text-2)">候補が見つかりませんでした</div>' +
+      '<button onclick="generateWithAI()" style="width:100%;padding:12px;background:linear-gradient(135deg,#4a9eff,#7b5cff);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;margin-bottom:8px">✨ キーワードのままAI生成する</button>' +
+      '<button onclick="_regState.phase=\'notfound\';_renderReg()" style="width:100%;padding:9px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 戻る</button>';
+  }
+  var cards = candidates.map(function(c, i){
+    return '<div class="card clickable" style="margin-bottom:8px;padding:12px" onclick="selectCandidate(' + i + ')">' +
+      '<div style="font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:4px">' + escapeHtml(c.title||'') + '</div>' +
+      '<div style="font-size:11px;color:var(--brand);margin-bottom:5px">' + escapeHtml(c.date||'') + (c.location ? '　📍' + escapeHtml(c.location) : '') + '</div>' +
+      '<div style="font-size:12px;color:var(--text-2);line-height:1.6">' + escapeHtml(c.description||'') + '</div>' +
+      '<div style="text-align:right;font-size:11px;color:var(--brand);margin-top:6px">この事件を記録する →</div>' +
+      '</div>';
+  }).join('');
+  return '<div style="font-size:12px;font-weight:700;color:var(--brand);margin-bottom:4px">🔍 「' + escapeHtml(_regState.keywords) + '」の候補</div>' +
+    '<div style="font-size:11px;color:var(--text-2);margin-bottom:12px">記録したい事件をタップしてください</div>' +
+    cards +
+    '<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">' +
+    '<button onclick="_regState.phase=\'notfound\';_renderReg()" style="width:100%;padding:9px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 戻る</button>' +
+    '</div>';
+}
+
 function _regGeneratingHTML(){
   return '<div style="text-align:center;padding:32px 0">' +
     '<div style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div>' +
     '<div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:6px">AIが記録を生成中…</div>' +
-    '<div style="font-size:12px;color:var(--text-2)">「' + escapeHtml(_regState.keywords) + '」の情報を構造化しています</div>' +
+    '<div style="font-size:12px;color:var(--text-2)">「' + escapeHtml((_regState.selectedCandidate||{}).title || _regState.keywords) + '」の情報を構造化しています</div>' +
     '</div>';
 }
 
@@ -877,9 +953,14 @@ async function generateWithAI(){
   _regState.phase = 'generating';
   _renderReg();
 
+  var sc = _regState.selectedCandidate;
+  var candidateContext = sc
+    ? '対象事件: ' + sc.title + '\n時期: ' + (sc.date||'不明') + '\n場所: ' + (sc.location||'不明') + '\n概要: ' + (sc.description||'') + '\n\n'
+    : '';
+
   var prompt = 'あなたはFACTというファクトチェックサービスのコンテンツ編集者です。\n' +
-    '以下のキーワードに関連するトピック記録を生成してください。\n\n' +
-    'キーワード: ' + _regState.keywords + '\n\n' +
+    '以下の事件・出来事のトピック記録を生成してください。\n\n' +
+    (candidateContext ? candidateContext : 'キーワード: ' + _regState.keywords + '\n\n') +
     '【厳守事項】\n' +
     '- 実際に知っている確実な事実のみ記載すること\n' +
     '- 日付・URL・固有名詞・事件の詳細を推測・捏造しないこと\n' +
