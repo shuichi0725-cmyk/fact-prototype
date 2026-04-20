@@ -780,7 +780,7 @@ function searchRegTopic(){
   var matches = FACT_TOPICS.filter(function(t){
     var haystack = (t.title + ' ' + (t.summary||'') + ' ' + (t.tags||[]).join(' ')).toLowerCase();
     return terms.some(function(k){ return haystack.includes(k); });
-  }).slice(0, 3);
+  }).slice(0, 5);
   _regState.phase = matches.length ? 'found' : 'notfound';
   _regState.matches = matches;
   _renderReg();
@@ -796,7 +796,7 @@ function _regFoundHTML(){
       '<div style="font-size:11px;color:' + c + ';font-weight:700">' + scoreLabel(t.score) + '　' + escapeHtml(t.cat) + '</div>' +
       '</div>';
   }).join('');
-  return '<div style="font-size:12px;font-weight:700;color:#4CAF50;margin-bottom:12px">✅ 「' + escapeHtml(_regState.keywords) + '」の記録が見つかりました</div>' +
+  return '<div style="font-size:12px;font-weight:700;color:#4CAF50;margin-bottom:12px">✅ 「' + escapeHtml(_regState.keywords) + '」に関連する記録が ' + _regState.matches.length + ' 件見つかりました</div>' +
     cards +
     '<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">' +
     '<div style="font-size:12px;color:var(--text-2);margin-bottom:8px">探している記録と違いますか？</div>' +
@@ -878,15 +878,18 @@ async function generateWithAI(){
   _renderReg();
 
   var prompt = 'あなたはFACTというファクトチェックサービスのコンテンツ編集者です。\n' +
-    '以下のキーワードに関連する詳細なトピック記録を生成してください。\n\n' +
+    '以下のキーワードに関連するトピック記録を生成してください。\n\n' +
     'キーワード: ' + _regState.keywords + '\n\n' +
+    '【厳守事項】\n' +
+    '- 実際に知っている確実な事実のみ記載すること\n' +
+    '- 日付・URL・固有名詞・事件の詳細を推測・捏造しないこと\n' +
+    '- 不明な情報は空文字列または空配列にすること（でたらめな情報を埋めない）\n\n' +
     '指示:\n' +
-    '- summaryは200〜300字の概要\n' +
-    '- detailSummaryは600〜1000字で背景・経緯・現状・重要ポイントをすべて含める\n' +
-    '- detail_sourcesはこのトピックを報道しそうな信頼性の高いメディア3〜5件（各1〜3記事）\n' +
-    '- timelineはトピックに関する重要な出来事を時系列で5〜10件\n' +
-    '- perspectivesは異なる立場の視点を3〜4件（政府・専門家・支持派・批判派など）\n' +
-    '- URLは各メディアの公式サイトのドメインを使った推定URLで可\n' +
+    '- summaryは200〜300字の概要（確実な事実のみ）\n' +
+    '- detailSummaryは600〜1000字で背景・経緯・重要ポイント（推測は「〜とされる」「〜と報道されている」などの表現を使う）\n' +
+    '- detail_sourcesはこのトピックを実際に報道したと知っている信頼性の高いメディア（URLは確実に分かる場合のみ記載、不明なら空文字列）\n' +
+    '- timelineは確実に知っている重要な出来事のみ（日付が不明な場合は「（日付不明）」を使う、捏造しない）\n' +
+    '- perspectivesは異なる立場の視点を2〜4件（実際に存在する立場のみ）\n' +
     '- scoreはメディアの信頼度（NHK/官公庁=95前後、全国紙=88〜92、通信社=90〜94）\n\n' +
     '以下のJSON形式のみを返してください（マークダウン不要、コードブロック不要）:\n' +
     '{\n' +
@@ -898,15 +901,15 @@ async function generateWithAI(){
     '    "subcat": "サブカテゴリ",\n' +
     '    "score": 0,\n' +
     '    "sourceCount": 0,\n' +
-    '    "date": "推定される基準日（YYYY年MM月DD日）",\n' +
+    '    "date": "確実に分かる基準日（YYYY年MM月DD日）、不明なら空文字列",\n' +
     '    "summary": "200〜300字の概要",\n' +
     '    "tags": ["タグ1","タグ2","タグ3","タグ4","タグ5"],\n' +
     '    "alert": null\n' +
     '  },\n' +
-    '  "detailSummary": "600〜1000字の詳細な解説",\n' +
+    '  "detailSummary": "600〜1000字の詳細な解説（推測部分は「〜とされる」等の表現を使う）",\n' +
     '  "scoreReason": "信頼度スコアの根拠（50〜100字）",\n' +
     '  "timeline": [\n' +
-    '    { "date": "YYYY年MM月DD日", "event": "出来事の説明（50〜100字）", "alert": false }\n' +
+    '    { "date": "YYYY年MM月DD日（確実な場合のみ、不明なら（日付不明））", "event": "確実な出来事の説明（50〜100字）", "alert": false }\n' +
     '  ],\n' +
     '  "perspectives": [\n' +
     '    {\n' +
@@ -920,14 +923,14 @@ async function generateWithAI(){
     '    {\n' +
     '      "id": 0,\n' +
     '      "lang": "ja",\n' +
-    '      "org": "報道機関名",\n' +
+    '      "org": "実在する報道機関名",\n' +
     '      "type": "公共放送または全国紙または通信社または地方紙または海外メディア",\n' +
     '      "score": 95,\n' +
     '      "articles": [\n' +
     '        {\n' +
-    '          "title": "記事タイトル",\n' +
-    '          "date": "YYYY年MM月DD日",\n' +
-    '          "url": "https://推定URL",\n' +
+    '          "title": "確実に存在する記事タイトル（不明なら空文字列）",\n' +
+    '          "date": "確実な記事日付（不明なら空文字列）",\n' +
+    '          "url": "確実に分かるURL（不明なら空文字列。推測URL禁止）",\n' +
     '          "summary": "記事内容の要約（100〜150字）"\n' +
     '        }\n' +
     '      ],\n' +
@@ -961,7 +964,7 @@ async function generateWithAI(){
 
 function submitAIGenerated(){
   var g = _regState.generated || {};
-  var m = Object.assign({}, g.meta_entry || {}, { _user: true });
+  var m = Object.assign({}, g.meta_entry || {}, { _user: true, _aiGenerated: true });
   if(!m.id){ showToast('IDが生成されませんでした'); return; }
   if(!_authUser){ _fbLoginThenAction(function(){ submitAIGenerated(); }); return; }
   var btn = document.getElementById('reg-submit-btn');
@@ -1115,6 +1118,15 @@ function _saveSubmission(keywords, issueTitle){
   persistState();
 }
 
+function _recalcCategories(){
+  CATEGORIES = CATEGORY_DEFS.map(function(def){
+    return Object.assign({}, def, {
+      count: FACT_TOPICS.filter(function(t){ return t.cat === def.label; }).length,
+      alert: FACT_TOPICS.some(function(t){ return t.cat === def.label && !!t.alert; })
+    });
+  });
+}
+
 function _addTopicLocally(generated){
   var g = generated || {};
   var m = Object.assign({}, g.meta_entry || {}, { _user: true });
@@ -1123,6 +1135,7 @@ function _addTopicLocally(generated){
   FACT_TOPICS.unshift(m);
   var detailObj = { sources: g.detail_sources || [], timeline: g.timeline || [], perspectives: g.perspectives || [], detailSummary: g.detailSummary || '', scoreReason: g.scoreReason || '' };
   TOPIC_DATA[m.id] = detailObj;
+  _recalcCategories();
   return true;
 }
 
@@ -1147,6 +1160,23 @@ async function _saveTopicToFirestore(generated){
   await _db.collection('topics').doc(topicId).set(docData);
 }
 
+
+function deleteTopic(){
+  var t = FACT_TOPICS.find(function(x){ return x.id === state.currentTopicId; });
+  if(!t) return;
+  if(!confirm('「' + t.title + '」を削除しますか？\nこの操作は取り消せません。')) return;
+  if(!_authUser){ showToast('Googleログインが必要です'); return; }
+  var tid = t.id;
+  FACT_TOPICS = FACT_TOPICS.filter(function(x){ return x.id !== tid; });
+  delete TOPIC_DATA[tid];
+  _recalcCategories();
+  popNav();
+  if(_db){
+    _db.collection('topics').doc(tid).delete()
+      .then(function(){ showToast('削除しました', 3000); })
+      .catch(function(e){ showToast('Firestore削除エラー: ' + e.message, 5000); });
+  }
+}
 
 function proposeUpdate(){
   var t=FACT_TOPICS.find(function(x){ return x.id===state.currentTopicId; });
@@ -2107,7 +2137,15 @@ function renderSummaryTab(){
     sourcesHtml = '<div style="padding:12px 0;font-size:12px;color:var(--text-2)">ソースデータを準備中です</div>';
   }
 
-  return '<div class="card" style="margin-bottom:12px">' +
+  var aiGenBanner = currentTopic._aiGenerated
+    ? '<div style="background:#FF980011;border:1px solid #FF980055;border-radius:8px;padding:10px 12px;margin-bottom:12px">' +
+      '<div style="font-size:11px;font-weight:700;color:#FF9800;margin-bottom:3px">⚠️ AI自動生成コンテンツ</div>' +
+      '<div style="font-size:11px;color:var(--text-2);line-height:1.6">この記録はAIが自動生成しました。日付・URL・固有名詞などに誤りが含まれる可能性があります。「✏️ 更新提案」で内容を修正できます。</div>' +
+      '</div>'
+    : '';
+
+  return aiGenBanner +
+    '<div class="card" style="margin-bottom:12px">' +
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
     '<div class="section-title" style="margin-bottom:0">AIサマリー</div>' +
     '<span style="font-size:10px;color:' + p.brand + ';background:' + p.brand + '11;padding:2px 8px;border-radius:99px;border:1px solid ' + p.brand + '33">Claude AI</span>' +
@@ -2143,6 +2181,10 @@ function renderSummaryTab(){
     (summarySourceList && summarySourceList.length > 0
       ? '<button onclick="state.searchTab=2;render()" style="width:100%;margin-top:10px;padding:8px;background:transparent;border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--brand);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600">ソースを全件見る →</button>'
       : '') +
+    '</div>' +
+    '<div style="margin-top:20px;padding-top:16px;border-top:1px solid #1a2a4a">' +
+    '<button onclick="deleteTopic()" style="width:100%;padding:12px;background:transparent;border:1px solid #e4444455;border-radius:8px;font-size:12px;color:#e44;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600">🗑️ この記録を削除する</button>' +
+    '<div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:6px">Googleログイン中のみ削除可能・全員から消えます</div>' +
     '</div>';
 }
 
