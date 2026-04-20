@@ -1965,7 +1965,6 @@ function renderSearchDetail(p){
     '<button onclick="popNav()" style="padding:5px 10px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:#4a9eff;font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 戻る</button>' +
     '<span style="font-size:13px;color:#e0e6f0;flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(q) + '</span>' +
     '<button onclick="proposeUpdate()" style="flex-shrink:0;padding:5px 10px;background:transparent;border:1px solid #1a2a4a;border-radius:99px;color:var(--text-2);font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;white-space:nowrap">✏️ 更新提案</button>' +
-    '<button onclick="deleteTopic()" style="flex-shrink:0;padding:5px 10px;background:transparent;border:1px solid #e4444433;border-radius:99px;color:#e44;font-size:11px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;white-space:nowrap">🗑️</button>' +
     '</div>' +
     // タブバー
     '<div id="search-tab-bar" style="display:flex;overflow-x:auto;gap:0;-webkit-overflow-scrolling:touch;scrollbar-width:none">' +
@@ -2182,6 +2181,10 @@ function renderSummaryTab(){
     (summarySourceList && summarySourceList.length > 0
       ? '<button onclick="state.searchTab=2;render()" style="width:100%;margin-top:10px;padding:8px;background:transparent;border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--brand);cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600">ソースを全件見る →</button>'
       : '') +
+    '</div>' +
+    '<div style="margin-top:20px;padding-top:16px;border-top:1px solid #1a2a4a">' +
+    '<button onclick="deleteTopic()" style="width:100%;padding:12px;background:transparent;border:1px solid #e4444455;border-radius:8px;font-size:12px;color:#e44;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;font-weight:600">🗑️ この記録を削除する</button>' +
+    '<div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:6px">Googleログイン中のみ削除可能・全員から消えます</div>' +
     '</div>';
 }
 
