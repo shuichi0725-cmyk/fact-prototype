@@ -863,14 +863,21 @@ async function generateCandidates(){
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], tools: [{ google_search: {} }] }) }
     );
     var data = await res.json();
+    console.log('[FACT candidates] status:', res.status, 'response:', JSON.stringify(data).slice(0, 2000));
     if(!res.ok) throw new Error((data.error||{}).message || res.status);
-    var parts = data.candidates[0].content.parts || [];
+    var cand = data.candidates && data.candidates[0];
+    if(!cand) throw new Error('candidatesが空: ' + JSON.stringify(data).slice(0,300));
+    console.log('[FACT candidates] finishReason:', cand.finishReason, 'parts:', JSON.stringify(cand.content && cand.content.parts).slice(0,500));
+    var parts = (cand.content && cand.content.parts) || [];
     var text = (parts.find(function(p){ return p.text; }) || {text:''}).text.trim();
+    if(!text) throw new Error('テキスト部分が空。finishReason=' + cand.finishReason);
     var match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    _regState.candidates = JSON.parse(match ? match[1] : text);
+    var parsed = JSON.parse(match ? match[1] : text);
+    _regState.candidates = Array.isArray(parsed) ? parsed : (parsed.candidates || parsed.events || []);
     _regState.phase = 'candidates';
     _renderReg();
   } catch(e) {
+    console.error('[FACT candidates] error:', e);
     _regState.phase = 'notfound';
     _renderReg();
     showToast('候補取得エラー: ' + e.message, 5000);
