@@ -409,31 +409,47 @@ function _factLog(msg){
   console.log('[FACT]', msg);
 }
 var _GEMINI_MODELS = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.1-flash-lite-preview'];
-async function _geminiRequest(apiKey, body){
-  for(var i = 0; i < _GEMINI_MODELS.length; i++){
-    var model = _GEMINI_MODELS[i];
-    _factLog('[AI送信] ' + model);
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(apiKey);
-    var res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    var data = await res.json();
-    _factLog('[AI応答] ' + model + ' status=' + res.status);
-    if(res.status === 503 || res.status === 429){
-      _factLog('[混雑' + res.status + '] ' + model + ' → 次のモデルへ');
-      continue;
+async function _geminiRequest(apiKey, body, onWait){
+  for(var attempt = 0; attempt < 2; attempt++){
+    for(var i = 0; i < _GEMINI_MODELS.length; i++){
+      var model = _GEMINI_MODELS[i];
+      _factLog('[AI送信' + (attempt > 0 ? '/再' : '') + '] ' + model);
+      var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(apiKey);
+      var res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      var data = await res.json();
+      _factLog('[AI応答] ' + model + ' status=' + res.status);
+      if(res.status === 503 || res.status === 429){
+        _factLog('[混雑' + res.status + '] ' + model + ' → 次のモデルへ');
+        continue;
+      }
+      if(res.status === 404){
+        _factLog('[廃止404] ' + model + ' → 次のモデルへ');
+        continue;
+      }
+      if(!res.ok){
+        var msg = (data.error||{}).message || String(res.status);
+        _factLog('[エラー] ' + model + ': ' + msg.slice(0, 120));
+        throw new Error(msg);
+      }
+      _factLog('[成功] ' + model + ' ✓');
+      return data;
     }
-    if(res.status === 404){
-      _factLog('[廃止404] ' + model + ' → 次のモデルへ');
-      continue;
+    if(attempt < 1){
+      var waitSec = 65;
+      _factLog('[待機] レート制限中。' + waitSec + '秒後に自動再試行します');
+      await new Promise(function(resolve){
+        var remaining = waitSec;
+        if(onWait) onWait(remaining);
+        var timer = setInterval(function(){
+          remaining--;
+          if(onWait) onWait(remaining);
+          if(remaining <= 0){ clearInterval(timer); resolve(); }
+        }, 1000);
+      });
+      _factLog('[再試行] 全モデルを再試行します');
     }
-    if(!res.ok){
-      var msg = (data.error||{}).message || String(res.status);
-      _factLog('[エラー] ' + model + ': ' + msg.slice(0, 120));
-      throw new Error(msg);
-    }
-    _factLog('[成功] ' + model + ' ✓');
-    return data;
   }
-  _factLog('[失敗] 全モデル利用不可');
+  _factLog('[失敗] 全モデル利用不可（再試行後も失敗）');
   throw new Error('全モデルが利用不可。しばらく待ってから再試行してください。');
 }
 function showFactLogs(){
@@ -791,6 +807,7 @@ function _regBody(){
   if(_regState.phase === 'input')             return _regInputHTML();
   if(_regState.phase === 'found')             return _regFoundHTML();
   if(_regState.phase === 'notfound')          return _regNotFoundHTML();
+  if(_regState.phase === 'rateLimitWait')      return _regRateLimitWaitHTML();
   if(_regState.phase === 'candidatesLoading') return _regCandidatesLoadingHTML();
   if(_regState.phase === 'candidates')        return _regCandidatesHTML();
   if(_regState.phase === 'generating')        return _regGeneratingHTML();
@@ -905,7 +922,11 @@ async function generateCandidates(){
     '[\n  {\n    "title": "事件・出来事の名称",\n    "date": "おおよその時期（例: 2008年2月）",\n    "description": "2〜3文の概要（確実な情報のみ）",\n    "location": "場所（都道府県・地名など）"\n  }\n]';
 
   try {
-    var data = await _geminiRequest(apiKey, { contents: [{ parts: [{ text: prompt }] }], tools: [{ google_search: {} }] });
+    var data = await _geminiRequest(apiKey, { contents: [{ parts: [{ text: prompt }] }], tools: [{ google_search: {} }] }, function(secs){
+      _regState.phase = 'rateLimitWait';
+      _regState.waitSeconds = secs;
+      _renderReg();
+    });
     var cand = data.candidates && data.candidates[0];
     if(!cand) throw new Error('candidatesが空: ' + JSON.stringify(data).slice(0,300));
     _factLog('[候補] finishReason=' + cand.finishReason);
@@ -935,6 +956,14 @@ function selectCandidate(i){
   generateWithAI();
 }
 
+function _regRateLimitWaitHTML(){
+  return '<div style="text-align:center;padding:32px 16px">' +
+    '<div style="font-size:40px;margin-bottom:12px">⏳</div>' +
+    '<div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:8px">APIの利用制限中</div>' +
+    '<div style="font-size:48px;font-weight:900;color:var(--brand);margin:12px 0;font-variant-numeric:tabular-nums">' + (_regState.waitSeconds||0) + '</div>' +
+    '<div style="font-size:12px;color:var(--text-2)">すべてのモデルが混雑しています<br>自動的に再試行します</div>' +
+    '</div>';
+}
 function _regCandidatesLoadingHTML(){
   return '<div style="text-align:center;padding:32px 0">' +
     '<div style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px"></div>' +
@@ -1079,7 +1108,11 @@ async function generateWithAI(){
     'msgは50字以内で具体的な注意喚起内容を記載。該当しない場合のみnullにする。';
 
   try {
-    var data = await _geminiRequest(apiKey, { contents: [{ parts: [{ text: prompt }] }], tools: [{ google_search: {} }] });
+    var data = await _geminiRequest(apiKey, { contents: [{ parts: [{ text: prompt }] }], tools: [{ google_search: {} }] }, function(secs){
+      _regState.phase = 'rateLimitWait';
+      _regState.waitSeconds = secs;
+      _renderReg();
+    });
     var parts = data.candidates[0].content.parts || [];
     var text = (parts.find(function(p){ return p.text; }) || {text:''}).text.trim();
     var match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -1374,7 +1407,7 @@ function submitUpdateProposal(){
     '  "new_timeline_events": [{ "date": "YYYY年MM月DD日", "event": "新しい出来事（50〜100字）", "alert": false }]\n' +
     '}';
 
-  _geminiRequest(apiKey, { contents: [{ parts: [{ text: updatePrompt }] }], tools: [{ google_search: {} }] })
+  _geminiRequest(apiKey, { contents: [{ parts: [{ text: updatePrompt }] }], tools: [{ google_search: {} }] }, function(secs){ if(btn) btn.textContent = 'AI更新中… (' + secs + '秒後に再試行)'; })
   .then(function(data){
     var _parts = data.candidates[0].content.parts || [];
     var text = (_parts.find(function(p){ return p.text; }) || {text:''}).text.trim();
