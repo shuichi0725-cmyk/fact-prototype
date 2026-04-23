@@ -919,14 +919,53 @@ async function generateCandidates(){
   if(!apiKey){ showToast('Gemini APIキーを入力してください'); return; }
   state.geminiKey = apiKey;
   persistState();
+
+  var cacheKey = 'fact_cand_v1_' + _regState.keywords.trim().toLowerCase();
+  try {
+    var raw = localStorage.getItem(cacheKey);
+    if(raw){
+      var cached = JSON.parse(raw);
+      if(Date.now() - cached.ts < 86400000){
+        _factLog('[キャッシュ] 候補を再利用（APIコール0回）: ' + _regState.keywords);
+        _regState.candidates = cached.candidates;
+        _regState.topDetail = cached.topDetail || null;
+        _regState._fromCache = true;
+        _regState.phase = 'candidates';
+        _renderReg();
+        return;
+      }
+    }
+  } catch(e){}
+
   _factLog('=== 候補生成 開始 キーワード:「' + _regState.keywords + '」===');
   _regState.phase = 'candidatesLoading';
   _renderReg();
 
-  var prompt = '「' + _regState.keywords + '」というキーワードに関連する実在する日本の事件・出来事・ニュースを最大5件リストアップしてください。\n\n' +
-    '【厳守】実際に確実に知っている事実のみ記載すること。存在しない事件を捏造しないこと。\n\n' +
-    '以下のJSON配列のみを返してください（マークダウン不要）:\n' +
-    '[\n  {\n    "title": "事件・出来事の名称",\n    "date": "おおよその時期（例: 2008年2月）",\n    "description": "2〜3文の概要（確実な情報のみ）",\n    "location": "場所（都道府県・地名など）"\n  }\n]';
+  var prompt = 'あなたはFACTというファクトチェックサービスのコンテンツ編集者です。\n' +
+    '「' + _regState.keywords + '」というキーワードに関連する実在する日本の事件・出来事・ニュースを最大5件リストアップし、\n' +
+    '最も関連性の高い1件についてはファクトチェック記録も同時に生成してください。\n\n' +
+    '【厳守】実際に確実に知っている事実のみ記載。存在しない事件を捏造しないこと。Google検索結果から事実を確認して記載すること。\n\n' +
+    '以下のJSON形式のみを返してください（マークダウン不要）:\n' +
+    '{\n' +
+    '  "candidates": [\n' +
+    '    { "title": "事件名", "date": "時期（例: 2008年2月）", "description": "2〜3文の概要", "location": "場所" }\n' +
+    '  ],\n' +
+    '  "top_detail": {\n' +
+    '    "topic_id": "snake_case_id",\n' +
+    '    "meta_entry": {\n' +
+    '      "id": "topic_idと同じ", "title": "タイトル（20〜40字）",\n' +
+    '      "cat": "カテゴリ（司法・裁判 / 地政学・安保 / 経済・産業 / 政治・行政 / 医療・健康 / 科学・環境 / 社会・事件 / テクノロジー / 教育・子ども / 食品・消費者 / 災害・インフラ / 歴史・検証）",\n' +
+    '      "subcat": "サブカテゴリ", "score": 0, "sourceCount": 0,\n' +
+    '      "date": "確実な基準日（YYYY年MM月DD日）",\n' +
+    '      "summary": "200〜300字の概要", "tags": ["タグ1","タグ2","タグ3"], "alert": null\n' +
+    '    },\n' +
+    '    "detailSummary": "600〜1000字の詳細解説",\n' +
+    '    "scoreReason": "信頼度スコアの根拠（50〜100字）",\n' +
+    '    "timeline": [{ "date": "YYYY年MM月DD日", "event": "出来事（50〜100字）", "alert": false }],\n' +
+    '    "perspectives": [{ "stance": "立場名", "color": "#4a9eff", "summary": "主張（100〜150字）", "sources": ["情報源名"] }],\n' +
+    '    "detail_sources": [{ "id": 0, "lang": "ja", "org": "報道機関名", "type": "公共放送または全国紙または通信社または地方紙", "score": 90, "date": "報道日", "headline": "見出し", "url": "確認できたURLのみ（推測禁止）", "summary": "要約（100〜150字）", "keyClaim": "主要な主張（150〜200字）" }]\n' +
+    '  }\n' +
+    '}';
 
   try {
     var data = await _geminiRequest(apiKey, { contents: [{ parts: [{ text: prompt }] }], tools: [{ google_search: {} }] }, function(secs){
@@ -941,8 +980,17 @@ async function generateCandidates(){
     var text = (parts.find(function(p){ return p.text; }) || {text:''}).text.trim();
     if(!text) throw new Error('テキスト部分が空。finishReason=' + cand.finishReason);
     var parsed = JSON.parse(_extractJSON(text));
-    _regState.candidates = Array.isArray(parsed) ? parsed : (parsed.candidates || parsed.events || []);
-    _factLog('=== 候補生成 完了 ' + _regState.candidates.length + '件 ===');
+    if(Array.isArray(parsed)){
+      _regState.candidates = parsed;
+      _regState.topDetail = null;
+    } else {
+      _regState.candidates = parsed.candidates || [];
+      _regState.topDetail = parsed.top_detail || null;
+    }
+    _factLog('=== 候補生成 完了 ' + _regState.candidates.length + '件' + (_regState.topDetail ? '（詳細付き・次回APIコール不要）' : '') + ' ===');
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), candidates: _regState.candidates, topDetail: _regState.topDetail }));
+    } catch(e){}
     _regState.phase = 'candidates';
     _renderReg();
   } catch(e) {
@@ -957,6 +1005,13 @@ function selectCandidate(i){
   var c = (_regState.candidates || [])[i];
   if(!c) return;
   _regState.selectedCandidate = c;
+  if(i === 0 && _regState.topDetail){
+    _factLog('[節約] topDetail再利用 → APIコール省略（1リクエスト節約）');
+    _regState.generated = _regState.topDetail;
+    _regState.phase = 'preview';
+    _renderReg();
+    return;
+  }
   _regState.phase = 'generating';
   _renderReg();
   generateWithAI();
@@ -980,21 +1035,27 @@ function _regCandidatesLoadingHTML(){
 
 function _regCandidatesHTML(){
   var candidates = _regState.candidates || [];
+  var hasTop = !!_regState.topDetail;
   if(candidates.length === 0){
     return '<div style="text-align:center;padding:20px;font-size:13px;color:var(--text-2)">候補が見つかりませんでした</div>' +
       '<button onclick="generateWithAI()" style="width:100%;padding:12px;background:linear-gradient(135deg,#4a9eff,#7b5cff);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;margin-bottom:8px">✨ キーワードのままAI生成する</button>' +
       '<button onclick="_regState.phase=\'notfound\';_renderReg()" style="width:100%;padding:9px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 戻る</button>';
   }
   var cards = candidates.map(function(c, i){
+    var badge = (i === 0 && hasTop)
+      ? '<span style="display:inline-block;padding:1px 7px;background:#4CAF5022;border:1px solid #4CAF5066;border-radius:99px;font-size:10px;color:#4CAF50;margin-left:6px">⚡ 追加APIコール不要</span>'
+      : '';
     return '<div class="card clickable" style="margin-bottom:8px;padding:12px" onclick="selectCandidate(' + i + ')">' +
-      '<div style="font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:4px">' + escapeHtml(c.title||'') + '</div>' +
+      '<div style="font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:4px">' + escapeHtml(c.title||'') + badge + '</div>' +
       '<div style="font-size:11px;color:var(--brand);margin-bottom:5px">' + escapeHtml(c.date||'') + (c.location ? '　📍' + escapeHtml(c.location) : '') + '</div>' +
       '<div style="font-size:12px;color:var(--text-2);line-height:1.6">' + escapeHtml(c.description||'') + '</div>' +
       '<div style="text-align:right;font-size:11px;color:var(--brand);margin-top:6px">この事件を記録する →</div>' +
       '</div>';
   }).join('');
+  var cacheNote = _regState._fromCache ? '<div style="font-size:10px;color:var(--text-3);text-align:right;margin-bottom:8px">📦 キャッシュから読み込み（APIコール0回）</div>' : '';
   return '<div style="font-size:12px;font-weight:700;color:var(--brand);margin-bottom:4px">🔍 「' + escapeHtml(_regState.keywords) + '」の候補</div>' +
-    '<div style="font-size:11px;color:var(--text-2);margin-bottom:12px">記録したい事件をタップしてください</div>' +
+    '<div style="font-size:11px;color:var(--text-2);margin-bottom:8px">記録したい事件をタップしてください</div>' +
+    cacheNote +
     cards +
     '<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">' +
     '<button onclick="_regState.phase=\'notfound\';_renderReg()" style="width:100%;padding:9px;background:transparent;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">← 戻る</button>' +
