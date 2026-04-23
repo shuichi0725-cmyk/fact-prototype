@@ -408,7 +408,7 @@ function _factLog(msg){
   if(_factLogs.length > 100) _factLogs.pop();
   console.log('[FACT]', msg);
 }
-var _GEMINI_MODELS = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.1-flash-lite-preview'];
+var _GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.1-flash-lite-preview'];
 async function _geminiRequest(apiKey, body, onWait){
   for(var attempt = 0; attempt < 2; attempt++){
     for(var i = 0; i < _GEMINI_MODELS.length; i++){
@@ -451,6 +451,13 @@ async function _geminiRequest(apiKey, body, onWait){
   }
   _factLog('[失敗] 全モデル利用不可（再試行後も失敗）');
   throw new Error('全モデルが利用不可。しばらく待ってから再試行してください。');
+}
+function _extractJSON(text){
+  var m = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if(m) return m[1];
+  var m2 = text.match(/```(?:json)?\s*([\s\S]+)/);
+  if(m2) return m2[1].trim();
+  return text.trim();
 }
 function showFactLogs(){
   var text = _factLogs.length ? _factLogs.join('\n\n') : 'ログなし';
@@ -933,8 +940,7 @@ async function generateCandidates(){
     var parts = (cand.content && cand.content.parts) || [];
     var text = (parts.find(function(p){ return p.text; }) || {text:''}).text.trim();
     if(!text) throw new Error('テキスト部分が空。finishReason=' + cand.finishReason);
-    var match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    var parsed = JSON.parse(match ? match[1] : text);
+    var parsed = JSON.parse(_extractJSON(text));
     _regState.candidates = Array.isArray(parsed) ? parsed : (parsed.candidates || parsed.events || []);
     _factLog('=== 候補生成 完了 ' + _regState.candidates.length + '件 ===');
     _regState.phase = 'candidates';
@@ -1115,8 +1121,7 @@ async function generateWithAI(){
     });
     var parts = data.candidates[0].content.parts || [];
     var text = (parts.find(function(p){ return p.text; }) || {text:''}).text.trim();
-    var match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    _regState.generated = JSON.parse(match ? match[1] : text);
+    _regState.generated = JSON.parse(_extractJSON(text));
     _factLog('=== AI記録生成 完了 ===');
     _regState.phase = 'preview';
     _renderReg();
@@ -1411,8 +1416,7 @@ function submitUpdateProposal(){
   .then(function(data){
     var _parts = data.candidates[0].content.parts || [];
     var text = (_parts.find(function(p){ return p.text; }) || {text:''}).text.trim();
-    var match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    var ai = JSON.parse(match ? match[1] : text);
+    var ai = JSON.parse(_extractJSON(text));
     var newTimeline = (existing.timeline||[]).concat(ai.new_timeline_events||[]);
     var updateDoc = {
       summary: ai.summary || t.summary,
