@@ -412,17 +412,28 @@ var _GEMINI_MODELS = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash', 
 async function _geminiRequest(apiKey, body){
   for(var i = 0; i < _GEMINI_MODELS.length; i++){
     var model = _GEMINI_MODELS[i];
+    _factLog('[AI送信] ' + model);
     var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(apiKey);
     var res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
     var data = await res.json();
-    _factLog('model=' + model + ' status=' + res.status);
+    _factLog('[AI応答] ' + model + ' status=' + res.status);
     if(res.status === 503 || res.status === 429){
-      _factLog(model + ' 混雑中 → 次のモデルへ');
+      _factLog('[混雑' + res.status + '] ' + model + ' → 次のモデルへ');
       continue;
     }
-    if(!res.ok) throw new Error((data.error||{}).message || res.status);
+    if(res.status === 404){
+      _factLog('[廃止404] ' + model + ' → 次のモデルへ');
+      continue;
+    }
+    if(!res.ok){
+      var msg = (data.error||{}).message || String(res.status);
+      _factLog('[エラー] ' + model + ': ' + msg.slice(0, 120));
+      throw new Error(msg);
+    }
+    _factLog('[成功] ' + model + ' ✓');
     return data;
   }
+  _factLog('[失敗] 全モデル利用不可');
   throw new Error('全モデルが利用不可。しばらく待ってから再試行してください。');
 }
 function showFactLogs(){
@@ -884,6 +895,7 @@ async function generateCandidates(){
   if(!apiKey){ showToast('Gemini APIキーを入力してください'); return; }
   state.geminiKey = apiKey;
   persistState();
+  _factLog('=== 候補生成 開始 キーワード:「' + _regState.keywords + '」===');
   _regState.phase = 'candidatesLoading';
   _renderReg();
 
@@ -894,20 +906,20 @@ async function generateCandidates(){
 
   try {
     var data = await _geminiRequest(apiKey, { contents: [{ parts: [{ text: prompt }] }], tools: [{ google_search: {} }] });
-    _factLog('candidates body=' + JSON.stringify(data).slice(0, 1000));
     var cand = data.candidates && data.candidates[0];
     if(!cand) throw new Error('candidatesが空: ' + JSON.stringify(data).slice(0,300));
-    _factLog('finishReason=' + cand.finishReason + ' parts=' + JSON.stringify(cand.content && cand.content.parts).slice(0,400));
+    _factLog('[候補] finishReason=' + cand.finishReason);
     var parts = (cand.content && cand.content.parts) || [];
     var text = (parts.find(function(p){ return p.text; }) || {text:''}).text.trim();
     if(!text) throw new Error('テキスト部分が空。finishReason=' + cand.finishReason);
     var match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
     var parsed = JSON.parse(match ? match[1] : text);
     _regState.candidates = Array.isArray(parsed) ? parsed : (parsed.candidates || parsed.events || []);
+    _factLog('=== 候補生成 完了 ' + _regState.candidates.length + '件 ===');
     _regState.phase = 'candidates';
     _renderReg();
   } catch(e) {
-    _factLog('candidates ERROR: ' + e.message);
+    _factLog('=== 候補生成 失敗: ' + e.message + ' ===');
     _regState.phase = 'notfound';
     _renderReg();
     showToast('候補取得エラー: ' + e.message, 5000);
@@ -988,6 +1000,7 @@ async function generateWithAI(){
   if(!apiKey){ showToast('Gemini APIキーを入力してください'); return; }
   state.geminiKey = apiKey;
   persistState();
+  _factLog('=== AI記録生成 開始 ===');
   _regState.phase = 'generating';
   _renderReg();
 
@@ -1071,10 +1084,11 @@ async function generateWithAI(){
     var text = (parts.find(function(p){ return p.text; }) || {text:''}).text.trim();
     var match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
     _regState.generated = JSON.parse(match ? match[1] : text);
+    _factLog('=== AI記録生成 完了 ===');
     _regState.phase = 'preview';
     _renderReg();
   } catch(e) {
-    _factLog('generateWithAI ERROR: ' + e.message);
+    _factLog('=== AI記録生成 失敗: ' + e.message + ' ===');
     _regState.phase = 'notfound';
     _renderReg();
     showToast('AI生成エラー: ' + e.message, 5000);
@@ -1345,6 +1359,7 @@ function submitUpdateProposal(){
   var apiKey = state.geminiKey;
   if(!apiKey){ showToast('Gemini APIキーが設定されていません。設定タブで入力してください。', 5000); if(btn){ btn.disabled=false; btn.textContent='✨ AIで更新して全員に反映'; } return; }
 
+  _factLog('=== 更新提案 開始 トピック:「' + (t.title||'') + '」===');
   var existing = TOPIC_DATA[t.id] || {};
   var updatePrompt = 'あなたはFACTというファクトチェックサービスのコンテンツ編集者です。\n' +
     '以下の既存トピック記録に、ユーザーが提供した新情報を反映して更新版を生成してください。\n\n' +
@@ -1384,11 +1399,13 @@ function submitUpdateProposal(){
     });
   })
   .then(function(){
+    _factLog('=== 更新提案 完了 ===');
     closeRegister();
     showToast('更新しました。全員に即時反映されます', 4000);
     if(t.id) goTopic(t.id);
   })
   .catch(function(e){
+    _factLog('=== 更新提案 失敗: ' + e.message + ' ===');
     if(btn){ btn.disabled=false; btn.textContent='✨ AIで更新して全員に反映'; }
     showToast('更新に失敗しました: '+e.message, 4000);
   });
