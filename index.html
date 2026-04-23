@@ -2376,8 +2376,8 @@ function renderTimelineTab(){
   var header = '<div style="background:#0c1525;border:1px solid #1a2a4a;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">' +
     '<div style="font-size:12px;color:var(--text-2)">' + items.length + '件' + (span>0 ? '・' + span + '年間（' + items[0].date.slice(0,4) + '〜' + items[items.length-1].date.slice(0,4) + '年）' : '') + '</div>' +
     '<div style="display:flex;gap:6px">' +
-    '<button onclick="state.timelineOrder=\"asc\";refreshTab(1)" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='asc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='asc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='asc'?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;font-family:sans-serif">古い順</button>' +
-    '<button onclick="state.timelineOrder=\"desc\";refreshTab(1)" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='desc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='desc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='desc'?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;font-family:sans-serif">新しい順</button>' +
+    '<button onclick="state.timelineOrder=\'asc\';refreshTab(1)" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='asc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='asc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='asc'?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;font-family:sans-serif">古い順</button>' +
+    '<button onclick="state.timelineOrder=\'desc\';refreshTab(1)" style="padding:4px 10px;border-radius:99px;border:1px solid ' + (state.timelineOrder==='desc'?p.brand:'#1a2a4a') + ';background:' + (state.timelineOrder==='desc'?p.brand+'22':'transparent') + ';color:' + (state.timelineOrder==='desc'?p.brand:'#8899b0') + ';font-size:11px;cursor:pointer;font-family:sans-serif">新しい順</button>' +
     '</div></div>';
 
   var legend = '<div style="display:flex;gap:12px;margin-bottom:14px">' +
