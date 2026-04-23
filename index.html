@@ -400,8 +400,27 @@ const CATEGORY_DEFS = [
   { id:"history",   label:"歴史・検証",    icon:"📜" },
 ];
 let CATEGORIES = [];
-
 let FACT_TOPICS = [];
+var _factLogs = [];
+function _factLog(msg){
+  var entry = new Date().toLocaleTimeString('ja-JP') + ' ' + msg;
+  _factLogs.unshift(entry);
+  if(_factLogs.length > 100) _factLogs.pop();
+  console.log('[FACT]', msg);
+}
+function showFactLogs(){
+  var text = _factLogs.length ? _factLogs.join('\n\n') : 'ログなし';
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:#000a;z-index:9999;display:flex;flex-direction:column;padding:16px';
+  overlay.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+    '<span style="color:#fff;font-weight:700;font-size:14px">デバッグログ</span>' +
+    '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:#e44;border:none;border-radius:6px;color:#fff;padding:4px 12px;cursor:pointer;font-size:12px">閉じる</button>' +
+    '</div>' +
+    '<textarea readonly style="flex:1;background:#0c1525;color:#a0e0a0;border:1px solid #1a2a4a;border-radius:8px;padding:10px;font-size:10px;font-family:monospace;resize:none;line-height:1.5">' +
+    text.replace(/</g,'&lt;') + '</textarea>' +
+    '<button onclick="navigator.clipboard&&navigator.clipboard.writeText(\'' + text.replace(/'/g,"\\'").replace(/\n/g,'\\n') + '\').then(function(){alert(\'コピーしました\')})" style="margin-top:8px;padding:10px;background:#4a9eff;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif">📋 テキストをコピー</button>';
+  document.body.appendChild(overlay);
+}
 
 let TOPIC_DATA = {};
 
@@ -863,11 +882,11 @@ async function generateCandidates(){
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], tools: [{ google_search: {} }] }) }
     );
     var data = await res.json();
-    console.log('[FACT candidates] status:', res.status, 'response:', JSON.stringify(data).slice(0, 2000));
+    _factLog('candidates status=' + res.status + ' body=' + JSON.stringify(data).slice(0, 1000));
     if(!res.ok) throw new Error((data.error||{}).message || res.status);
     var cand = data.candidates && data.candidates[0];
     if(!cand) throw new Error('candidatesが空: ' + JSON.stringify(data).slice(0,300));
-    console.log('[FACT candidates] finishReason:', cand.finishReason, 'parts:', JSON.stringify(cand.content && cand.content.parts).slice(0,500));
+    _factLog('finishReason=' + cand.finishReason + ' parts=' + JSON.stringify(cand.content && cand.content.parts).slice(0,400));
     var parts = (cand.content && cand.content.parts) || [];
     var text = (parts.find(function(p){ return p.text; }) || {text:''}).text.trim();
     if(!text) throw new Error('テキスト部分が空。finishReason=' + cand.finishReason);
@@ -877,7 +896,7 @@ async function generateCandidates(){
     _regState.phase = 'candidates';
     _renderReg();
   } catch(e) {
-    console.error('[FACT candidates] error:', e);
+    _factLog('candidates ERROR: ' + e.message);
     _regState.phase = 'notfound';
     _renderReg();
     showToast('候補取得エラー: ' + e.message, 5000);
@@ -1053,6 +1072,7 @@ async function generateWithAI(){
     _regState.phase = 'preview';
     _renderReg();
   } catch(e) {
+    _factLog('generateWithAI ERROR: ' + e.message);
     _regState.phase = 'notfound';
     _renderReg();
     showToast('AI生成エラー: ' + e.message, 5000);
@@ -2928,6 +2948,14 @@ function renderSettings(){
       <button onclick="openRegister()" style="width:100%;padding:12px;background:#4CAF5022;border:1px solid #4CAF5055;border-radius:10px;color:#4CAF50;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-bottom:8px">📝 新規トピック登録</button>
       ${_db ? '' : `<div style="font-size:11px;color:#FF9800;padding:8px;background:#FF980011;border-radius:8px;margin-top:8px">⚠️ Firebase未設定: index.html内の_FB_CONFIGにFirebaseプロジェクトの設定を貼り付けてください。</div>`}
       ${_db ? `<button onclick="_migrateDataToFirestore()" style="width:100%;padding:9px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-3);font-size:11px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-top:8px">🔄 既存データをFirestoreに移行（管理者用）</button>` : ''}
+    </div>
+  </div>
+
+  <div style="margin-top:20px;padding-bottom:20px">
+    <div class="section-title">🛠️ デバッグ</div>
+    <div class="card">
+      <div style="font-size:11px;color:var(--text-2);margin-bottom:10px">エラーが発生した場合、ログを確認してサポートに共有できます。</div>
+      <button onclick="showFactLogs()" style="width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-2);font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans JP',sans-serif">📋 エラーログを表示</button>
     </div>
   </div>
   </div>`;
